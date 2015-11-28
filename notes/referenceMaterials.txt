@@ -1,0 +1,32 @@
+DynamoDB Local
+--------------
+https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tools.DynamoDBLocal.html
+
+Other DynamoDB ORM Tools
+------------------
+https://github.com/mathcamp/flywheel
+https://bitbucket.org/Ludia/dynamodb-mapper/src/
+https://github.com/jlafon/PynamoDB
+https://github.com/serebrov/dynamo_objects
+
+Docker
+------
+https://www.docker.com/
+https://hub.docker.com/account/login/
+
+NGINX
+-----
+http://nginx.org/en/docs/
+http://nginx.org/en/docs/http/configuring_https_servers.html#single_http_https_server
+http://l33t.peopleperhour.com/2014/06/09/using-nginx-to-proxy-to-docker-containers/
+https://stackoverflow.com/questions/23649444/redirect-subdomain-to-port-nginx-flask
+https://stackoverflow.com/questions/32194167/x-forwarded-proto-for-rails-behind-nginx-behind-elb
+
+Elastic Load Balancer
+---------------------
+https://stackoverflow.com/questions/12828515/aws-elb-server-side-https
+https://stackoverflow.com/questions/17174626/elb-and-apache-configuration-for-https-website
+https://serverfault.com/questions/619971/redirect-all-http-requests-behind-amazon-elb-to-https-without-using-if
+
+Web Application Firewall (ddos)
+-------------------------------

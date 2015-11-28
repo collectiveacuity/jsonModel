@@ -1,0 +1,133 @@
+# LINUX TUTORIAL
+# http://www.westwind.com/reference/OS-X/commandline/pipes.html
+
+# Setup OpenSSH for Windows
+# http://www.mls-software.com/opensshd.html 
+
+# Wait for input from user and assign input to value:
+echo 'Please provide input:'
+read INPUT_VARIABLE
+
+# Set system-wide environmental variables from environ_file
+source environ_file
+
+# Send the output of one command to the input of the next
+ls -a | sort
+
+# Use the output of one command to make a file (overwrites existing file)
+ls -a > list_of_files_in_directory.txt 
+
+# Append the output of a command to the contents of a file
+ls -a >> ./list_of_files_on_disk.text
+ 
+# Use the contents of a file as the input to a command
+ls < list_of_files.txt
+
+# Find a file
+find / -name '.bashrc'
+
+# Find path to current location
+pwd
+
+# Execute a command within another command
+ECHO The path to my file is $(pwd)
+
+# Set local environmental variable as output of another command
+export LAB_TEST_LOCAL_VARIABLE=`date`
+ECHO The current date is $LAB_TEST_LOCAL_VARIABLE
+
+
+# IF/ELSE STATEMENTS
+
+# The OS environmental variable is some version of Windows 
+if [[ ${OS} == Windows* ]]
+then
+  export LAB_HACK_FIRST_SLASH="/"
+else
+  export LAB_HACK_FIRST_SLASH=""
+fi
+
+# A directory exists or not
+if [ -d test/ ]
+then
+  echo test directory already exists.
+else
+  mkdir test
+fi
+
+
+# FOR LOOPS
+
+for r in $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[State.Name, InstanceId]' --output text | grep running)
+do
+	aws ec2 stop-instances --instance-ids $r
+done
+
+
+
+
+# Sleep (five seconds)
+sleep 5
+
+# While loop
+COUNTER=0
+while [ $COUNTER -lt 2 ]
+do
+	sleep 5
+	counter = counter + 1
+done
+
+
+# COPYING FILES
+
+# Copy file over ssh
+scp -i ssh-key.pem file.foo user@myclient.com:/path/to/file.foo
+
+# Create Tar ball
+tar -cvf output.tar /path/to/<directory>
+
+# Extract files from Tar ball
+tar -xvf input.tar
+
+# Copy file from a url
+wget 'http://example.com/file.tar.gz'
+
+# Encrypting Folder with Tar and OpenSSL
+tar -zcvf - foldername | openssl des3 -salt -k [secretpassword] > folder.des3
+
+# Unencryt Folder with Tar and OpenSSL
+openssl des3 -d -k [secretpassword] < foldername.des3 | tar zxf -
+
+
+# SCHEDULED TASKS
+
+# http://www.folkstalk.com/2012/07/add-job-to-cron-crontab-command.html
+# http://superuser.com/questions/67352/run-a-command-every-week-with-cron
+
+# List cron tasks
+crontab -l
+
+# Edit cron tasks
+crontab -e
+
+
+# SYSTEM RESOURCES
+
+# List system resource usage
+# http://javarevisited.blogspot.com/2012/03/how-to-find-file-and-directory-size-in.html
+df -h .
+
+# List command history
+history
+
+# Remove command history
+history -cw
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,11 @@
+# GENERATING SSH KEYS
+
+# Tutorial on BitBucket
+# https://confluence.atlassian.com/display/BITBUCKET/Set+up+SSH+for+Git
+
+# Create id file in ~/.ssh/
+ssh-keygen
+
+# Edit (or create) the config file in ~/.ssh/config
+Host bitbucket.org
+ IdentityFile ~/.ssh/<privatekeyfile> 

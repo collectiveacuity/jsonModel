@@ -1,0 +1,10 @@
+recursive-exclude * __pycache__
+recursive-exclude * *.pyc
+recursive-exclude * *.pyo
+recursive-exclude * *.orig
+recursive-exclude * *.gitignore
+recursive-exclude * *.dockerignore
+recursive-exclude .git *
+recursive-exclude .idea *
+recursive-exclude cred *
+recursive-exclude notes *
