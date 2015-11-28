@@ -28,7 +28,7 @@ a components map.
 
 Default Settings
 ^^^^^^^^^^^^^^^^
-- **Structure**: The validation process will assume that keys with a declared value exist in each dictionary and that dictionaries or lists with other properties declared inside of them exist in the input. So, the example model expects to see an address field in the top level dictionary which is itself a dictionary with at least city, region and country key-value pairs inside of it. But, on the other hand, there is no requirement that a list of comments exists.
+- **Structure**: The validation process will assume that keys with a declared value exist in each dictionary and that dictionaries or lists with other properties declared inside of them exist in the input. So, the example model expects to see an address field in the top level dictionary which is itself a dictionary with at least city, region and country key-value pairs inside of it. But, on the other hand, there is no requirement that a list of comment strings exists. A list with a single empty value inside it is considered optional so that there is a placeholder with which to declare the format of the contents of the list.
 - **Datatype**: The validation process will assume that the datatype of each value in the input matches the datatype in the model. So, the example model expects to see a string for userID, a double-point precision for datetime, a boolean for active, etc...
 - **Requirements**: The validation process will assume a key with a non-empty value is a required input. So, all fields in the example are required except postal_code and comments. The empty value for each datatype can be expressed with {}, [], 0, 0.0, false or "" and indicates that it is optional.
 
