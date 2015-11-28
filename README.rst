@@ -32,7 +32,8 @@ From GitHub::
 
 Getting Started
 ^^^^^^^^^^^^^^^
-This module is designed to facilitate the process of implementing data validation against a declared json data model. jsonModel offers a more intuitive declaration process than other schema enforcement modules currently available by relying upon the architecture of json itself to validate datatypes, requirements and defaults. For many data models, full validation can be achieved from an example declaration. .. code-block:: javascript
+This module is designed to facilitate the process of implementing data validation against a declared json data model. jsonModel offers a more intuitive declaration process than other schema enforcement modules currently available by relying upon the architecture of json itself to validate datatypes, requirements and defaults. For many data models, full validation can be achieved from an example declaration.
+.. code-block:: javascript
 
     "schema": {
         "userID": "gY3Cv81QwL0Fs",
@@ -49,7 +50,8 @@ This module is designed to facilitate the process of implementing data validatio
 
 *[Validation of input against this model declaration requires values for all four top level keys and that each key value must be the corresponding datatype in the model. For the address field, the value for all keys except postal_code are required string inputs. If a value is provided for postal_code, it must be a string.]*
 
-In addition to intuitive self-valid schema declarations, jsonModel also offers a rich way to further refine the conditionality of any property in the model through a components map of keys whose name corresponds to the path to the schema property. .. code-block:: javascript
+In addition to intuitive self-valid schema declarations, jsonModel also offers a rich way to further refine the conditionality of any property in the model through a components map of keys whose name corresponds to the path to the schema property.
+.. code-block:: javascript
 
     "components": {
         "userID" {
@@ -78,7 +80,8 @@ To declare the model:
         "components": {} # optional map
     }
 
-To initialize the class object:.. code-block:: python
+To initialize the class object:
+.. code-block:: python
 
     from jsonModel import jsonModel
     import json
@@ -87,7 +90,8 @@ To initialize the class object:.. code-block:: python
     validModel = jsonModel(sampleModel)
 
 
-To validate input against model declaration:.. code-block:: python
+To validate input against model declaration:
+.. code-block:: python
 
     validModel.validate(input)
 
