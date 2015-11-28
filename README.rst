@@ -17,7 +17,7 @@ Features
 - Schema declaration is self-valid
 - Built-in validation of model declaration
 - Flat structure to declarations of property attributes
-- Accommodates additional functions for property validation
+- Accommodates additional functions for property validation #TODO
 
 Installation
 ^^^^^^^^^^^^
