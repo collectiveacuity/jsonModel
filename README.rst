@@ -47,15 +47,15 @@ This module is designed to facilitate the process of implementing data validatio
     }
 
 
-*[Validation of input against this model declaration requires values for all four top level keys and that each key value must be the corresponding datatype in the model. For the address field, the value for all keys except postal_code are required string inputs. If a value is provided for postal_code, it must be a string.]*
+*[In this model, the input must contain a values for all four top level keys and each value must correspond to the datatype in the model. So, the input must have a userID field with a string, a datetime field with a double, an active key with a boolean and the address field must be a dictionary which itself contains city, region and country. Since it is empty, postal_code is optional. If a value is provided for postal_code however, it must be a string.]*
 
-In addition to intuitive self-valid schema declarations, jsonModel also offers a rich way to further refine the conditionality of any property in the model through a components map of keys whose name corresponds to the path to the schema property::
+In addition to intuitive self-valid schema declarations, jsonModel also offers a rich way to further refine the conditionality of any property in the model through an accompanying components map whose key names correspond to the path to the schema property which requires additional validation::
 
     "components": {
         "userID" {
             "min_length": 13,
             "max_length": 13,
-            "must_not_contain": [ "[^a-zA-Z0-9]" ]
+            "must_not_contain": [ "[^\w]", "_" ]
         }
         "address.city": {
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
@@ -64,7 +64,7 @@ In addition to intuitive self-valid schema declarations, jsonModel also offers a
     }
 
 
-*[Validation of any input against this model also checks the paths designated in the components dictionary to make sure that values do not violate any of the declared additional attributes of the property. Whenever they may conflict with the attributes declared in the schema example, the conditions in the components map supersedes. So, in this case, the requirement that an address contain a city has been turned off. But if a city is provided, it must match one of the four city values provided. Likewise, any value provided in userID must be 13 characters long and can only be composed of alphanumerical characters.]*
+*[In this model, the process of checking the inputs will also check the paths designated in the components dictionary to make sure that values do not violate any of the additional attributes of the property declared in the components. Whenever they may conflict with the attributes declared in the schema example, the conditions in the components map supersedes. So, in this case, the requirement that an address contain a city key-value has been turned off. But if a city is provided, it must match one of the four city values provided. Likewise, any value provided in userID must be no more than nor less than 13 characters long and can only be composed of alphanumerical characters.]*
 
 This module also validates the architecture of the model declarations themselves to facilitate the model design process and ensure that no models break the rules of the module. Error reports are provided to identity the scope of conditionals applicable to any given property in addition to the module documentation.
 
