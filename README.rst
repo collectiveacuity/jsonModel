@@ -20,7 +20,7 @@ Features
 - Accommodates additional functions for property validation
 
 Installation
-============
+^^^^^^^^^^^^
 From PyPi::
 
     $ pip install jsonModel
@@ -32,12 +32,7 @@ From GitHub::
 
 Getting Started
 ^^^^^^^^^^^^^^^
-This module is designed to facilitate the process of implementing data validation
-against a declared json data model. jsonModel offers a more intuitive declaration
-process than other schema enforcement modules currently available by relying upon
-the architecture of json itself to validate datatypes, requirements and defaults.
-For many data models, full validation can be achieved from an example declaration.
-.. code-block:: javascript
+This module is designed to facilitate the process of implementing data validation against a declared json data model. jsonModel offers a more intuitive declaration process than other schema enforcement modules currently available by relying upon the architecture of json itself to validate datatypes, requirements and defaults. For many data models, full validation can be achieved from an example declaration. .. code-block:: javascript
 
     "schema": {
         "userID": "gY3Cv81QwL0Fs",
@@ -52,15 +47,9 @@ For many data models, full validation can be achieved from an example declaratio
     }
 
 
-[Validation of input against this model declaration requires values for all four
-top level keys and that each key value must be the corresponding datatype in the
-model. For the address field, the value for all keys except postal_code are required
-string inputs. If a value is provided for postal_code, it must be a string.]
+*[Validation of input against this model declaration requires values for all four top level keys and that each key value must be the corresponding datatype in the model. For the address field, the value for all keys except postal_code are required string inputs. If a value is provided for postal_code, it must be a string.]*
 
-In addition to intuitive self-valid schema declarations, jsonModel also offers a
-rich way to further refine the conditionality of any property in the model through
-a components map of keys whose name corresponds to the path to the schema property.
-.. code-block:: javascript
+In addition to intuitive self-valid schema declarations, jsonModel also offers a rich way to further refine the conditionality of any property in the model through a components map of keys whose name corresponds to the path to the schema property. .. code-block:: javascript
 
     "components": {
         "userID" {
@@ -75,19 +64,9 @@ a components map of keys whose name corresponds to the path to the schema proper
     }
 
 
-[Validation of any input against this model also checks the paths designated in
-the components dictionary to make sure that values do not violate any of the
-declared additional attributes of the property. Whenever they may conflict with
-the attributes declared in the schema example, the conditions in the components
-map supersedes. So, in this case, the requirement that an address contain a city
-has been turned off. But if a city is provided, it must match one of the four
-city values provided. Likewise, any value provided in userID must be 13 characters
-long and can only be composed of alphanumerical characters.]
+*[Validation of any input against this model also checks the paths designated in the components dictionary to make sure that values do not violate any of the declared additional attributes of the property. Whenever they may conflict with the attributes declared in the schema example, the conditions in the components map supersedes. So, in this case, the requirement that an address contain a city has been turned off. But if a city is provided, it must match one of the four city values provided. Likewise, any value provided in userID must be 13 characters long and can only be composed of alphanumerical characters.]*
 
-This module also validates the architecture of the model declarations themselves
-to facilitate the model design process and ensure that no models break the rules
-of the module. Error reports are provided to identity the scope of conditionals
-applicable to any given property in addition to the module documentation.
+This module also validates the architecture of the model declarations themselves to facilitate the model design process and ensure that no models break the rules of the module. Error reports are provided to identity the scope of conditionals applicable to any given property in addition to the module documentation.
 
 To declare the model:
 .. code-block:: javascript
@@ -99,8 +78,7 @@ To declare the model:
         "components": {} # optional map
     }
 
-To initialize the class object:
-.. code-block:: python
+To initialize the class object:.. code-block:: python
 
     from jsonModel import jsonModel
     import json
@@ -109,8 +87,7 @@ To initialize the class object:
     validModel = jsonModel(sampleModel)
 
 
-To validate input against model declaration:
-.. code-block:: python
+To validate input against model declaration:.. code-block:: python
 
     validModel.validate(input)
 
