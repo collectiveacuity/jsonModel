@@ -80,6 +80,7 @@ To declare the model::
     }
 
 *[all fields except schema are optional]*
+
 To initialize the class object::
 
     from jsonModel import jsonModel
