@@ -68,15 +68,18 @@ In addition to intuitive self-valid schema declarations, jsonModel also offers a
 
 This module also validates the architecture of the model declarations themselves to facilitate the model design process and ensure that no models break the rules of the module. Error reports are provided to identity the scope of conditionals applicable to any given property in addition to the module documentation.
 
-To declare the model (components is optional)::
+To declare the model::
 
     {
         "schema": {
             "property": "value"
         },
-        "components": {}
+        "components": {},
+        "title": "my cool data model",
+        "url": "https://collectiveacuity.com/api/mycoolresource?jsonmodel=true"
     }
 
+*[all fields except schema are optional]*
 To initialize the class object::
 
     from jsonModel import jsonModel
