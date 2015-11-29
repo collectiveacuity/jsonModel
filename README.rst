@@ -83,8 +83,7 @@ To declare the model::
 
 To initialize the class object::
 
-    from jsonModel import jsonModel
-    import json
+    from jsonModel import jsonModel, ModelValidationError, InputValidationError
 
     sampleModel = json.loads(open('sample-model.json').read())
     validModel = jsonModel(sampleModel)

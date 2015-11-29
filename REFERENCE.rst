@@ -71,24 +71,23 @@ validated if there is an item to validate. Otherwise, it is ignored.
 List of Field Conditionals
 --------------------------
 - "**required_field**": false, # a true boolean requires this key-value in the input
-- "**value_datatypes**": [], # a list of datatypes which are acceptable types for the value, acceptable items of this list are: [], {}, "", false, 0, 0.0 in the list
+- "**default_value**": null, # a value for an optional property when no value is given
 - "**byte_data**": false, # a true boolean expects to see base64 byte data in the string field [strings only]
-- "**default_value**": None, # a value for an optional property when no value is given
 - "**min_length**": 0, # the minimum number of characters in a string [strings only]
 - "**max_length**": 0, # the maximum number of characters in a string [strings only]
-- "**min_value**": 0, # the minimum value of a number [integers and doubles only]
-- "**max_value**": 0, # the maximum value of a number [integers and doubles only]
+- "**must_not_contain**": [], # a list of regular expressions which should not be found in a string [strings only]
+- "**must_contain**": [], # a list of regular expressions which must be found in a string [strings only]
+- "**min_value**": 0, # the minimum value of a number [numbers only]
+- "**max_value**": 0, # the maximum value of a number [numbers only]
 - "**min_size**": 0, # the minimum number of items in a list [lists only]
 - "**max_size**": 0, # the maximum number of items in a list [lists only]
 - "**unique_set**": false, # a true boolean treats a list as a set of unique primitives with no duplication [lists of strings and numbers only]
 - "**match_first**": false, # a true boolean checks to see that each item of a list matches the construct of the first item [lists only]
-- "**must_not_contain**": [], # a list of regular expressions which should not be found in a string [strings only]
-- "**must_contain**": [], # a list of regular expressions which must be found in a string [strings only]
-- "**discrete_values**": [], # a list of values allowed, this attribute supersedes other qualifying attributes in the component list [integers, doubles and strings only]
+- "**discrete_values**": [], # a list of values allowed, this attribute supersedes other qualifying attributes in the component list [numbers and strings only]
 - "**identical_to**": "", # the key name in the components map whose value the value of this component must match
 - "**lambda_function**": "", # a single argument function which should be run to validate the value of this component, lambda_function must return true (valid) or false (invalid)
 - "**validation_url**": "", # an uri which can be called to validate the value of this component with its input in the body of the request, uri response must return true (valid) or false (invalid)
-- "**example_values**": [], # a list of values which satisfy all the validation requirements
+- "**example_values**": [], # a list of values which satisfy all the validation requirements [ numbers and strings only ]
 - "**field_description**": "" # a description of the nature of the component used in documentation
 
 
