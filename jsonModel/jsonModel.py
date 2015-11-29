@@ -56,7 +56,7 @@ class jsonModel(object):
 
     def __init__(self, data_model):
 
-    # validate input
+    # validate schema input
         if not isinstance(data_model, dict):
             raise ModelValidationError('Data model must be a dictionary.')
         elif 'schema' not in data_model.keys():
@@ -71,57 +71,94 @@ class jsonModel(object):
         self.keyName = mapModel(self.schema).keyName
         self.keyType = mapModel(self.schema).keyType
 
-    # validate components key names
+    # validate title input & construct title method
+        self.title = ''
+        if 'title' in data_model.keys():
+            if not isinstance(data_model['title'], str):
+                raise ModelValidationError('The value of data model "title" must be a string.')
+            self.title = data_model['title']
+
+    # validate title input & construct title method
+        self.url = ''
+        if 'url' in data_model.keys():
+            if not isinstance(data_model['url'], str):
+                raise ModelValidationError('The value of data model "url" must be a string.')
+            self.title = data_model['url']
+
+    # validate components input & construct component method
+        self.components = {}
+        if 'components' in data_model.keys():
+            if not isinstance(data_model['components'], dict):
+                raise ModelValidationError('The value of data model "components" must be a dictionary.')
+            self.components = data_model['components']
+
+    # validate key names in components
         dummy_string = 'string'
         dummy_integer = 2
         dummy_float = 2.2
         dummy_boolean = True
         dummy_list = []
         dummy_map = {}
-        if 'components' in data_model.keys():
-            for key, value in data_model['components'].items():
-                number_field = False
-                if key not in self.keyName:
-                    raise ModelValidationError('Data model "components" key "%s" is not declared in "schema".' % key)
-                elif not isinstance(value, dict):
-                    raise ModelValidationError('Value for the data model "components" key "%s" must be a dictionary.' % key)
+        for key, value in self.components.items():
+            number_field = False
+            if key not in self.keyName:
+                raise ModelValidationError('Data model "components" key "%s" is not declared in "schema".' % key)
+            elif not isinstance(value, dict):
+                raise ModelValidationError('Value for the data model "components" key "%s" must be a dictionary.' % key)
 
     # validate component qualifier fields are appropriate to datatype
-                data_type = self.keyType[self.keyName.index(key)]
-                type_dict = {}
-                if data_type == dummy_string.__class__:
-                    type_dict = self.__rules__['components']['string_fields']
-                elif data_type == dummy_integer.__class__:
-                    type_dict = self.__rules__['components']['number_fields']
-                    number_field = True
-                elif data_type == dummy_float.__class__:
-                    type_dict = self.__rules__['components']['number_fields']
-                    number_field = True
-                elif data_type == dummy_boolean.__class__:
-                    type_dict = self.__rules__['components']['boolean_fields']
-                elif data_type == dummy_list.__class__:
-                    type_dict = self.__rules__['components']['list_fields']
-                elif data_type == dummy_map.__class__:
-                    type_dict = self.__rules__['components']['map_fields']
-                if set(value.keys()) - set(type_dict.keys()):
-                    raise ModelValidationError('Data model "components" key "%s" may only have datatype %s qualifiers %s.' % (key, data_type, set(type_dict.keys())))
+            data_type = self.keyType[self.keyName.index(key)]
+            type_dict = {}
+            if data_type == dummy_string.__class__:
+                type_dict = self.__rules__['components']['string_fields']
+            elif data_type == dummy_integer.__class__:
+                type_dict = self.__rules__['components']['number_fields']
+                number_field = True
+            elif data_type == dummy_float.__class__:
+                type_dict = self.__rules__['components']['number_fields']
+                number_field = True
+            elif data_type == dummy_boolean.__class__:
+                type_dict = self.__rules__['components']['boolean_fields']
+            elif data_type == dummy_list.__class__:
+                type_dict = self.__rules__['components']['list_fields']
+            elif data_type == dummy_map.__class__:
+                type_dict = self.__rules__['components']['map_fields']
+            if set(value.keys()) - set(type_dict.keys()):
+                raise ModelValidationError('Data model "components" key "%s" may only have datatype %s qualifiers %s.' % (key, data_type, set(type_dict.keys())))
 
     # validate component qualifier field values are appropriate datatype
-                for k, v in value.items():
-                    if k == 'default_value':
-                        if number_field:
-                            if not isinstance(v, int) and not isinstance(v, float):
-                                raise ModelValidationError('Value of data model "components" key "%s" qualifier field "default_value" must be a number datatype.' % key)
-                        elif not isinstance(v, data_type):
-                            raise ModelValidationError('Value of data model "components" key "%s" qualifier field "default_value" must be a %s datatype.' % (key, data_type))
-                    elif k == 'min_value' or k == 'max_value':
+            for k, v in value.items():
+                if k == 'default_value':
+                    if number_field:
                         if not isinstance(v, int) and not isinstance(v, float):
-                            raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" must be a number datatype.' % (key, k))
-                    elif not isinstance(v, type_dict[k].__class__):
-                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" must be a %s datatype.' % (key, k, type_dict[k].__class__))
+                            raise ModelValidationError('Value of data model "components" key "%s" qualifier field "default_value" must be a number datatype.' % key)
+                    elif not isinstance(v, data_type):
+                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "default_value" must be a %s datatype.' % (key, data_type))
+                elif k == 'min_value' or k == 'max_value':
+                    if not isinstance(v, int) and not isinstance(v, float):
+                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" must be a number datatype.' % (key, k))
+                elif not isinstance(v, type_dict[k].__class__):
+                    raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" must be a %s datatype.' % (key, k, type_dict[k].__class__))
 
     # validate individual qualifier field values
-                    # if k == ''
+                if k == 'must_not_contain' or k == 'must_contain':
+                    for item in v:
+                        if not isinstance(item, str):
+                            raise ModelValidationError('Each data model "components" key "%s" qualifier field "%s" item must be a string.' % (key, k))
+                if k == 'min_length' or k == 'max_length' or k == 'min_size' or k == 'max_size':
+                    if v < 0:
+                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" cannot be negative.' % (key, k))
+                if k == 'discrete_values' or k == 'example_values':
+                    for item in v:
+                        if number_field:
+                            if not isinstance(item, int) and not isinstance(item, float):
+                                raise ModelValidationError('Each data model "components" key "%s" qualifier field "%s" item must be a number.' % (key, k))
+                        elif not isinstance(item, str):
+                            raise ModelValidationError('Each data model "components" key "%s" qualifier field "%s" item must be a string.' % (key, k))
+                if k == 'identical_to':
+                    if not v in self.keyName:
+                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" not found in components keys.' % (key, k))
+
 
     def validate(self, input_dict):
         return input_dict

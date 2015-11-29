@@ -47,7 +47,7 @@ This module is designed to facilitate the process of implementing data validatio
     }
 
 
-*[In this model, the input must contain a values for all four top level keys and each value must correspond to the datatype in the model. So, the input must have a userID field with a string, a datetime field with a double, an active key with a boolean and the address field must be a dictionary which itself contains city, region and country. Since it is empty, postal_code is optional. If a value is provided for postal_code however, it must be a string.]*
+*[In this model, the input must contain values for all four top level keys and each value must correspond to the datatype in the model. So, the input must have a userID field with a string, a datetime field with a double, an active key with a boolean and the address field must be a dictionary which itself contains city, region and country. Since it is empty, postal_code is optional. If a value is provided for postal_code however, it must be a string.]*
 
 In addition to intuitive self-valid schema declarations, jsonModel also offers a rich way to further refine the conditionality of any property in the model through an accompanying components map whose key names correspond to the path to the schema property which requires additional validation::
 
@@ -83,7 +83,7 @@ To declare the model::
 
 To initialize the class object::
 
-    from jsonModel import jsonModel, ModelValidationError, InputValidationError
+    from jsonModel import *
 
     sampleModel = json.loads(open('sample-model.json').read())
     validModel = jsonModel(sampleModel)
