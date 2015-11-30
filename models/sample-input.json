@@ -1,0 +1,11 @@
+{
+  "userID": "gY3Cv91QwL0Fs",
+  "datetime": 1460000000,
+  "active": false,
+  "address": {
+      "city": "New York",
+      "region": "NY",
+      "postal_code": "10001",
+      "country": "United States"
+  }
+}

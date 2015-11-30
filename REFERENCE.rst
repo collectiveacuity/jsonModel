@@ -21,7 +21,7 @@ a components map.
             "city": "New Orleans",
             "region": "LA",
             "postal_code": "",
-            "country: "United States"
+            "country": "United States"
         },
         "comments": [ "" ]
     }
@@ -45,11 +45,11 @@ nesting and array identification.
 **Components Example**::
 
     "components": {
-        "userID" {
+        "userID": {
             "min_length": 13,
             "max_length": 13,
-            "must_not_contain": [ "[^a-zA-Z0-9]" ]
-        }
+            "must_not_contain": [ "[^\\w]", "_" ]
+        },
         "address.city": {
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
             "required_field": false

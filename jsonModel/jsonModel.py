@@ -174,5 +174,5 @@ class requestModel(object):
         return request_input
 
 
-testModel = json.loads(open('model-rules.json').read())
+testModel = json.loads(open('../models/sample-model.json').read())
 jsonModel(testModel)
