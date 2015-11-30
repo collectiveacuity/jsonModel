@@ -12,10 +12,27 @@ class ModelValidationError(Exception):
 
 class InputValidationError(Exception):
 
-    def __init__(self, message='', error=None):
-        text = '\nInput is invalid.\n%s' % message
-        super(InputValidationError, self).__init__(text)
-        self.error = error
+    def __init__(self, error_dict=None):
+        self.error = {
+            'input_criteria': {},
+            'failed_test': '',
+            'input_path': {},
+            'error_value': None,
+            'error_code': 0
+        }
+        if isinstance(error_dict, dict):
+            if 'input_criteria' in error_dict:
+                self.error['input_criteria'] = error_dict['input_criteria']
+            if 'failed_test' in error_dict:
+                self.error['failed_test'] = error_dict['failed_test']
+            if 'input_path' in error_dict:
+                self.error['input_path'] = error_dict['input_path']
+            if 'error_value' in error_dict:
+                self.error['error_value'] = error_dict['error_value']
+            if 'error_code' in error_dict:
+                self.error['error_code'] = error_dict['error_code']
+        self.message = '\nError Report: %s' % self.error
+        super(InputValidationError, self).__init__(self.message)
 
 class mapModel(object):
 
@@ -106,7 +123,7 @@ class jsonModel(object):
             elif not isinstance(value, dict):
                 raise ModelValidationError('Value for the data model "components" key "%s" must be a dictionary.' % key)
 
-    # validate component qualifier fields are appropriate to datatype
+    # validate component qualifier fields are appropriate to component datatype
             data_type = self.keyType[self.keyName.index(key)]
             type_dict = {}
             if data_type == dummy_string.__class__:
@@ -126,7 +143,7 @@ class jsonModel(object):
             if set(value.keys()) - set(type_dict.keys()):
                 raise ModelValidationError('Data model "components" key "%s" may only have datatype %s qualifiers %s.' % (key, data_type, set(type_dict.keys())))
 
-    # validate component qualifier field values are appropriate datatype
+    # validate component qualifier field values are appropriate value datatype
             for k, v in value.items():
                 if k == 'default_value':
                     if number_field:
@@ -161,7 +178,24 @@ class jsonModel(object):
 
 
     def validate(self, input_dict):
+        if not isinstance(input_dict, dict):
+            error_dict = {
+                'input_criteria': { 'required_field': True, 'valid_datatype': {} },
+                'failed_test': 'valid_datatype',
+                'input_path': {},
+                'error_value': input_dict.__class__,
+                'error_code': 4001
+            }
+            raise InputValidationError(error_dict)
         return input_dict
+
+    def unitTests(self, valid_input):
+        invalid_list = []
+        try:
+            self.validate(invalid_list)
+        except InputValidationError as err:
+            assert err.error['input_criteria']['valid_datatype'] == {}
+        return self
 
 class requestModel(object):
 
@@ -175,4 +209,5 @@ class requestModel(object):
 
 
 testModel = json.loads(open('../models/sample-model.json').read())
-jsonModel(testModel)
+testInput = json.loads(open('../models/sample-input.json').read())
+jsonModel(testModel).unitTests(testInput)
