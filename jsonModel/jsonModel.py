@@ -73,87 +73,18 @@ class mapModel(object):
         return key_name, key_criteria
 
     def list(self, input_list, path_to_root, key_name, key_criteria):
-        for i in range(len(input_list)):
-            key_path = path_to_root + '[%s]' % i
-            key_name.append(key_path)
-            criteria_dict = {
-                'required_field': False,
-                'value_datatype': input_list[i].__class__
-            }
-            if input_list[i]:
-                criteria_dict['required_field'] = True
-            key_criteria.append(criteria_dict)
-            if isinstance(input_list[i], dict):
-                self.dict(input_dict=input_list[i], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
-            elif isinstance(input_list[i], list):
-                self.list(input_list=input_list[i], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
+        key_path = path_to_root + '[0]'
+        key_name.append(key_path)
+        criteria_dict = {
+            'required_field': False,
+            'value_datatype': input_list[0].__class__
+        }
+        key_criteria.append(criteria_dict)
+        if isinstance(input_list[0], dict):
+            self.dict(input_dict=input_list[0], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
+        elif isinstance(input_list[0], list):
+            self.list(input_list=input_list[0], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
         return key_name, key_criteria
-
-class validateInput(object):
-
-    '''
-        a helper class of recursive methods to compare input to model map
-    '''
-
-    def __init__(self, input_dict, schema_dict, model_map):
-        self.dict(input_dict, schema_dict, model_map, schema_dict, '')
-
-    def dict(self, input_dict, schema_dict, model_map, model_schema, path_to_root):
-        max_keys = []
-        key_list = []
-        req_keys = []
-        key_set = []
-        input_keys = []
-        if path_to_root:
-            top_level_key = path_to_root
-        else:
-            top_level_key = '.'
-        for key in schema_dict.keys():
-            schema_key_name = path_to_root + '.' + key
-            max_keys.append(schema_key_name)
-            key_list.append(key)
-            if model_map[schema_key_name]['required_field']:
-                req_keys.append(schema_key_name)
-                key_set.append(key)
-        for key in input_dict.keys():
-            input_key_name = path_to_root + '.' + key
-            input_keys.append(input_key_name)
-        missing_keys = set(req_keys) - set(input_keys)
-        if not path_to_root:
-            input_path = '.'
-        else:
-            input_path = path_to_root
-        if missing_keys:
-            error_dict = {
-                'model_schema': model_schema,
-                'input_criteria': model_map[top_level_key],
-                'failed_test': 'required_field',
-                'input_path': input_path,
-                'error_value': key_set,
-                'error_code': 4002
-            }
-            error_dict['input_criteria']['required_keys'] = req_keys
-            raise InputValidationError(error_dict)
-        for key, value in input_dict.items():
-            input_key_name = path_to_root + '.' + key
-            if input_key_name not in max_keys and not model_map[top_level_key]['extra_fields']:
-                error_dict = {
-                    'model_schema': model_schema,
-                    'input_criteria': model_map[top_level_key],
-                    'failed_test': 'extra_fields',
-                    'input_path': input_path,
-                    'error_value': key,
-                    'error_code': 4003
-                }
-                error_dict['input_criteria']['maximum_scope'] = key_list
-                raise InputValidationError(error_dict)
-
-
-    def list(self, input_list, schema_list, model_map, model_schema, path_to_root):
-        pass
-
-    def set(self, input_set, schema_set, model_map, model_schema, path_to_root):
-        pass
 
 class jsonModel(object):
 
@@ -175,6 +106,14 @@ class jsonModel(object):
         self.schema = data_model['schema']
         self.keyName = mapModel(self.schema).keyName
         self.keyCriteria = mapModel(self.schema).keyCriteria
+
+    # validate existence of first item in list declarations
+        key_set = set(self.keyName)
+        for i in range(len(self.keyName)):
+            if isinstance([], self.keyCriteria[i]['value_datatype']):
+                item_key = self.keyName[i] + '[0]'
+                if not item_key in key_set:
+                    raise ModelValidationError('List in "schema" key of data model at path "%s" must declare an initial item for the list.' % self.keyName[i])
 
     # validate title input & construct title method
         self.title = ''
@@ -208,12 +147,6 @@ class jsonModel(object):
             self.components = data_model['components']
 
     # validate key names in components
-        dummy_string = 'string'
-        dummy_integer = 2
-        dummy_float = 2.2
-        dummy_boolean = True
-        dummy_list = []
-        dummy_map = {}
         for key, value in self.components.items():
             number_field = False
             if key not in self.keyName:
@@ -224,19 +157,19 @@ class jsonModel(object):
     # validate component qualifier fields are appropriate to component datatype
             data_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
             type_dict = {}
-            if data_type == dummy_string.__class__:
+            if isinstance("string", data_type):
                 type_dict = self.__rules__['components']['.string_fields']
-            elif data_type == dummy_integer.__class__:
+            elif isinstance(2, data_type):
                 type_dict = self.__rules__['components']['.number_fields']
                 number_field = True
-            elif data_type == dummy_float.__class__:
+            elif isinstance(2.2, data_type):
                 type_dict = self.__rules__['components']['.number_fields']
                 number_field = True
-            elif data_type == dummy_boolean.__class__:
+            elif isinstance(True, data_type):
                 type_dict = self.__rules__['components']['.boolean_fields']
-            elif data_type == dummy_list.__class__:
+            elif isinstance([], data_type):
                 type_dict = self.__rules__['components']['.list_fields']
-            elif data_type == dummy_map.__class__:
+            elif isinstance({}, data_type):
                 type_dict = self.__rules__['components']['.map_fields']
             if set(value.keys()) - set(type_dict.keys()):
                 raise ModelValidationError('Data model "components" key "%s" may only have datatype %s qualifiers %s.' % (key, data_type, set(type_dict.keys())))
@@ -273,6 +206,12 @@ class jsonModel(object):
                 if k == 'identical_to':
                     if not v in self.keyName:
                         raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" not found in components keys.' % (key, k))
+                if k == 'unique_values':
+                    if v:
+                        item_name = key + '[0]'
+                        item_datatype = self.keyCriteria[self.keyName.index(item_name)]['value_datatype']
+                        if not isinstance("string", item_datatype) and not isinstance(2, item_datatype) and not isinstance(2.2, item_datatype):
+                            raise ModelValidationError('A "true" value for "unique_values" requires data model "components" key "%s[0]" to be a string or number primitive.' % key)
 
     # construct keyMap from components, key names and key criteria
         self.keyMap = {}
@@ -283,9 +222,110 @@ class jsonModel(object):
                 for k, v in self.components[key].items():
                     self.keyMap[key][k] = v
 
+    def dict(self, input_dict, schema_dict, path_to_root):
+        max_keys = []
+        key_list = []
+        req_keys = []
+        key_set = []
+        input_keys = []
+        if path_to_root:
+            top_level_key = path_to_root
+        else:
+            top_level_key = '.'
+        for key in schema_dict.keys():
+            schema_key_name = path_to_root + '.' + key
+            max_keys.append(schema_key_name)
+            key_list.append(key)
+            if self.keyMap[schema_key_name]['required_field']:
+                req_keys.append(schema_key_name)
+                key_set.append(key)
+        for key in input_dict.keys():
+            input_key_name = path_to_root + '.' + key
+            input_keys.append(input_key_name)
+        missing_keys = set(req_keys) - set(input_keys)
+        if not path_to_root:
+            input_path = '.'
+        else:
+            input_path = path_to_root
+        if missing_keys:
+            error_dict = {
+                'model_schema': self.schema,
+                'input_criteria': self.keyMap[top_level_key],
+                'failed_test': 'required_field',
+                'input_path': input_path,
+                'error_value': key_set,
+                'error_code': 4002
+            }
+            error_dict['input_criteria']['required_keys'] = req_keys
+            raise InputValidationError(error_dict)
+        for key, value in input_dict.items():
+            input_key_name = path_to_root + '.' + key
+            if input_key_name in max_keys:
+                input_criteria = self.keyMap[input_key_name]
+                error_dict = {
+                    'model_schema': self.schema,
+                    'input_criteria': input_criteria,
+                    'failed_test': 'value_datatype',
+                    'input_path': input_path,
+                    'error_value': key,
+                    'error_code': 4001
+                }
+                if isinstance(value, bool):
+                    if not isinstance(value, input_criteria['value_datatype']):
+                        raise InputValidationError(error_dict)
+                    else:
+                        self.boolean(value, input_key_name)
+                elif isinstance(value, int) or isinstance(value, float):
+                    if isinstance(3, input_criteria['value_datatype']) or isinstance(3.3, input_criteria['value_datatype']):
+                        self.number(value, input_key_name)
+                    else:
+                        raise InputValidationError(error_dict)
+                elif not isinstance(value, input_criteria['value_datatype']):
+                    raise InputValidationError(error_dict)
+                elif isinstance(value, str):
+                    self.string(value, input_key_name)
+                elif isinstance(value, dict):
+                    self.dict(value, schema_dict[key], input_key_name)
+                elif isinstance(value, list):
+                    if 'unique_values' in input_criteria.keys():
+                        if input_criteria['unique_values']:
+                            self.set(value, schema_dict[key], input_key_name)
+                        else:
+                            self.list(value, schema_dict[key], input_key_name)
+                    else:
+                        self.list(value, schema_dict[key], input_key_name)
+            elif not self.keyMap[top_level_key]['extra_fields']:
+                error_dict = {
+                    'model_schema': self.schema,
+                    'input_criteria': self.keyMap[top_level_key],
+                    'failed_test': 'extra_fields',
+                    'input_path': input_path,
+                    'error_value': key,
+                    'error_code': 4003
+                }
+                error_dict['input_criteria']['maximum_scope'] = key_list
+                raise InputValidationError(error_dict)
+
+
+    def list(self, input_list, schema_list, path_to_root):
+        pass
+
+    def set(self, input_set, schema_set, path_to_root):
+        pass
+
+    def number(self, input_number, path_to_root):
+        pass
+
+    def string(self, input_string, path_to_root):
+        pass
+
+    def boolean(self, input_boolean, path_to_root):
+        pass
+
     def validate(self, input_dict):
         if not isinstance(input_dict, dict):
             error_dict = {
+                'model_schema': self.schema,
                 'input_criteria': self.keyMap['.'],
                 'failed_test': 'value_datatype',
                 'input_path': '.',
@@ -293,7 +333,7 @@ class jsonModel(object):
                 'error_code': 4001
             }
             raise InputValidationError(error_dict)
-        validateInput(input_dict, self.schema, self.keyMap)
+        self.dict(input_dict, self.schema, '')
         return input_dict
 
     def unitTests(self, valid_input):
@@ -302,10 +342,9 @@ class jsonModel(object):
         try:
             self.validate(invalid_list)
         except InputValidationError as err:
-            assert not err.error['model_schema']
             assert err.error['failed_test'] == 'value_datatype'
         extra_key_input = deepcopy(valid_input)
-        extra_key_input['extra'] = 'string'
+        extra_key_input['extraKey'] = 'string'
         try:
             self.validate(extra_key_input)
         except InputValidationError as err:

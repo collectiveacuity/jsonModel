@@ -19,14 +19,14 @@ The default behavior of a schema declaration includes validation of structure, d
             "postal_code": "",
             "country": "United States"
         },
-        "comments": [ "strings" ]
+        "comments": [ "string" ]
     }
 
 Default Settings
 ^^^^^^^^^^^^^^^^
-- **Structure**: The validation process will assume that a dictionary (including the top-level dictionary) defines its maximum scope of key names and that lists can contain any number of items. Lists cannot contain mixed datatypes and the structure of the first item in a list defines the allowable properties of each item in the list. So, the example model expects to find only the userID, datetime, active, address and comments fields and it will accept any number of strings in the comments list.
-- **Datatype**: The validation process will assume that the datatype of each value in the input matches the datatype in the model. So, the example model expects to see a string for userID, a number for datetime, a boolean for active, etc...
-- **Requirements**: The validation process will assume a key with a non-empty value is a required input. On top of this, a list with a single item it is also considered optional so that there is a placeholder with which to declare the format of the contents of the list. So, all fields in the example are required except postal_code and comments. The empty value for each datatype can be expressed with {}, [], 0, 0.0, false or "" and indicates that it is optional.
+- **Structure**: The validation process will assume that a dictionary (including the top-level dictionary) defines its maximum scope of key names and that lists can contain any number of items. Lists cannot contain mixed datatypes and the first item in a list defines the allowable properties of each item in the list. For this reason, all lists declared in the model must also contain an item. So, the example model expects to find only the userID, datetime, active, address and comments fields and it will accept any number of strings in the comments list.
+- **Datatype**: The validation process will assume that the datatype of each value in the input matches the datatype in the model. So, the example model expects to see a string for userID, a number for datetime, a boolean for active, etc... Special datatypes like bytes, integers, doubles and sets which json does not support must be handled by qualifiers in the components map.
+- **Requirements**: The validation process will assume a key with a non-empty value is a required input. Since lists must have an item, all declared lists are assumed to be required fields in the model. So, all fields in the example are required except postal_code. The empty value for each datatype can be expressed with {}, 0, 0.0, false or "" and indicates that it is optional.
 
 Components Map
 --------------
@@ -47,6 +47,10 @@ The default validation process can be modified, and other (less common) conditio
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
             "required_field": false
         },
+        ".comments": {
+            "required_field": false,
+            "unique_values": true
+        }
         ".comments[0]": {
             "max_length": 120
         }
@@ -54,7 +58,7 @@ The default validation process can be modified, and other (less common) conditio
 
 Path Definitions
 ^^^^^^^^^^^^^^^^
-To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, a key named "userID" is expected to be found in the top level map of the schema, .address.city refers to the "city" key inside the "address" map inside the schema map and .comments[0] refers to the first item inside the comments list.  Since the comments list is itself optional, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys.
+To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, a key named "userID" is expected to be found in the top level map of the schema, .address.city refers to the "city" key inside the "address" map inside the schema map and .comments[0] refers to the first item inside the comments list.  Since the comments list is itself made optional by the component ".comments" declaration, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys.
 
 List of Field Conditionals (and default values)
 -----------------------------------------------
@@ -72,8 +76,7 @@ List of Field Conditionals (and default values)
 - "**max_value**": 0, # the maximum value of a number [numbers only]
 - "**min_size**": 0, # the minimum number of items in a list [lists only]
 - "**max_size**": 0, # the maximum number of items in a list [lists only]
-- "**unique_set**": false, # a true boolean treats a list as a set of unique primitives with no duplication [lists of strings and numbers only]
-- "**match_first**": false, # a true boolean checks to see that each item of a list matches the construct of the first item [lists only]
+- "**unique_values**": false, # a true boolean treats a list as a set of unique primitives with no duplication [lists of strings and numbers only]
 - "**discrete_values**": [], # a list of values allowed, this attribute supersedes other qualifying attributes in the component list [numbers and strings only]
 - "**identical_to**": "", # the key name in the components map whose value the value of this component must match
 - "**lambda_function**": "", # a single argument function which should be run to validate the value of this component, lambda_function must return true (valid) or false (invalid)
@@ -107,7 +110,7 @@ Errors created from improper model specification will raise a ModelValidationErr
             'extra_fields': False
         },
         'failed_test': 'extra_fields',
-        'error_value': 'extra',
+        'error_value': 'extraKey',
         'error_code': 4003
     }
 

@@ -60,7 +60,7 @@
       "min_size": 0,
       "max_size": 0,
       "match_first": 0,
-      "unique_set": false,
+      "unique_values": false,
       "identical_to": ".similar_list",
       "lambda_function": "",
       "validation_url": "",

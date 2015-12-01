@@ -1,27 +1,35 @@
 {
   "schema": {
-        "userID": "gY3Cv81QwL0Fs",
-        "datetime": 1456000345.543713,
-        "active": true,
-        "address": {
-            "city": "New Orleans",
-            "region": "LA",
-            "postal_code": "",
-            "country": "United States"
-        }
+    "userID": "gY3Cv81QwL0Fs",
+    "datetime": 1456000345.543713,
+    "active": true,
+    "address": {
+      "city": "New Orleans",
+      "region": "LA",
+      "postal_code": "",
+      "country": "United States"
     },
+    "comments": [ "string" ]
+  },
   "components": {
-        ".": {
-          "extra_fields": false
-        },
-        ".userID": {
-            "min_length": 13,
-            "max_length": 13,
-            "must_not_contain": [ "[^\\w]", "_" ]
-        },
-        ".address.city": {
-            "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
-            "required_field": false
-        }
+    ".": {
+      "extra_fields": false
+    },
+    ".userID": {
+      "min_length": 13,
+      "max_length": 13,
+      "must_not_contain": [ "[^\\w]", "_" ]
+    },
+    ".address.city": {
+      "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
+      "required_field": false
+    },
+    ".comments": {
+      "required_field": false,
+      "unique_values": true
+    },
+    ".comments[0]": {
+      "max_length": 120
     }
+  }
 }
