@@ -52,12 +52,12 @@ This module is designed to facilitate the process of implementing data validatio
 In addition to intuitive self-valid schema declarations, jsonModel also offers a rich way to further refine the conditionality of any property in the model through an accompanying components map whose key names correspond to the path to the schema property which requires additional validation::
 
     "components": {
-        "userID": {
+        ".userID": {
             "min_length": 13,
             "max_length": 13,
             "must_not_contain": [ "[^\\w]", "_" ]
         },
-        "address.city": {
+        ".address.city": {
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
             "required_field": false
         }
@@ -77,7 +77,7 @@ To declare the model::
         "components": {},
         "title": "my cool data model",
         "url": "https://collectiveacuity.com/api/mycoolresource?jsonmodel=true",
-        "max_size": 0,
+        "max_size": 1024,
     }
 
 *[all fields except schema are optional]*

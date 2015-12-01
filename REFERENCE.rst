@@ -30,7 +30,7 @@ Default Settings
 
 Components Map
 --------------
-The default validation process can be modified, and other (less common) conditionals can be added through the components map of the model. Whereas the schema map provides a transparent data architecture that is self-valid, the components map can be used to specify the conditions of acceptable data for any number of fields in the schema. The component map is an optional flat dictionary where each key in the component map designates a particular path in the schema using the '.' and [1] nomenclature of nesting and array identification.
+The default validation process can be modified, and other (less common) conditionals can be added through the components map of the model. Whereas the schema map provides a transparent data architecture that is self-valid, the components map can be used to specify the conditions of acceptable data for any number of fields in the schema. The component map is an optional flat dictionary where each key in the component map designates a particular path in the schema using the '.' and [0] nomenclature of nesting and array identification.
 
 **Components Example**::
 
@@ -59,7 +59,7 @@ List of Field Conditionals (and default values)
 -----------------------------------------------
 - "**value_datatype**": null, # IMMUTABLE / DEFINED IN SCHEMA / error code [4001]
 - "**required_field**": false, # a true boolean requires this key-value in the input / error code [4002]
-- "**extra_fields**": false, # a true boolean allows map to contain undeclared keys / error code [4003] / [maps only]
+- "**extra_fields**": false, # a true boolean allows map to contain undeclared keys / error code [4003] / [**maps only**]
 - "**default_value**": null, # a value for an optional property when no value is given
 - "**byte_data**": false, # a true boolean expects to see base64 byte data in the string field [strings only]
 - "**min_length**": 0, # the minimum number of characters in a string [strings only]
