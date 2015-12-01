@@ -99,6 +99,7 @@ Errors created from improper model specification will raise a ModelValidationErr
                 'region': 'LA',
                 'country': 'United States'
             },
+            'comments': [ 'string' ],
             'active': True,
             'userID': 'gY3Cv81QwL0Fs'
         },
@@ -106,7 +107,7 @@ Errors created from improper model specification will raise a ModelValidationErr
         'input_criteria': {
             'required_field': True,
             'value_datatype': <class 'dict'>,
-            'maximum_scope': [ 'datetime', 'address', 'active', 'userID' ],
+            'maximum_scope': [ 'datetime', 'address', 'active', 'userID', 'comments' ],
             'extra_fields': False
         },
         'failed_test': 'extra_fields',
