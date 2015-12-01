@@ -95,12 +95,12 @@ Errors created from improper model specification will raise a ModelValidationErr
 Order of Exceptions
 ^^^^^^^^^^^^^^^^^^^
 The validation process will raise an error as soon as it encounters one, so there is no guarantee that the error that is reported is the only error in the input. However the steps of the validation process are designed to tackle the largest scope first before they drill down. Here is the order of error exception:
-- 1. Required keys in a dictionary
-- 2. Extra keys in a dictionary
-- 3. Individual fields in the dictionary
-- - A. Datatype of value
-- - B. Non-empty value
-- - C. Other value qualifiers
+#. Required keys in a dictionary
+#. Extra keys in a dictionary
+#. Individual fields in the dictionary
+- #. Datatype of value
+- #. Non-empty value
+- #. Other value qualifiers
 To help the process of error handling and client-server negotiation, the input_criteria is included in the error dictionary as a map of all the conditional qualifiers which are associated with a particular field in the input.
 
 
