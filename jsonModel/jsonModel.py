@@ -100,7 +100,9 @@ class validateInput(object):
 
     def dict(self, input_dict, schema_dict, model_map, model_schema, path_to_root):
         max_keys = []
+        key_list = []
         req_keys = []
+        key_set = []
         input_keys = []
         if path_to_root:
             top_level_key = path_to_root
@@ -109,8 +111,10 @@ class validateInput(object):
         for key in schema_dict.keys():
             schema_key_name = path_to_root + '.' + key
             max_keys.append(schema_key_name)
+            key_list.append(key)
             if model_map[schema_key_name]['required_field']:
                 req_keys.append(schema_key_name)
+                key_set.append(key)
         for key in input_dict.keys():
             input_key_name = path_to_root + '.' + key
             input_keys.append(input_key_name)
@@ -125,7 +129,7 @@ class validateInput(object):
                 'input_criteria': model_map[top_level_key],
                 'failed_test': 'required_field',
                 'input_path': input_path,
-                'error_value': missing_keys,
+                'error_value': key_set,
                 'error_code': 4002
             }
             error_dict['input_criteria']['required_keys'] = req_keys
@@ -138,14 +142,12 @@ class validateInput(object):
                     'input_criteria': model_map[top_level_key],
                     'failed_test': 'extra_fields',
                     'input_path': input_path,
-                    'error_value': input_key_name,
+                    'error_value': key,
                     'error_code': 4003
                 }
-                error_dict['input_criteria']['maximum_scope'] = max_keys
+                error_dict['input_criteria']['maximum_scope'] = key_list
                 raise InputValidationError(error_dict)
 
-
-        pass
 
     def list(self, input_list, schema_list, model_map, model_schema, path_to_root):
         pass
