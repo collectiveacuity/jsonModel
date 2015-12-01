@@ -16,6 +16,7 @@ class InputValidationError(Exception):
 
     def __init__(self, error_dict=None):
         self.error = {
+            'model_schema': {},
             'input_criteria': {},
             'failed_test': '',
             'input_path': {},
@@ -23,6 +24,8 @@ class InputValidationError(Exception):
             'error_code': 0
         }
         if isinstance(error_dict, dict):
+            if 'model_schema' in error_dict:
+                self.error['model_schema'] = error_dict['model_schema']
             if 'input_criteria' in error_dict:
                 self.error['input_criteria'] = error_dict['input_criteria']
             if 'failed_test' in error_dict:
@@ -93,9 +96,9 @@ class validateInput(object):
     '''
 
     def __init__(self, input_dict, schema_dict, model_map):
-        self.dict(input_dict, schema_dict, model_map, '')
+        self.dict(input_dict, schema_dict, model_map, schema_dict, '')
 
-    def dict(self, input_dict, schema_dict, model_map, path_to_root):
+    def dict(self, input_dict, schema_dict, model_map, model_schema, path_to_root):
         max_keys = []
         req_keys = []
         input_keys = []
@@ -118,6 +121,7 @@ class validateInput(object):
             input_path = path_to_root
         if missing_keys:
             error_dict = {
+                'model_schema': model_schema,
                 'input_criteria': model_map[top_level_key],
                 'failed_test': 'required_field',
                 'input_path': input_path,
@@ -130,6 +134,7 @@ class validateInput(object):
             input_key_name = path_to_root + '.' + key
             if input_key_name not in max_keys and not model_map[top_level_key]['extra_fields']:
                 error_dict = {
+                    'model_schema': model_schema,
                     'input_criteria': model_map[top_level_key],
                     'failed_test': 'extra_fields',
                     'input_path': input_path,
@@ -142,10 +147,10 @@ class validateInput(object):
 
         pass
 
-    def list(self, input_list, schema_list, model_map, path_to_root):
+    def list(self, input_list, schema_list, model_map, model_schema, path_to_root):
         pass
 
-    def set(self, input_set, schema_set, model_map, path_to_root):
+    def set(self, input_set, schema_set, model_map, model_schema, path_to_root):
         pass
 
 class jsonModel(object):
@@ -295,12 +300,14 @@ class jsonModel(object):
         try:
             self.validate(invalid_list)
         except InputValidationError as err:
+            assert not err.error['model_schema']
             assert err.error['failed_test'] == 'value_datatype'
         extra_key_input = deepcopy(valid_input)
         extra_key_input['extra'] = 'string'
         try:
             self.validate(extra_key_input)
         except InputValidationError as err:
+            assert err.error['model_schema']
             assert err.error['failed_test'] == 'extra_fields'
         missing_key_input = deepcopy(valid_input)
         del missing_key_input['active']

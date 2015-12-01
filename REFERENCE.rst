@@ -51,6 +51,7 @@ The default validation process can be modified, and other (less common) conditio
             "max_length": 120
         }
     }
+
 Path Definitions
 ^^^^^^^^^^^^^^^^
 To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, a key named "userID" is expected to be found in the top level map of the schema, .address.city refers to the "city" key inside the "address" map inside the schema map and .comments[0] refers to the first item inside the comments list.  Since the comments list is itself optional, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys.
@@ -86,12 +87,29 @@ Errors created from improper model specification will raise a ModelValidationErr
 **Error Method Example**::
 
     self.error = {
-        'input_criteria': self.keyMap['.'],
-        'failed_test': 'value_datatype',
+        'model_schema': {
+            'datetime': 1456000345.543713,
+            'address': {
+                'city': 'New Orleans',
+                'postal_code': '',
+                'region': 'LA',
+                'country': 'United States'
+            },
+            'active': True,
+            'userID': 'gY3Cv81QwL0Fs'
+        },
         'input_path': '.',
-        'error_value': input_dict.__class__,
-        'error_code': 4001
+        'input_criteria': {
+            'required_field': True,
+            'value_datatype': <class 'dict'>,
+            'maximum_scope': ['.datetime', '.address', '.active', '.userID'],
+            'extra_fields': False
+        },
+        'failed_test': 'extra_fields',
+        'error_value': '.extra',
+        'error_code': 4003
     }
+
 Order of Exceptions
 ^^^^^^^^^^^^^^^^^^^
 The validation process will raise an error as soon as it encounters one, so there is no guarantee that the error that is reported is the only error in the input. However the steps of the validation process are designed to tackle the largest scope first before they drill down. Here is the order of error exception:
@@ -100,11 +118,11 @@ The validation process will raise an error as soon as it encounters one, so ther
 #. Extra keys in a dictionary
 #. Individual fields in the dictionary
 
-- #. Datatype of value
-- #. Non-empty value
-- #. Other value qualifiers
+- - Datatype of value
+- - Non-empty value
+- - Other value qualifiers
 
-To help the process of error handling and client-server negotiation, the input_criteria is included in the error dictionary as a map of all the conditional qualifiers which are associated with a particular field in the input.
+To help the process of error handling and client-server negotiation, both the schema for the model as well as the the map of conditional qualifiers for the field that raised the error are included in the error dictionary.
 
 
 
