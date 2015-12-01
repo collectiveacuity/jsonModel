@@ -11,12 +11,15 @@
         }
     },
   "components": {
-        "userID": {
+        ".": {
+          "extra_fields": false
+        },
+        ".userID": {
             "min_length": 13,
             "max_length": 13,
             "must_not_contain": [ "[^\\w]", "_" ]
         },
-        "address.city": {
+        ".address.city": {
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
             "required_field": false
         }

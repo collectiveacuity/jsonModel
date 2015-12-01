@@ -5,7 +5,6 @@
   "address": {
       "city": "New York",
       "region": "NY",
-      "postal_code": "10001",
       "country": "United States"
   }
 }

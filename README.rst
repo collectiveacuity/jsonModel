@@ -76,7 +76,8 @@ To declare the model::
         },
         "components": {},
         "title": "my cool data model",
-        "url": "https://collectiveacuity.com/api/mycoolresource?jsonmodel=true"
+        "url": "https://collectiveacuity.com/api/mycoolresource?jsonmodel=true",
+        "max_size": 0,
     }
 
 *[all fields except schema are optional]*
