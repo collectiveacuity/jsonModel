@@ -1,7 +1,7 @@
 =============================
 jsonModel Reference Materials
 =============================
-*Documentation for the list of conditional attributes that can be added to properties of a jsonModel schema.*
+*Documentation for model declaration and error handling for jsonModel validation.*
 
 Schema Default Behavior
 -----------------------
@@ -57,9 +57,9 @@ To validate additional conditionals placed on a property in the schema, the vali
 
 List of Field Conditionals (and default values)
 -----------------------------------------------
-- "**value_datatype**": null, # IMMUTABLE / DEFINED IN SCHEMA / error code [4001]
-- "**required_field**": false, # a true boolean requires this key-value in the input / error code [4002]
-- "**extra_fields**": false, # a true boolean allows map to contain undeclared keys / error code [4003] / [**maps only**]
+- "**value_datatype**": null, # **IMMUTABLE** / DEFINED IN SCHEMA / error_code: 4001
+- "**required_field**": false, # a true boolean requires this key-value in the input / error_code: 4002
+- "**extra_fields**": false, # a true boolean allows map to contain undeclared keys / error_code: 4003 / [**maps only**]
 - "**default_value**": null, # a value for an optional property when no value is given
 - "**byte_data**": false, # a true boolean expects to see base64 byte data in the string field [strings only]
 - "**min_length**": 0, # the minimum number of characters in a string [strings only]
@@ -78,6 +78,30 @@ List of Field Conditionals (and default values)
 - "**validation_url**": "", # an uri which can be called to validate the value of this component with its input in the body of the request, uri response must return true (valid) or false (invalid)
 - "**example_values**": [], # a list of values which satisfy all the validation requirements [ numbers and strings only ]
 - "**field_description**": "" # a description of the nature of the component used in documentation
+
+Error Handling
+--------------
+Errors created from improper model specification will raise a ModelValidationError with a message that is designed to help determine the source of the model declaration error. To ensure that model initialization occurs properly, no error encoding is included to handle these exceptions. However, it is expected that validation of inputs will through errors. Otherwise, what's the point?! So, in addition to a text report, a dictionary has been included with the InputValidationError exception to facilitate error handling.
+
+**Error Method Example**::
+
+    self.error = {
+        'input_criteria': self.keyMap['.'],
+        'failed_test': 'value_datatype',
+        'input_path': '.',
+        'error_value': input_dict.__class__,
+        'error_code': 4001
+    }
+Order of Exceptions
+^^^^^^^^^^^^^^^^^^^
+The validation process will raise an error as soon as it encounters one, so there is no guarantee that the error that is reported is the only error in the input. However the steps of the validation process are designed to tackle the largest scope first before they drill down. Here is the order of error exception:
+- 1. Required keys in a dictionary
+- 2. Extra keys in a dictionary
+- 3. Individual fields in the dictionary
+- - A. Datatype of value
+- - B. Non-empty value
+- - C. Other value qualifiers
+To help the process of error handling and client-server negotiation, the input_criteria is included in the error dictionary as a map of all the conditional qualifiers which are associated with a particular field in the input.
 
 
 

@@ -95,6 +95,14 @@ To validate input against model declaration::
     validModel.validate(input)
 
 
+To handle invalid inputs::
+
+    try:
+        validModel.validate(invalid_input)
+    except InputValidationError as err:
+        assert err.error['error_code'] > 4000
+
+
 For more details about how to use jsonModel, refer to the
 `Reference Documentation on Github
 <https://github.com/collectiveacuity/jsonModel/REFERENCE.rst>`_
