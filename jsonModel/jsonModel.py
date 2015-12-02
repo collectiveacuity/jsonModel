@@ -3,6 +3,7 @@ __created__ = '2015.11'
 
 import json
 import re
+from base64 import b64encode, b64decode
 from copy import deepcopy
 
 class ModelValidationError(Exception):
@@ -92,6 +93,13 @@ class jsonModel(object):
 
     def __init__(self, data_model):
 
+        '''
+            a method for testing data model declaration & initializing the class
+
+        :param data_model: dictionary with json model architecture
+        :return: jsonModel object
+        '''
+
     # validate schema input
         if not isinstance(data_model, dict):
             raise ModelValidationError('Data model must be a dictionary.')
@@ -150,9 +158,9 @@ class jsonModel(object):
         for key, value in self.components.items():
             number_field = False
             if key not in self.keyName:
-                raise ModelValidationError('Data model "components" key "%s" is not declared in "schema".' % key)
+                raise ModelValidationError('Data model "components%s" is not declared in "schema".' % key)
             elif not isinstance(value, dict):
-                raise ModelValidationError('Value for the data model "components" key "%s" must be a dictionary.' % key)
+                raise ModelValidationError('Value for data model "components%s" must be a dictionary.' % key)
 
     # validate component qualifier fields are appropriate to component datatype
             data_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
@@ -172,46 +180,118 @@ class jsonModel(object):
             elif isinstance({}, data_type):
                 type_dict = self.__rules__['components']['.map_fields']
             if set(value.keys()) - set(type_dict.keys()):
-                raise ModelValidationError('Data model "components" key "%s" may only have datatype %s qualifiers %s.' % (key, data_type, set(type_dict.keys())))
+                raise ModelValidationError('Data model "components%s" may only have datatype %s qualifiers %s.' % (key, data_type, set(type_dict.keys())))
 
     # validate component qualifier field values are appropriate value datatype
             for k, v in value.items():
                 if k == 'default_value':
                     if number_field:
                         if not isinstance(v, int) and not isinstance(v, float):
-                            raise ModelValidationError('Value of data model "components" key "%s" qualifier field "default_value" must be a number datatype.' % key)
+                            raise ModelValidationError('Value for data model "components%s.%s"default_value" must be a number.' % key)
                     elif not isinstance(v, data_type):
-                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "default_value" must be a %s datatype.' % (key, data_type))
+                        raise ModelValidationError('Value for data model "components%s.default_value" must be a %s datatype.' % (key, data_type))
                 elif k == 'min_value' or k == 'max_value':
-                    if not isinstance(v, int) and not isinstance(v, float):
-                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" must be a number datatype.' % (key, k))
+                    if isinstance(v, bool) or (not isinstance(v, int) and not isinstance(v, float)):
+                        raise ModelValidationError('Value for data model "components%s.%s" must be a number.' % (key, k))
                 elif not isinstance(v, type_dict[k].__class__):
-                    raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" must be a %s datatype.' % (key, k, type_dict[k].__class__))
+                    raise ModelValidationError('Value for data model "components%s.%s" must be a %s datatype.' % (key, k, type_dict[k].__class__))
 
     # validate individual qualifier field values
                 if k == 'must_not_contain' or k == 'must_contain':
                     for item in v:
                         if not isinstance(item, str):
-                            raise ModelValidationError('Each data model "components" key "%s" qualifier field "%s" item must be a string.' % (key, k))
+                            raise ModelValidationError('Each item in data model "components%s.%s" list must be a string.' % (key, k))
                 if k == 'min_length' or k == 'max_length' or k == 'min_size' or k == 'max_size':
                     if v < 0:
-                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" cannot be negative.' % (key, k))
+                        raise ModelValidationError('Value for data model "components%s.%s" cannot be negative.' % (key, k))
                 if k == 'discrete_values' or k == 'example_values':
                     for item in v:
                         if number_field:
                             if not isinstance(item, int) and not isinstance(item, float):
-                                raise ModelValidationError('Each data model "components" key "%s" qualifier field "%s" item must be a number.' % (key, k))
+                                raise ModelValidationError('Each item in data model "components%s.%s" list must be a number.' % (key, k))
                         elif not isinstance(item, str):
-                            raise ModelValidationError('Each data model "components" key "%s" qualifier field "%s" item must be a string.' % (key, k))
+                            raise ModelValidationError('Each item in data model "components%s.%s" list must be a string.' % (key, k))
                 if k == 'identical_to':
                     if not v in self.keyName:
-                        raise ModelValidationError('Value of data model "components" key "%s" qualifier field "%s" not found in components keys.' % (key, k))
+                        raise ModelValidationError('Data model "components%s.%s": "%s" not found in components keys.' % (key, k, v))
                 if k == 'unique_values':
                     if v:
                         item_name = key + '[0]'
                         item_datatype = self.keyCriteria[self.keyName.index(item_name)]['value_datatype']
                         if not isinstance("string", item_datatype) and not isinstance(2, item_datatype) and not isinstance(2.2, item_datatype):
                             raise ModelValidationError('A "true" value for "unique_values" requires data model "components" key "%s[0]" to be a string or number primitive.' % key)
+
+    # validate default value against all other fields
+            if 'default_value' in value.keys():
+                default = value['default_value']
+                if 'min_value' in value.keys():
+                    if default < value['min_value']:
+                        raise ModelValidationError('Data model "components%s.default_value": %s must not be less than "min_value": %s.' % (key, default, value['min_value']))
+                if 'max_value' in value.keys():
+                    if default > value['max_value']:
+                        raise ModelValidationError('Data model "components%s.default_value": %s must not be greater than "max_value": %s.' % (key, default, value['max_value']))
+                if 'min_length' in value.keys():
+                    if len(default) < value['min_length']:
+                        raise ModelValidationError('Data model "components%s.default_value": "%s" must be at least "min_length": %s characters.' % (key, default, value['min_length']))
+                if 'max_length' in value.keys():
+                    if len(default) > value['max_length']:
+                        raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be more than "max_length": %s characters.' % (key, default, value['max_length']))
+                if 'must_not_contain' in value.keys():
+                    for regex in value['must_not_contain']:
+                        regex_pattern = re.compile(regex)
+                        if regex_pattern.findall(default):
+                            raise ModelValidationError('Data model "components%s.default_value": "%s" matches regex pattern "%s" in "must_not_contain".' % (key, default, regex))
+                if 'must_contain' in value.keys():
+                    for regex in value['must_contain']:
+                        regex_pattern = re.compile(regex)
+                        if not regex_pattern.findall(default):
+                            raise ModelValidationError('Data model "components%s.default_value": "%s" does not match regex pattern "%s" in "must_contain".' % (key, default, regex))
+                if 'discrete_values' in value.keys():
+                    if default not in value['discrete_values']:
+                        raise ModelValidationError('Data model "components%s.default_value": "%s" is not found in "discrete_values".' % (key, default))
+                if 'byte_data' in value.keys():
+                    try:
+                        decoded_bytes = b64decode(default)
+                    except:
+                        raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be base64 decoded to "byte_data".' % (key, default))
+                    if not isinstance(decoded_bytes, bytes):
+                        raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be base64 decoded to "byte_data".' % (key, default))
+
+    # validate example values against all other fields
+            if 'example_values' in value.keys():
+                for example in value['example_values']:
+                    if 'min_value' in value.keys():
+                        if example < value['min_value']:
+                            raise ModelValidationError('Data model "components%s.example_values" item %s must not be less than "min_value": %s.' % (key, example, value['min_value']))
+                    if 'max_value' in value.keys():
+                        if example > value['max_value']:
+                            raise ModelValidationError('Data model "components%s.example_values" item %s must not be greater than "max_value": %s.' % (key, example, value['max_value']))
+                    if 'min_length' in value.keys():
+                        if len(example) < value['min_length']:
+                            raise ModelValidationError('Data model "components%s.example_values" item "%s" must be at least "min_length": %s characters.' % (key, example, value['min_length']))
+                    if 'max_length' in value.keys():
+                        if len(example) > value['max_length']:
+                            raise ModelValidationError('Data model "components%s.example_values" item "%s" cannot be more than "max_length": %s characters.' % (key, example, value['max_length']))
+                    if 'must_not_contain' in value.keys():
+                        for regex in value['must_not_contain']:
+                            regex_pattern = re.compile(regex)
+                            if regex_pattern.findall(example):
+                                raise ModelValidationError('Data model "components%s.example_values" item "%s" matches regex pattern "%s" in "must_not_contain".' % (key, example, regex))
+                    if 'must_contain' in value.keys():
+                        for regex in value['must_contain']:
+                            regex_pattern = re.compile(regex)
+                            if not regex_pattern.findall(example):
+                                raise ModelValidationError('Data model "components%s.example_values" item "%s" does not match regex pattern "%s" in "must_contain".' % (key, example, regex))
+                    if 'discrete_values' in value.keys():
+                        if example not in value['discrete_values']:
+                            raise ModelValidationError('Data model "components%s.example_values" item "%s" is not found in "discrete_values".' % (key, example))
+                    if 'byte_data' in value.keys():
+                        try:
+                            decoded_bytes = b64decode(example)
+                        except:
+                            raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be base64 decoded to "byte_data".' % (key, example))
+                        if not isinstance(decoded_bytes, bytes):
+                            raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be base64 decoded to "byte_data".' % (key, example))
 
     # construct keyMap from components, key names and key criteria
         self.keyMap = {}
@@ -223,11 +303,20 @@ class jsonModel(object):
                     self.keyMap[key][k] = v
 
     def dict(self, input_dict, schema_dict, path_to_root):
+
+        '''
+            a helper method for recursively validating keys in dictionaries
+
+        :return input_dict
+        '''
+
+    # construct lists of keys and variables from schema and input to evaluate
         max_keys = []
-        key_list = []
+        max_key_list = []
         req_keys = []
-        key_set = []
+        req_key_list = []
         input_keys = []
+        input_key_list = []
         if path_to_root:
             top_level_key = path_to_root
         else:
@@ -235,13 +324,16 @@ class jsonModel(object):
         for key in schema_dict.keys():
             schema_key_name = path_to_root + '.' + key
             max_keys.append(schema_key_name)
-            key_list.append(key)
+            max_key_list.append(key)
             if self.keyMap[schema_key_name]['required_field']:
                 req_keys.append(schema_key_name)
-                key_set.append(key)
+                req_key_list.append(key)
         for key in input_dict.keys():
             input_key_name = path_to_root + '.' + key
             input_keys.append(input_key_name)
+            input_key_list.append(key)
+
+    # validate existence of required fields
         missing_keys = set(req_keys) - set(input_keys)
         if not path_to_root:
             input_path = '.'
@@ -253,11 +345,21 @@ class jsonModel(object):
                 'input_criteria': self.keyMap[top_level_key],
                 'failed_test': 'required_field',
                 'input_path': input_path,
-                'error_value': key_set,
+                'error_value': req_key_list,
                 'error_code': 4002
             }
             error_dict['input_criteria']['required_keys'] = req_keys
             raise InputValidationError(error_dict)
+
+    # set default values for empty optional fields
+        for key in max_key_list:
+            if key not in input_key_list:
+                indexed_key = max_keys[max_key_list.index(key)]
+                if indexed_key in self.components.keys():
+                    if 'default_value' in self.components[indexed_key]:
+                        input_dict[key] = self.components[indexed_key]['default_value']
+
+    # route values to appropriate validation method based upon datatype
         for key, value in input_dict.items():
             input_key_name = path_to_root + '.' + key
             if input_key_name in max_keys:
@@ -274,26 +376,28 @@ class jsonModel(object):
                     if not isinstance(value, input_criteria['value_datatype']):
                         raise InputValidationError(error_dict)
                     else:
-                        self.boolean(value, input_key_name)
+                        input_dict[key] = self.boolean(value, input_key_name)
                 elif isinstance(value, int) or isinstance(value, float):
                     if isinstance(3, input_criteria['value_datatype']) or isinstance(3.3, input_criteria['value_datatype']):
-                        self.number(value, input_key_name)
+                        input_dict[key] = self.number(value, input_key_name)
                     else:
                         raise InputValidationError(error_dict)
                 elif not isinstance(value, input_criteria['value_datatype']):
                     raise InputValidationError(error_dict)
                 elif isinstance(value, str):
-                    self.string(value, input_key_name)
+                    input_dict[key] = self.string(value, input_key_name)
                 elif isinstance(value, dict):
-                    self.dict(value, schema_dict[key], input_key_name)
+                    input_dict[key] = self.dict(value, schema_dict[key], input_key_name)
                 elif isinstance(value, list):
                     if 'unique_values' in input_criteria.keys():
                         if input_criteria['unique_values']:
-                            self.set(value, schema_dict[key], input_key_name)
+                            input_dict[key] = self.set(value, schema_dict[key], input_key_name)
                         else:
-                            self.list(value, schema_dict[key], input_key_name)
+                            input_dict[key] = self.list(value, schema_dict[key], input_key_name)
                     else:
-                        self.list(value, schema_dict[key], input_key_name)
+                        input_dict[key] = self.list(value, schema_dict[key], input_key_name)
+
+    # handle the fields beyond the scope of the schema
             elif not self.keyMap[top_level_key]['extra_fields']:
                 error_dict = {
                     'model_schema': self.schema,
@@ -303,24 +407,41 @@ class jsonModel(object):
                     'error_value': key,
                     'error_code': 4003
                 }
-                error_dict['input_criteria']['maximum_scope'] = key_list
+                error_dict['input_criteria']['maximum_scope'] = max_key_list
                 raise InputValidationError(error_dict)
 
+        return input_dict
 
     def list(self, input_list, schema_list, path_to_root):
-        pass
+        return input_list
 
     def set(self, input_set, schema_set, path_to_root):
-        pass
+        return input_set
 
     def number(self, input_number, path_to_root):
-        pass
+        input_criteria = self.keyMap[path_to_root]
+        error_dict = {
+            'model_schema': self.schema,
+            'input_criteria': input_criteria,
+            'input_path': path_to_root,
+            'error_value': input_number
+        }
+        if input_criteria['required_field']:
+            if not input_number:
+                error_dict['failed_test'] = 'required_field'
+                error_dict['error_code'] = 4002
+                raise InputValidationError(error_dict)
+        if not input_number and not input_criteria['required_field']:
+            if 'default_value' in input_criteria.keys():
+                input_number = input_criteria['default_value']
+
+        return input_number
 
     def string(self, input_string, path_to_root):
-        pass
+        return input_string
 
     def boolean(self, input_boolean, path_to_root):
-        pass
+        return input_boolean
 
     def validate(self, input_dict):
         if not isinstance(input_dict, dict):
@@ -333,7 +454,7 @@ class jsonModel(object):
                 'error_code': 4001
             }
             raise InputValidationError(error_dict)
-        self.dict(input_dict, self.schema, '')
+        input_dict = self.dict(input_dict, self.schema, '')
         return input_dict
 
     def unitTests(self, valid_input):
@@ -356,7 +477,11 @@ class jsonModel(object):
             self.validate(missing_key_input)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'required_field'
-        self.validate(valid_input)
+        default_input = deepcopy(valid_input)
+        default_input['datetime'] = 0
+        new_default_input = self.validate(default_input)
+        assert new_default_input['datetime'] == 1500
+        print(self.validate(valid_input))
         return self
 
 class requestModel(object):

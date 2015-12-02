@@ -3,6 +3,7 @@
     "userID": "gY3Cv81QwL0Fs",
     "datetime": 1456000345.543713,
     "active": true,
+    "state": "aGFwcHk=",
     "address": {
       "city": "New Orleans",
       "region": "LA",
@@ -18,11 +19,30 @@
     ".userID": {
       "min_length": 13,
       "max_length": 13,
-      "must_not_contain": [ "[^\\w]", "_" ]
+      "must_not_contain": [ "[^\\w]", "_" ],
+      "must_contain": [ "g" ],
+      "default_value": "ghjKe34TSbhde",
+      "example_values": [ "ghjKe3400bhde" ],
+      "discrete_values": [ "ghjKe3400bhde", "ghjKe34TSbhde" ]
+    },
+    ".state": {
+      "required_field": false,
+      "byte_data": true,
+      "default_value": "aGFwcHIk=",
+      "example_values": [ "aGFwcHk=" ]
+    },
+    ".datetime": {
+      "required_field": false,
+      "default_value": 1500,
+      "max_value": 14000,
+      "min_value": 1499.99,
+      "discrete_values": [ 1500, 10000.0 ],
+      "example_values": [ 10000 ]
     },
     ".address.city": {
       "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
-      "required_field": false
+      "required_field": false,
+      "default_value": "New York"
     },
     ".comments": {
       "required_field": false,
