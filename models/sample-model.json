@@ -3,7 +3,7 @@
     "userID": "gY3Cv81QwL0Fs",
     "datetime": 1456000345.543713,
     "active": true,
-    "state": "aGFwcHk=",
+    "emotion": "aGFwcHk=",
     "address": {
       "city": "New Orleans",
       "region": "LA",
@@ -25,10 +25,9 @@
       "example_values": [ "ghjKe3400bhde" ],
       "discrete_values": [ "ghjKe3400bhde", "ghjKe34TSbhde" ]
     },
-    ".state": {
+    ".emotion": {
       "required_field": false,
       "byte_data": true,
-      "default_value": "aGFwcHIk=",
       "example_values": [ "aGFwcHk=" ]
     },
     ".datetime": {

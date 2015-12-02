@@ -121,29 +121,30 @@ class jsonModel(object):
             if isinstance([], self.keyCriteria[i]['value_datatype']):
                 item_key = self.keyName[i] + '[0]'
                 if not item_key in key_set:
-                    raise ModelValidationError('List in "schema" key of data model at path "%s" must declare an initial item for the list.' % self.keyName[i])
+                    message = 'List at data model path .schema%s must declare an initial item for the list.' % self.keyName[i]
+                    raise ModelValidationError(message)
 
     # validate title input & construct title method
         self.title = ''
         if 'title' in data_model.keys():
             if not isinstance(data_model['title'], str):
-                raise ModelValidationError('The value of data model "title" must be a string.')
+                raise ModelValidationError('Value for data model path .title must be a string.')
             self.title = data_model['title']
 
     # validate title input & construct title method
         self.url = ''
         if 'url' in data_model.keys():
             if not isinstance(data_model['url'], str):
-                raise ModelValidationError('The value of data model "url" must be a string.')
+                raise ModelValidationError('Value for data model path .url must be a string.')
             self.title = data_model['url']
 
     # validate max size input & construct max size method
         self.maxSize = None
         if 'max_size' in data_model.keys():
             if not isinstance(data_model['max_size'], int):
-                raise ModelValidationError('The value of data model "max_size" must be a positive integer.')
+                raise ModelValidationError('Value for data model path .max_size must be a positive integer.')
             elif data_model['max_size'] < 0:
-                raise ModelValidationError('The value of data model "max_size" must be a positive integer.')
+                raise ModelValidationError('Value for data model path .max_size must be a positive integer.')
             elif data_model['max_size']:
                 self.maxSize = data_model['max_size']
 
@@ -151,16 +152,16 @@ class jsonModel(object):
         self.components = {}
         if 'components' in data_model.keys():
             if not isinstance(data_model['components'], dict):
-                raise ModelValidationError('The value of data model "components" must be a dictionary.')
+                raise ModelValidationError('Value for data model path .components must be a dictionary.')
             self.components = data_model['components']
 
     # validate key names in components
         for key, value in self.components.items():
             number_field = False
             if key not in self.keyName:
-                raise ModelValidationError('Data model "components%s" is not declared in "schema".' % key)
+                raise ModelValidationError('Data model path .components%s is not declared in "schema".' % key)
             elif not isinstance(value, dict):
-                raise ModelValidationError('Value for data model "components%s" must be a dictionary.' % key)
+                raise ModelValidationError('Value for data model path .components%s must be a dictionary.' % key)
 
     # validate component qualifier fields are appropriate to component datatype
             data_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
@@ -200,98 +201,130 @@ class jsonModel(object):
                 if k == 'must_not_contain' or k == 'must_contain':
                     for item in v:
                         if not isinstance(item, str):
-                            raise ModelValidationError('Each item in data model "components%s.%s" list must be a string.' % (key, k))
+                            message = 'Each item in list at data model path .components%s.%s must be a string.' % (key, k)
+                            raise ModelValidationError(message)
                 if k == 'min_length' or k == 'max_length' or k == 'min_size' or k == 'max_size':
                     if v < 0:
-                        raise ModelValidationError('Value for data model "components%s.%s" cannot be negative.' % (key, k))
+                        message = 'Value for data model path components%s.%s cannot be negative.' % (key, k)
+                        raise ModelValidationError(message)
                 if k == 'discrete_values' or k == 'example_values':
                     for item in v:
                         if number_field:
                             if not isinstance(item, int) and not isinstance(item, float):
                                 raise ModelValidationError('Each item in data model "components%s.%s" list must be a number.' % (key, k))
                         elif not isinstance(item, str):
-                            raise ModelValidationError('Each item in data model "components%s.%s" list must be a string.' % (key, k))
+                            message = 'Each item in list at data model path .components%s.%s must be a string.' % (key, k)
+                            raise ModelValidationError(message)
                 if k == 'identical_to':
                     if not v in self.keyName:
-                        raise ModelValidationError('Data model "components%s.%s": "%s" not found in components keys.' % (key, k, v))
+                        message = 'Value "%s" for data model path .components%s.%s not found in components keys.' % (v, key, k)
+                        raise ModelValidationError(message)
                 if k == 'unique_values':
                     if v:
                         item_name = key + '[0]'
                         item_datatype = self.keyCriteria[self.keyName.index(item_name)]['value_datatype']
                         if not isinstance("string", item_datatype) and not isinstance(2, item_datatype) and not isinstance(2.2, item_datatype):
-                            raise ModelValidationError('A "true" value for "unique_values" requires data model "components" key "%s[0]" to be a string or number primitive.' % key)
+                            message = '"unique_values": true requires value at data model path .components.%s[0] to be a string or number primitive.' % key
+                            raise ModelValidationError(message)
 
-    # validate default value against all other fields
+    # validate default value declaration against other criteria
             if 'default_value' in value.keys():
                 default = value['default_value']
+                if isinstance(default, str):
+                    header = 'Value "%s" at data model path .components%s.default_value' % (default, key)
+                else:
+                    header = 'Value %s at data model path .components%s.default_value' % (default, key)
                 if 'min_value' in value.keys():
                     if default < value['min_value']:
-                        raise ModelValidationError('Data model "components%s.default_value": %s must not be less than "min_value": %s.' % (key, default, value['min_value']))
+                        message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
+                        raise ModelValidationError(message)
                 if 'max_value' in value.keys():
                     if default > value['max_value']:
-                        raise ModelValidationError('Data model "components%s.default_value": %s must not be greater than "max_value": %s.' % (key, default, value['max_value']))
+                        message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
+                        raise ModelValidationError(message)
                 if 'min_length' in value.keys():
                     if len(default) < value['min_length']:
-                        raise ModelValidationError('Data model "components%s.default_value": "%s" must be at least "min_length": %s characters.' % (key, default, value['min_length']))
+                        message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
+                        raise ModelValidationError(message)
                 if 'max_length' in value.keys():
                     if len(default) > value['max_length']:
-                        raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be more than "max_length": %s characters.' % (key, default, value['max_length']))
+                        message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
+                        raise ModelValidationError(message)
                 if 'must_not_contain' in value.keys():
                     for regex in value['must_not_contain']:
                         regex_pattern = re.compile(regex)
                         if regex_pattern.findall(default):
-                            raise ModelValidationError('Data model "components%s.default_value": "%s" matches regex pattern "%s" in "must_not_contain".' % (key, default, regex))
+                            message = '%s matches regex pattern "%s" in "must_not_contain".' % (header, regex)
+                            raise ModelValidationError(message)
                 if 'must_contain' in value.keys():
                     for regex in value['must_contain']:
                         regex_pattern = re.compile(regex)
                         if not regex_pattern.findall(default):
-                            raise ModelValidationError('Data model "components%s.default_value": "%s" does not match regex pattern "%s" in "must_contain".' % (key, default, regex))
+                            message = '%s does not match regex pattern "%s" in "must_contain".' % (header, regex)
+                            raise ModelValidationError(message)
                 if 'discrete_values' in value.keys():
                     if default not in value['discrete_values']:
-                        raise ModelValidationError('Data model "components%s.default_value": "%s" is not found in "discrete_values".' % (key, default))
+                        message = '%s is not found in "discrete_values".' % header
+                        raise ModelValidationError(message)
                 if 'byte_data' in value.keys():
+                    message = '%s cannot be base64 decoded to "byte_data".' % header
                     try:
                         decoded_bytes = b64decode(default)
                     except:
-                        raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be base64 decoded to "byte_data".' % (key, default))
+                        raise ModelValidationError(message)
                     if not isinstance(decoded_bytes, bytes):
-                        raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be base64 decoded to "byte_data".' % (key, default))
+                        raise ModelValidationError(message)
 
-    # validate example values against all other fields
+    # validate example values declarations against other criteria
             if 'example_values' in value.keys():
-                for example in value['example_values']:
+                for i in range(len(value['example_values'])):
+                    example = value['example_values'][i]
+                    if isinstance(example, str):
+                        header = 'Value "%s" at data model path .components%s.example_values[%s]' % (example, key, i)
+                    else:
+                        header = 'Value %s at data model path .components%s.example_values[%s]' % (example, key, i)
                     if 'min_value' in value.keys():
                         if example < value['min_value']:
-                            raise ModelValidationError('Data model "components%s.example_values" item %s must not be less than "min_value": %s.' % (key, example, value['min_value']))
+                            message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
+                            raise ModelValidationError(message)
                     if 'max_value' in value.keys():
                         if example > value['max_value']:
-                            raise ModelValidationError('Data model "components%s.example_values" item %s must not be greater than "max_value": %s.' % (key, example, value['max_value']))
+                            message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
+                            raise ModelValidationError(message)
                     if 'min_length' in value.keys():
                         if len(example) < value['min_length']:
-                            raise ModelValidationError('Data model "components%s.example_values" item "%s" must be at least "min_length": %s characters.' % (key, example, value['min_length']))
+                            message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
+                            raise ModelValidationError(message)
                     if 'max_length' in value.keys():
                         if len(example) > value['max_length']:
-                            raise ModelValidationError('Data model "components%s.example_values" item "%s" cannot be more than "max_length": %s characters.' % (key, example, value['max_length']))
+                            message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
+                            raise ModelValidationError(message)
                     if 'must_not_contain' in value.keys():
                         for regex in value['must_not_contain']:
                             regex_pattern = re.compile(regex)
                             if regex_pattern.findall(example):
-                                raise ModelValidationError('Data model "components%s.example_values" item "%s" matches regex pattern "%s" in "must_not_contain".' % (key, example, regex))
+                                message = '%s matches regex pattern "%s" in "must_not_contain".' % (header, regex)
+                                raise ModelValidationError(message)
                     if 'must_contain' in value.keys():
                         for regex in value['must_contain']:
                             regex_pattern = re.compile(regex)
                             if not regex_pattern.findall(example):
-                                raise ModelValidationError('Data model "components%s.example_values" item "%s" does not match regex pattern "%s" in "must_contain".' % (key, example, regex))
+                                message = '%s does not match regex pattern "%s" in "must_contain".' % (header, regex)
+                                raise ModelValidationError(message)
                     if 'discrete_values' in value.keys():
                         if example not in value['discrete_values']:
-                            raise ModelValidationError('Data model "components%s.example_values" item "%s" is not found in "discrete_values".' % (key, example))
+                            message = '%s is not found in "discrete_values".' % header
+                            raise ModelValidationError(message)
                     if 'byte_data' in value.keys():
+                        message = '%s cannot be base64 decoded to "byte_data".' % header
                         try:
                             decoded_bytes = b64decode(example)
                         except:
-                            raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be base64 decoded to "byte_data".' % (key, example))
+                            raise ModelValidationError(message)
                         if not isinstance(decoded_bytes, bytes):
-                            raise ModelValidationError('Data model "components%s.default_value": "%s" cannot be base64 decoded to "byte_data".' % (key, example))
+                            raise ModelValidationError(message)
+
+    # TODO: validate discrete values declarations against other criteria
 
     # construct keyMap from components, key names and key criteria
         self.keyMap = {}
@@ -310,17 +343,27 @@ class jsonModel(object):
         :return input_dict
         '''
 
-    # construct lists of keys and variables from schema and input to evaluate
-        max_keys = []
-        max_key_list = []
-        req_keys = []
-        req_key_list = []
-        input_keys = []
-        input_key_list = []
+    # construct lists of keys in input dictionary
         if path_to_root:
             top_level_key = path_to_root
         else:
             top_level_key = '.'
+        input_keys = []
+        input_key_list = []
+        for key in input_dict.keys():
+            input_key_name = path_to_root + '.' + key
+            input_keys.append(input_key_name)
+            input_key_list.append(key)
+
+    # TODO: validate identical to qualifier for dictionary
+
+    # TODO: incorporate lambda function and validation url methods
+
+    # construct lists of keys in schema dictionary
+        max_keys = []
+        max_key_list = []
+        req_keys = []
+        req_key_list = []
         for key in schema_dict.keys():
             schema_key_name = path_to_root + '.' + key
             max_keys.append(schema_key_name)
@@ -328,38 +371,40 @@ class jsonModel(object):
             if self.keyMap[schema_key_name]['required_field']:
                 req_keys.append(schema_key_name)
                 req_key_list.append(key)
-        for key in input_dict.keys():
-            input_key_name = path_to_root + '.' + key
-            input_keys.append(input_key_name)
-            input_key_list.append(key)
 
     # validate existence of required fields
         missing_keys = set(req_keys) - set(input_keys)
-        if not path_to_root:
-            input_path = '.'
-        else:
-            input_path = path_to_root
         if missing_keys:
             error_dict = {
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[top_level_key],
                 'failed_test': 'required_field',
-                'input_path': input_path,
+                'input_path': top_level_key,
                 'error_value': req_key_list,
                 'error_code': 4002
             }
             error_dict['input_criteria']['required_keys'] = req_keys
             raise InputValidationError(error_dict)
 
-    # set default values for empty optional fields
-        for key in max_key_list:
-            if key not in input_key_list:
-                indexed_key = max_keys[max_key_list.index(key)]
-                if indexed_key in self.components.keys():
-                    if 'default_value' in self.components[indexed_key]:
-                        input_dict[key] = self.components[indexed_key]['default_value']
+    # validate existence of extra fields
+        extra_keys = set(input_keys) - set(max_keys)
+        if extra_keys and not self.keyMap[top_level_key]['extra_fields']:
+            extra_key_list = []
+            for key in extra_keys:
+                pathless_key = re.sub(top_level_key, '', key, count=1)
+                extra_key_list.append(pathless_key)
+            error_dict = {
+                'model_schema': self.schema,
+                'input_criteria': self.keyMap[top_level_key],
+                'failed_test': 'extra_fields',
+                'input_path': top_level_key,
+                'error_value': extra_key_list,
+                'error_code': 4003
+            }
+            error_dict['input_criteria']['maximum_scope'] = max_key_list
+            raise InputValidationError(error_dict)
 
-    # route values to appropriate validation method based upon datatype
+    # validate datatype of value and call appropriate sub-routine for value
         for key, value in input_dict.items():
             input_key_name = path_to_root + '.' + key
             if input_key_name in max_keys:
@@ -368,7 +413,7 @@ class jsonModel(object):
                     'model_schema': self.schema,
                     'input_criteria': input_criteria,
                     'failed_test': 'value_datatype',
-                    'input_path': input_path,
+                    'input_path': top_level_key,
                     'error_value': key,
                     'error_code': 4001
                 }
@@ -397,22 +442,31 @@ class jsonModel(object):
                     else:
                         input_dict[key] = self.list(value, schema_dict[key], input_key_name)
 
-    # handle the fields beyond the scope of the schema
-            elif not self.keyMap[top_level_key]['extra_fields']:
-                error_dict = {
-                    'model_schema': self.schema,
-                    'input_criteria': self.keyMap[top_level_key],
-                    'failed_test': 'extra_fields',
-                    'input_path': input_path,
-                    'error_value': key,
-                    'error_code': 4003
-                }
-                error_dict['input_criteria']['maximum_scope'] = max_key_list
-                raise InputValidationError(error_dict)
+    # set default values for empty optional fields
+        for key in max_key_list:
+            if key not in input_key_list:
+                indexed_key = max_keys[max_key_list.index(key)]
+                if indexed_key in self.components.keys():
+                    if 'default_value' in self.components[indexed_key]:
+                        input_dict[key] = self.components[indexed_key]['default_value']
 
         return input_dict
 
     def list(self, input_list, schema_list, path_to_root):
+
+        '''
+            a helper method for recursively validating items in a list
+
+        :return: input_list
+        '''
+
+    # construct rules for list and items
+        list_rules = self.keyMap[path_to_root]
+        initial_key = path_to_root + '[0]'
+        item_rules = self.keyMap[initial_key]
+
+    # validate list rules
+
         return input_list
 
     def set(self, input_set, schema_set, path_to_root):
