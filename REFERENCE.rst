@@ -104,7 +104,7 @@ Errors created from improper model specification will raise a ModelValidationErr
                 'region': 'LA',
                 'country': 'United States'
             },
-            'comments': [ 'string' ],
+            'comments': [ '@GerardMaras Rock the shrimp bouillabaisse!' ],
             'active': True,
             'userID': 'gY3Cv81QwL0Fs',
             'emoticon': 'aGFwcHk=',
@@ -113,7 +113,7 @@ Errors created from improper model specification will raise a ModelValidationErr
         'input_criteria': {
             'required_field': True,
             'value_datatype': <class 'dict'>,
-            'maximum_scope': [ 'datetime', 'address', 'active', 'userID', 'comments' ],
+            'maximum_scope': [ 'datetime', 'address', 'active', 'userID', 'comments', 'emoticon' ],
             'extra_fields': False
         },
         'failed_test': 'extra_fields',
@@ -125,14 +125,14 @@ Order of Exceptions
 ^^^^^^^^^^^^^^^^^^^
 The validation process will raise an error as soon as it encounters one, so there is no guarantee that the error that is reported is the only error in the input. Since there is no order to the set of keys in a dictionaries, there is also no guaranteed a priori order to the evaluation process. However below is an overview of the order of the steps of the validation process:
 
-Structure:
+**Structure:**
 #. Input is a dictionary
 #. Required keys in the input
 #. Extra keys in the input
 #. Value of each key in the input (recursive) *(see below)*
 #. Inject default values for missing optional keys
 
-Values (or Items):
+**Values (or Items):**
 #. Datatype of value
 #. Non-empty value
 #. Other value qualifiers
