@@ -23,20 +23,21 @@
       "must_contain": [ "g" ],
       "default_value": "ghjKe34TSbhde",
       "example_values": [ "ghjKe3400bhde" ],
-      "discrete_values": [ "ghjKe3400bhde", "ghjKe34TSbhde" ]
+      "discrete_values": [ "ghjKe3400bhde", "ghjKe34TSbhde", "gY3Cv81QwL0Fs" ]
     },
     ".emoticon": {
       "required_field": false,
       "byte_data": true,
-      "example_values": [ "aGFwcHk=" ]
+      "example_values": [ "aGFwcHIk=" ]
     },
     ".datetime": {
       "required_field": false,
       "default_value": 1500,
-      "max_value": 14000,
+      "max_value": 2000000000,
       "min_value": 1499.99,
-      "discrete_values": [ 1500, 10000.0 ],
-      "example_values": [ 10000 ]
+      "integer_only": false,
+      "discrete_values": [ 1500, 10000, 1456000345.543713 ],
+      "example_values": [ 10000.0 ]
     },
     ".address.city": {
       "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],

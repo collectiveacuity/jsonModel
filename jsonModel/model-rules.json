@@ -32,6 +32,7 @@
       "default_value": 0.0,
       "min_value": 0.0,
       "max_value": 0.0,
+      "integer_only": false,
       "discrete_values": [],
       "identical_to": ".similar_number",
       "lambda_function": "",

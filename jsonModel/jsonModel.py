@@ -66,6 +66,8 @@ class mapModel(object):
                 criteria_dict['required_field'] = True
             if isinstance(value, dict):
                 criteria_dict['extra_fields'] = False
+            if isinstance(value, bool) or isinstance(value, str) or isinstance(value, int) or isinstance(value, float):
+                criteria_dict['declared_value'] = value
             key_criteria.append(criteria_dict)
             if isinstance(value, dict):
                 self.dict(input_dict=input_dict[key], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
@@ -228,52 +230,66 @@ class jsonModel(object):
                             raise ModelValidationError(message)
 
     # validate default value declaration against other criteria
-            if 'default_value' in value.keys():
-                default = value['default_value']
-                if isinstance(default, str):
-                    header = 'Value "%s" at data model path .components%s.default_value' % (default, key)
-                else:
-                    header = 'Value %s at data model path .components%s.default_value' % (default, key)
-                if 'min_value' in value.keys():
-                    if default < value['min_value']:
-                        message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
-                        raise ModelValidationError(message)
-                if 'max_value' in value.keys():
-                    if default > value['max_value']:
-                        message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
-                        raise ModelValidationError(message)
-                if 'min_length' in value.keys():
-                    if len(default) < value['min_length']:
-                        message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
-                        raise ModelValidationError(message)
-                if 'max_length' in value.keys():
-                    if len(default) > value['max_length']:
-                        message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
-                        raise ModelValidationError(message)
-                if 'must_not_contain' in value.keys():
-                    for regex in value['must_not_contain']:
-                        regex_pattern = re.compile(regex)
-                        if regex_pattern.findall(default):
-                            message = '%s matches regex pattern "%s" in "must_not_contain".' % (header, regex)
+            declared_values = [ 'declared_value', 'default_value' ]
+            schema_field = self.keyCriteria[self.keyName.index(key)]
+            for qualifier in declared_values:
+                if qualifier in value.keys() or qualifier in schema_field:
+                    if qualifier in value.keys():
+                        default = value[qualifier]
+                        value_path = '.components%s.default_value' % key
+                    else:
+                        default = schema_field[qualifier]
+                        value_path = '.schema%s' % key
+                    if isinstance(default, str):
+                        value_key = '"%s"' % default
+                    else:
+                        value_key = default
+                    header = 'Value %s at data model path %s' % (value_key, value_path)
+                    if 'min_value' in value.keys():
+                        if default < value['min_value']:
+                            message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
                             raise ModelValidationError(message)
-                if 'must_contain' in value.keys():
-                    for regex in value['must_contain']:
-                        regex_pattern = re.compile(regex)
-                        if not regex_pattern.findall(default):
-                            message = '%s does not match regex pattern "%s" in "must_contain".' % (header, regex)
+                    if 'max_value' in value.keys():
+                        if default > value['max_value']:
+                            message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
                             raise ModelValidationError(message)
-                if 'discrete_values' in value.keys():
-                    if default not in value['discrete_values']:
-                        message = '%s is not found in "discrete_values".' % header
-                        raise ModelValidationError(message)
-                if 'byte_data' in value.keys():
-                    message = '%s cannot be base64 decoded to "byte_data".' % header
-                    try:
-                        decoded_bytes = b64decode(default)
-                    except:
-                        raise ModelValidationError(message)
-                    if not isinstance(decoded_bytes, bytes):
-                        raise ModelValidationError(message)
+                    if 'integer_only' in value.keys():
+                        if value['integer_only']:
+                            if not isinstance(default, int):
+                                message = '%s must be an "integer_only".' % header
+                                raise ModelValidationError(message)
+                    if 'min_length' in value.keys():
+                        if len(default) < value['min_length']:
+                            message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
+                            raise ModelValidationError(message)
+                    if 'max_length' in value.keys():
+                        if len(default) > value['max_length']:
+                            message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
+                            raise ModelValidationError(message)
+                    if 'must_not_contain' in value.keys():
+                        for regex in value['must_not_contain']:
+                            regex_pattern = re.compile(regex)
+                            if regex_pattern.findall(default):
+                                message = '%s matches regex pattern "%s" in "must_not_contain".' % (header, regex)
+                                raise ModelValidationError(message)
+                    if 'must_contain' in value.keys():
+                        for regex in value['must_contain']:
+                            regex_pattern = re.compile(regex)
+                            if not regex_pattern.findall(default):
+                                message = '%s does not match regex pattern "%s" in "must_contain".' % (header, regex)
+                                raise ModelValidationError(message)
+                    if 'discrete_values' in value.keys():
+                        if default not in value['discrete_values']:
+                            message = '%s is not found in "discrete_values".' % header
+                            raise ModelValidationError(message)
+                    if 'byte_data' in value.keys():
+                        message = '%s cannot be base64 decoded to "byte_data".' % header
+                        try:
+                            decoded_bytes = b64decode(default)
+                        except:
+                            raise ModelValidationError(message)
+                        if not isinstance(decoded_bytes, bytes):
+                            raise ModelValidationError(message)
 
     # validate example values declarations against other criteria
             if 'example_values' in value.keys():
@@ -291,6 +307,11 @@ class jsonModel(object):
                         if example > value['max_value']:
                             message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
                             raise ModelValidationError(message)
+                    if 'integer_only' in value.keys():
+                        if value['integer_only']:
+                            if not isinstance(example, int):
+                                message = '%s must be an "integer_only".' % header
+                                raise ModelValidationError(message)
                     if 'min_length' in value.keys():
                         if len(example) < value['min_length']:
                             message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
@@ -325,6 +346,8 @@ class jsonModel(object):
                             raise ModelValidationError(message)
 
     # TODO: validate discrete values declarations against other criteria
+
+    # TODO: validate integer_only against min_value and max_value declarations
 
     # construct keyMap from components, key names and key criteria
         self.keyMap = {}
@@ -533,6 +556,13 @@ class jsonModel(object):
         return input_list
 
     def number(self, input_number, path_to_root):
+
+        '''
+            a helper method for recursively validating properties of a number
+
+        :return: input_number
+        '''
+
         rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
         input_criteria = self.keyMap[rules_path_to_root]
         error_dict = {
@@ -543,6 +573,7 @@ class jsonModel(object):
             'error_value': input_number,
             'error_code': 4001
         }
+
 
         return input_number
 
