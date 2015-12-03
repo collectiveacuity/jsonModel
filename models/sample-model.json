@@ -47,7 +47,7 @@
       "required_field": false,
       "min_size": 3,
       "max_size": 3,
-      "unique_values": false
+      "unique_values": true
     },
     ".comments[0]": {
       "max_length": 120

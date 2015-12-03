@@ -436,13 +436,7 @@ class jsonModel(object):
                 elif isinstance(value, dict):
                     input_dict[key] = self.dict(value, schema_dict[key], input_key_name)
                 elif isinstance(value, list):
-                    if 'unique_values' in input_criteria.keys():
-                        if input_criteria['unique_values']:
-                            input_dict[key] = self.set(value, schema_dict[key], input_key_name)
-                        else:
-                            input_dict[key] = self.list(value, schema_dict[key], input_key_name)
-                    else:
-                        input_dict[key] = self.list(value, schema_dict[key], input_key_name)
+                    input_dict[key] = self.list(value, schema_dict[key], input_key_name)
 
     # set default values for empty optional fields
         for key in max_key_list:
@@ -524,18 +518,19 @@ class jsonModel(object):
             elif isinstance(item, dict):
                 input_list[i] = self.dict(item, schema_list[0], input_path)
             elif isinstance(item, list):
-                if 'unique_values' in item_rules.keys():
-                    if item_rules['unique_values']:
-                        input_list[i] = self.set(item, schema_list[0], input_path)
-                    else:
-                        input_list[i] = self.list(item, schema_list[0], input_path)
-                else:
-                    input_list[i] = self.list(item, schema_list[0], input_path)
+                input_list[i] = self.list(item, schema_list[0], input_path)
+
+    # validate unique values in list
+        if 'unique_values' in list_rules.keys():
+            if len(set(input_list)) < len(input_list):
+                list_error['failed_test'] = 'unique_values'
+                list_error['error_value'] = input_list
+                list_error['error_code'] = 4012
+                raise InputValidationError(list_error)
+
+    # TODO: validate identical to references
 
         return input_list
-
-    def set(self, input_set, schema_set, path_to_root):
-        return input_set
 
     def number(self, input_number, path_to_root):
         rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
@@ -635,6 +630,12 @@ class jsonModel(object):
             self.validate(mixed_list)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'value_datatype'
+        duplicate_list = deepcopy(valid_input)
+        duplicate_list['comments'][2] = 'gold'
+        try:
+            self.validate(duplicate_list)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'unique_values'
         print(self.validate(valid_input))
         return self
 

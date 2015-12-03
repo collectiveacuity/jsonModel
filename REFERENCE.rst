@@ -81,7 +81,7 @@ List of Field Conditionals (and default values)
 - "**max_value**": 0, # the maximum value of a number [numbers only]
 - "**min_size**": 0, # the minimum number of items in a list / error_code: 4010 / [**lists only**]
 - "**max_size**": 0, # the maximum number of items in a list / error_code: 4011 / [**lists only**]
-- "**unique_values**": false, # a true boolean treats a list as a set of unique primitives with no duplication [lists of strings and numbers only]
+- "**unique_values**": false, # a true boolean treats a list as a set of unique primitives with no duplication / error_code: 4012 [**lists of strings and numbers only**]
 - "**discrete_values**": [], # a list of values allowed, this attribute supersedes other qualifying attributes in the component list [numbers and strings only]
 - "**identical_to**": "", # the key name in the components map whose value the value of this component must match
 - "**lambda_function**": "", # a single argument function which should be run to validate the value of this component, lambda_function must return true (valid) or false (invalid)
