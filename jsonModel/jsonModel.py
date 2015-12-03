@@ -348,6 +348,7 @@ class jsonModel(object):
             top_level_key = path_to_root
         else:
             top_level_key = '.'
+        rules_top_level_key = re.sub('\[\d+\]', '[0]', top_level_key)
         input_keys = []
         input_key_list = []
         for key in input_dict.keys():
@@ -368,7 +369,8 @@ class jsonModel(object):
             schema_key_name = path_to_root + '.' + key
             max_keys.append(schema_key_name)
             max_key_list.append(key)
-            if self.keyMap[schema_key_name]['required_field']:
+            rules_schema_key_name = re.sub('\[\d+\]', '[0]', schema_key_name)
+            if self.keyMap[rules_schema_key_name]['required_field']:
                 req_keys.append(schema_key_name)
                 req_key_list.append(key)
 
@@ -377,7 +379,7 @@ class jsonModel(object):
         if missing_keys:
             error_dict = {
                 'model_schema': self.schema,
-                'input_criteria': self.keyMap[top_level_key],
+                'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'required_field',
                 'input_path': top_level_key,
                 'error_value': req_key_list,
@@ -388,14 +390,14 @@ class jsonModel(object):
 
     # validate existence of extra fields
         extra_keys = set(input_keys) - set(max_keys)
-        if extra_keys and not self.keyMap[top_level_key]['extra_fields']:
+        if extra_keys and not self.keyMap[rules_top_level_key]['extra_fields']:
             extra_key_list = []
             for key in extra_keys:
-                pathless_key = re.sub(top_level_key, '', key, count=1)
+                pathless_key = re.sub(rules_top_level_key, '', key, count=1)
                 extra_key_list.append(pathless_key)
             error_dict = {
                 'model_schema': self.schema,
-                'input_criteria': self.keyMap[top_level_key],
+                'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'extra_fields',
                 'input_path': top_level_key,
                 'error_value': extra_key_list,
@@ -404,31 +406,31 @@ class jsonModel(object):
             error_dict['input_criteria']['maximum_scope'] = max_key_list
             raise InputValidationError(error_dict)
 
-    # validate datatype of value and call appropriate sub-routine for value
+    # validate datatype of value
         for key, value in input_dict.items():
             input_key_name = path_to_root + '.' + key
+            rules_input_key_name = re.sub('\[\d+\]', '[0]', input_key_name)
             if input_key_name in max_keys:
-                input_criteria = self.keyMap[input_key_name]
+                input_criteria = self.keyMap[rules_input_key_name]
                 error_dict = {
                     'model_schema': self.schema,
                     'input_criteria': input_criteria,
                     'failed_test': 'value_datatype',
-                    'input_path': top_level_key,
-                    'error_value': key,
+                    'input_path': input_key_name,
+                    'error_value': value.__class__,
                     'error_code': 4001
                 }
+                if value.__class__ != input_criteria['value_datatype']:
+                    if isinstance(value, bool) or (not isinstance(value, int) and not isinstance(value, float)):
+                        raise InputValidationError(error_dict)
+                    elif not isinstance(2.2, input_criteria['value_datatype']) and not isinstance(2, input_criteria['value_datatype']):
+                        raise InputValidationError(error_dict)
+
+    # call appropriate validation sub-routine for datatype of value
                 if isinstance(value, bool):
-                    if not isinstance(value, input_criteria['value_datatype']):
-                        raise InputValidationError(error_dict)
-                    else:
-                        input_dict[key] = self.boolean(value, input_key_name)
+                    input_dict[key] = self.boolean(value, input_key_name)
                 elif isinstance(value, int) or isinstance(value, float):
-                    if isinstance(3, input_criteria['value_datatype']) or isinstance(3.3, input_criteria['value_datatype']):
-                        input_dict[key] = self.number(value, input_key_name)
-                    else:
-                        raise InputValidationError(error_dict)
-                elif not isinstance(value, input_criteria['value_datatype']):
-                    raise InputValidationError(error_dict)
+                    input_dict[key] = self.number(value, input_key_name)
                 elif isinstance(value, str):
                     input_dict[key] = self.string(value, input_key_name)
                 elif isinstance(value, dict):
@@ -461,11 +463,74 @@ class jsonModel(object):
         '''
 
     # construct rules for list and items
-        list_rules = self.keyMap[path_to_root]
-        initial_key = path_to_root + '[0]'
+        rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+        list_rules = self.keyMap[rules_path_to_root]
+        initial_key = rules_path_to_root + '[0]'
         item_rules = self.keyMap[initial_key]
 
+    # construct list error report template
+        list_error = {
+            'model_schema': self.schema,
+            'input_criteria': list_rules,
+            'failed_test': 'value_datatype',
+            'input_path': path_to_root,
+            'error_value': 0,
+            'error_code': 4001
+        }
+
     # validate list rules
+        if 'min_size' in list_rules.keys():
+            if len(input_list) < list_rules['min_size']:
+                list_error['failed_test'] = 'min_size'
+                list_error['error_value'] = len(input_list)
+                list_error['error_code'] = 4010
+                raise InputValidationError(list_error)
+        if 'max_size' in list_rules.keys():
+            if len(input_list) > list_rules['max_size']:
+                list_error['failed_test'] = 'max_size'
+                list_error['error_value'] = len(input_list)
+                list_error['error_code'] = 4011
+                raise InputValidationError(list_error)
+
+    # construct item error report template
+        item_error = {
+            'model_schema': self.schema,
+            'input_criteria': item_rules,
+            'failed_test': 'value_datatype',
+            'input_path': initial_key,
+            'error_value': input_list[0],
+            'error_code': 4001
+        }
+
+    # validate datatype of items
+        for i in range(len(input_list)):
+            input_path = path_to_root + '[%s]' % i
+            item = input_list[i]
+            item_error['input_path'] = input_path
+            item_error['error_value'] = item.__class__
+            if item.__class__ != item_rules['value_datatype']:
+                if isinstance(item, bool) or (not isinstance(item, int) and not isinstance(item, float)):
+                    raise InputValidationError(item_error)
+                elif not isinstance(2.2, item_rules['value_datatype']) and not isinstance(2, item_rules['value_datatype']):
+                    raise InputValidationError(item_error)
+
+    # call appropriate validation sub-routine for datatype of item
+            if isinstance(item, bool):
+                input_list[i] = self.boolean(item, input_path)
+            elif isinstance(item, int) or isinstance(item, float):
+                input_list[i] = self.number(item, input_path)
+            elif isinstance(item, str):
+                input_list[i] = self.string(item, input_path)
+            elif isinstance(item, dict):
+                input_list[i] = self.dict(item, schema_list[0], input_path)
+            elif isinstance(item, list):
+                if 'unique_values' in item_rules.keys():
+                    if item_rules['unique_values']:
+                        input_list[i] = self.set(item, schema_list[0], input_path)
+                    else:
+                        input_list[i] = self.list(item, schema_list[0], input_path)
+                else:
+                    input_list[i] = self.list(item, schema_list[0], input_path)
 
         return input_list
 
@@ -473,28 +538,45 @@ class jsonModel(object):
         return input_set
 
     def number(self, input_number, path_to_root):
-        input_criteria = self.keyMap[path_to_root]
+        rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+        input_criteria = self.keyMap[rules_path_to_root]
         error_dict = {
             'model_schema': self.schema,
             'input_criteria': input_criteria,
+            'failed_test': 'value_datatype',
             'input_path': path_to_root,
-            'error_value': input_number
+            'error_value': input_number,
+            'error_code': 4001
         }
-        if input_criteria['required_field']:
-            if not input_number:
-                error_dict['failed_test'] = 'required_field'
-                error_dict['error_code'] = 4002
-                raise InputValidationError(error_dict)
-        if not input_number and not input_criteria['required_field']:
-            if 'default_value' in input_criteria.keys():
-                input_number = input_criteria['default_value']
 
         return input_number
 
     def string(self, input_string, path_to_root):
+        rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+        input_criteria = self.keyMap[rules_path_to_root]
+        error_dict = {
+            'model_schema': self.schema,
+            'input_criteria': input_criteria,
+            'failed_test': 'value_datatype',
+            'input_path': path_to_root,
+            'error_value': input_string,
+            'error_code': 4001
+        }
+
         return input_string
 
     def boolean(self, input_boolean, path_to_root):
+        rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+        input_criteria = self.keyMap[rules_path_to_root]
+        error_dict = {
+            'model_schema': self.schema,
+            'input_criteria': input_criteria,
+            'failed_test': 'value_datatype',
+            'input_path': path_to_root,
+            'error_value': input_boolean,
+            'error_code': 4001
+        }
+
         return input_boolean
 
     def validate(self, input_dict):
@@ -532,9 +614,27 @@ class jsonModel(object):
         except InputValidationError as err:
             assert err.error['failed_test'] == 'required_field'
         default_input = deepcopy(valid_input)
-        default_input['datetime'] = 0
+        del default_input['datetime']
         new_default_input = self.validate(default_input)
         assert new_default_input['datetime'] == 1500
+        short_list = deepcopy(valid_input)
+        short_list['comments'].pop()
+        try:
+            self.validate(short_list)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'min_size'
+        long_list = deepcopy(valid_input)
+        long_list['comments'].append('pewter')
+        try:
+            self.validate(long_list)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'max_size'
+        mixed_list = deepcopy(valid_input)
+        mixed_list['comments'][1] = 100
+        try:
+            self.validate(mixed_list)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'value_datatype'
         print(self.validate(valid_input))
         return self
 

@@ -13,20 +13,21 @@ The default behavior of a schema declaration includes validation of structure, d
         "userID": "gY3Cv81QwL0Fs",
         "datetime": 1456000345.543713,
         "active": true,
+        "emoticon": "aGFwcHk=",
         "address": {
             "city": "New Orleans",
             "region": "LA",
             "postal_code": "",
             "country": "United States"
         },
-        "comments": [ "string" ]
+        "comments": [ "@GerardMaras Rock the shrimp bouillabaisse!" ]
     }
 
 Default Settings
 ^^^^^^^^^^^^^^^^
-- **Structure**: The validation process will assume that a dictionary (including the top-level dictionary) defines its maximum scope of key names and that lists can contain any number of items. Lists cannot contain mixed datatypes and the first item in a list defines the allowable properties of each item in the list. For this reason, all lists declared in the model must also contain an item. So, the example model expects to find only the userID, datetime, active, address and comments fields and it will accept any number of strings in the comments list.
+- **Structure**: The validation process will assume that a dictionary (including the top-level dictionary) defines its maximum scope of key names and that lists can contain any number of items. Lists cannot contain mixed datatypes and the first item in a list defines the allowable properties of each item in the list. For this reason, all lists declared in the model must also contain an item. So, the example model expects to find only the userID, datetime, active, emoticon, address and comments fields and it will accept any number of strings in the comments list.
 - **Datatype**: The validation process will assume that the datatype of each value in the input matches the datatype in the model. So, the example model expects to see a string for userID, a number for datetime, a boolean for active, etc... Special datatypes like bytes, integers, doubles and sets which json does not support must be handled by qualifiers in the components map.
-- **Requirements**: The validation process will assume a key with a non-empty value is a required input. Since lists must have an item, all declared lists are assumed to be required fields in the model. So, all fields in the example are required except postal_code. The empty value for each datatype can be expressed with {}, 0, 0.0, false or "" and indicates that it is optional.
+- **Requirements**: The validation process will assume a key with a non-empty value is a required input. Since lists must declare an item, all lists are assumed to be required fields in the model. So, all fields in the example are required except postal_code. The empty value for each datatype can be expressed with {}, 0, 0.0, false or "" and indicates that it is optional.
 
 Components Map
 --------------
@@ -43,6 +44,10 @@ The default validation process can be modified, and other (less common) conditio
             "max_length": 13,
             "must_not_contain": [ "[^\\w]", "_" ]
         },
+        ".emoticon": {
+            "required_field": false,
+            "byte_data": true
+        }
         ".address.city": {
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
             "required_field": false
@@ -58,7 +63,7 @@ The default validation process can be modified, and other (less common) conditio
 
 Path Definitions
 ^^^^^^^^^^^^^^^^
-To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, a key named "userID" is expected to be found in the top level map of the schema, .address.city refers to the "city" key inside the "address" map inside the schema map and .comments[0] refers to the first item inside the comments list.  Since the comments list is itself made optional by the component ".comments" declaration, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys.
+To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, the key named ".userID" maps to the "userID" key to be found in the top level map of the schema, ".address.city" refers to the "city" key inside the "address" map inside the schema map and ".comments[0]" refers to the first item inside the comments list.  Since the comments list is itself made optional by the component ".comments" declaration, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys.
 
 List of Field Conditionals (and default values)
 -----------------------------------------------
@@ -74,8 +79,8 @@ List of Field Conditionals (and default values)
 - "**must_contain**": [], # a list of regular expressions which must be found in a string [strings only]
 - "**min_value**": 0, # the minimum value of a number [numbers only]
 - "**max_value**": 0, # the maximum value of a number [numbers only]
-- "**min_size**": 0, # the minimum number of items in a list [lists only]
-- "**max_size**": 0, # the maximum number of items in a list [lists only]
+- "**min_size**": 0, # the minimum number of items in a list / error_code: 4010 / [**lists only**]
+- "**max_size**": 0, # the maximum number of items in a list / error_code: 4011 / [**lists only**]
 - "**unique_values**": false, # a true boolean treats a list as a set of unique primitives with no duplication [lists of strings and numbers only]
 - "**discrete_values**": [], # a list of values allowed, this attribute supersedes other qualifying attributes in the component list [numbers and strings only]
 - "**identical_to**": "", # the key name in the components map whose value the value of this component must match
@@ -86,7 +91,7 @@ List of Field Conditionals (and default values)
 
 Error Handling
 --------------
-Errors created from improper model specification will raise a ModelValidationError with a message that is designed to help determine the source of the model declaration error. To ensure that model initialization occurs properly, no error encoding is included to handle these exceptions. However, it is expected that validation of inputs will through errors. Otherwise, what's the point?! So, in addition to a text report, a dictionary has been included with the InputValidationError exception to facilitate error handling.
+Errors created from improper model specification will raise a ModelValidationError with a message that is designed to help determine the source of the model declaration error. To ensure that model initialization occurs properly, no error encoding is included to handle these exceptions. However, it is expected that validation of inputs will produce errors. Otherwise, what's the point?! So, in addition to a text report, a dictionary has been included with the InputValidationError exception to facilitate error handling.
 
 **Error Method Example**::
 
@@ -102,7 +107,7 @@ Errors created from improper model specification will raise a ModelValidationErr
             'comments': [ 'string' ],
             'active': True,
             'userID': 'gY3Cv81QwL0Fs',
-            'emotion': 'aGFwcHk=',
+            'emoticon': 'aGFwcHk=',
         },
         'input_path': '.',
         'input_criteria': {
@@ -124,7 +129,7 @@ Structure:
 #. Input is a dictionary
 #. Required keys in the input
 #. Extra keys in the input
-#. Value of each key in the input *(see below)*
+#. Value of each key in the input (recursive) *(see below)*
 #. Inject default values for missing optional keys
 
 Values (or Items):

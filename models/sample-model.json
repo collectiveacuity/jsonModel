@@ -3,14 +3,14 @@
     "userID": "gY3Cv81QwL0Fs",
     "datetime": 1456000345.543713,
     "active": true,
-    "emotion": "aGFwcHk=",
+    "emoticon": "aGFwcHk=",
     "address": {
       "city": "New Orleans",
       "region": "LA",
       "postal_code": "",
       "country": "United States"
     },
-    "comments": [ "string" ]
+    "comments": [ "@GerardMaras Rock the shrimp bouillabaisse!" ]
   },
   "components": {
     ".": {
@@ -25,7 +25,7 @@
       "example_values": [ "ghjKe3400bhde" ],
       "discrete_values": [ "ghjKe3400bhde", "ghjKe34TSbhde" ]
     },
-    ".emotion": {
+    ".emoticon": {
       "required_field": false,
       "byte_data": true,
       "example_values": [ "aGFwcHk=" ]
@@ -45,7 +45,9 @@
     },
     ".comments": {
       "required_field": false,
-      "unique_values": true
+      "min_size": 3,
+      "max_size": 3,
+      "unique_values": false
     },
     ".comments[0]": {
       "max_length": 120

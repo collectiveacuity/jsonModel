@@ -2,7 +2,7 @@
   "userID": "gY3Cv91QwL0Fs",
   "datetime": 1460000000,
   "active": false,
-  "comments": [],
+  "comments": [ "gold", "silver", "bronze" ],
   "address": {
       "city": "New York",
       "region": "NY",
