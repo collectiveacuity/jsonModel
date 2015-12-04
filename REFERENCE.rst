@@ -14,20 +14,22 @@ The default behavior of a schema declaration includes validation of structure, d
         "datetime": 1456000345.543713,
         "active": true,
         "emoticon": "aGFwcHk=",
+        "rating": 8,
         "address": {
             "city": "New Orleans",
             "region": "LA",
             "postal_code": "",
-            "country": "United States"
+            "country": "United States",
+            "country_code": 0
         },
         "comments": [ "@GerardMaras Rock the shrimp bouillabaisse!" ]
     }
 
 Default Settings
 ^^^^^^^^^^^^^^^^
-- **Structure**: The validation process will assume that a dictionary (including the top-level dictionary) defines its maximum scope of key names and that lists can contain any number of items. Lists cannot contain mixed datatypes and the first item in a list defines the allowable properties of each item in the list. For this reason, all lists declared in the model must also contain an item. So, the example model expects to find only the userID, datetime, active, emoticon, address and comments fields and it will accept any number of strings in the comments list.
-- **Datatype**: The validation process will assume that the datatype of each value in the input matches the datatype in the model. So, the example model expects to see a string for userID, a number for datetime, a boolean for active, etc... Special datatypes like bytes, integers, doubles and sets which json does not support must be handled by qualifiers in the components map.
-- **Requirements**: The validation process will assume a key with a non-empty value is a required input. Since lists must declare an item, all lists are assumed to be required fields in the model. So, all fields in the example are required except postal_code. The empty value for each datatype can be expressed with {}, 0, 0.0, false or "" and indicates that it is optional.
+- **Structure**: The validation process will assume that a dictionary (including the top-level dictionary) defines its maximum scope of key names and that lists can contain any number of items. Lists cannot contain mixed datatypes and the first item in a list defines the allowable properties of each item in the list. For this reason, all lists declared in the model must also contain an item. So, the example model expects to find only the userID, datetime, active, emoticon, rating, address and comments fields and it will accept any number of strings in the comments list.
+- **Datatype**: The validation process will assume that the datatype of each value in the input matches the datatype in the model. So, the example model expects to see a string for userID, a number for datetime, a boolean for active, etc... Special datatypes like bytes, integers and sets which json does not directly support must be handled by qualifiers in the components map.
+- **Requirements**: The validation process will assume a key with a non-empty value is a required input. Since lists must declare an item, all lists are assumed to be required fields in the model. So, all fields in the example are required except postal_code and country_code. The empty value for each datatype can be expressed with {}, 0, 0.0, false or "" and indicates that it is optional.
 
 Components Map
 --------------
@@ -37,7 +39,7 @@ The default validation process can be modified, and other (less common) conditio
 
     "components": {
         ".": {
-            "extra_fields": true
+            "extra_fields": false
         },
         ".userID": {
             "min_length": 13,
@@ -46,24 +48,37 @@ The default validation process can be modified, and other (less common) conditio
         },
         ".emoticon": {
             "required_field": false,
-            "byte_data": true
-        }
+            "byte_data": true,
+            "example_values": [ "aGFwcHIk=" ]
+        },
+        ".rating": {
+            "required_field": false,
+            "min_value": 1,
+            "max_value": 10,
+            "default_value": 5,
+            "integer_only": true
+        },
         ".address.city": {
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
-            "required_field": false
+            "required_field": false,
+            "default_value": "New York"
         },
         ".comments": {
             "required_field": false,
+            "min_size": 1,
+            "max_size": 3,
             "unique_values": true
         }
         ".comments[0]": {
-            "max_length": 120
+            "max_length": 140,
+            "must_contain": [ "[a-zA-Z]{2,}" ],
+            "example_values": [ "couldn't find the place", "hidden gem!!!!" ]
         }
     }
 
 Path Definitions
 ^^^^^^^^^^^^^^^^
-To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, the key named ".userID" maps to the "userID" key to be found in the top level map of the schema, ".address.city" refers to the "city" key inside the "address" map inside the schema map and ".comments[0]" refers to the first item inside the comments list.  Since the comments list is itself made optional by the component ".comments" declaration, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys.
+To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, the key named ".userID" maps to the "userID" key to be found in the top level map of the schema, ".address.city" refers to the "city" key inside the "address" map inside the schema map and ".comments[0]" refers to the first item inside the comments list.  Since the comments list is itself made optional by the declaration "required_field": false in the ".comments" key, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys.
 
 List of Field Conditionals (and default values)
 -----------------------------------------------
@@ -73,23 +88,23 @@ List of Field Conditionals (and default values)
 - "**maximum_scope**": [], # **IMMUTABLE** / the maximum extent of keys allowed in a dictionary generated by extra_fields default / [**maps only**]
 - "**declared_value**": null, # **IMMUTABLE** / the value or item defined in the schema [**strings, numbers and booleans only**]
 - "**default_value**": null, # a value for an optional property when field is missing in input [**strings, numbers and booleans only**]
-- "**byte_data**": false, # a true boolean expects to see base64 byte data in the string field [strings only]
-- "**min_length**": 0, # the minimum number of characters in a string [strings only]
-- "**max_length**": 0, # the maximum number of characters in a string [strings only]
-- "**must_not_contain**": [], # a list of regular expressions which should not be found in a string [strings only]
-- "**must_contain**": [], # a list of regular expressions which must be found in a string [strings only]
-- "**min_value**": 0, # the minimum value of a number [numbers only]
-- "**max_value**": 0, # the maximum value of a number [numbers only]
-- "**integer_only**": false, # a true boolean requires number to be an integer [numbers only]
-- "**min_size**": 0, # the minimum number of items in a list / error_code: 4010 / [**lists only**]
-- "**max_size**": 0, # the maximum number of items in a list / error_code: 4011 / [**lists only**]
-- "**unique_values**": false, # a true boolean treats a list as a set of unique primitives with no duplication / error_code: 4012 [**lists of strings and numbers only**]
-- "**discrete_values**": [], # a list of values allowed, this attribute supersedes other qualifying attributes in the component list [numbers and strings only]
-- "**identical_to**": "", # the key name in the components map whose value the value of this component must match
-- "**lambda_function**": "", # a single argument function which should be run to validate the value of this component, lambda_function must return true (valid) or false (invalid)
-- "**validation_url**": "", # an uri which can be called to validate the value of this component with its input in the body of the request, uri response must return true (valid) or false (invalid)
-- "**example_values**": [], # a list of values which satisfy all the validation requirements [ numbers and strings only ]
-- "**field_description**": "" # a description of the nature of the component used in documentation
+- "**byte_data**": false, # a true boolean expects to see base64 byte data in the string field / error_code: 4004 [**strings only**]
+- "**min_length**": 0, # the minimum number of characters in a string / error_code: 4005 [**strings only**]
+- "**max_length**": 0, # the maximum number of characters in a string / error_code: 4006 [**strings only**]
+- "**must_not_contain**": [], # a list of regular expressions which should not be found in a string / error_code: 4007 [**strings only**]
+- "**must_contain**": [], # a list of regular expressions which must be found in a string / error_code: 4008 [**strings only**]
+- "**integer_only**": false, # a true boolean requires number to be an integer / error_code: 4009 [**numbers only**]
+- "**min_value**": 0, # the minimum value of a number / error_code: 4010 [**numbers only**]
+- "**max_value**": 0, # the maximum value of a number / error_code: 4011 [**numbers only**]
+- "**min_size**": 0, # the minimum number of items in a list / error_code: 4012 / [**lists only**]
+- "**max_size**": 0, # the maximum number of items in a list / error_code: 4013 / [**lists only**]
+- "**unique_values**": false, # a true boolean treats a list as a set of unique primitives with no duplication / error_code: 4014 [**lists of strings and numbers only**]
+- "**discrete_values**": [], # a list of values allowed / error_code: 4015 [**numbers and strings only**]
+- "**identical_to**": "", # **TODO** / the key name in the components map whose value the value of this component must match
+- "**lambda_function**": "", # **TODO** / a single argument function which should be run to validate the value of this component, lambda_function must return true (valid) or false (invalid)
+- "**validation_url**": "", # **TODO** / an uri which can be called to validate the value of this component with its input in the body of the request, uri response must return true (valid) or false (invalid)
+- "**example_values**": [], # a list of values which satisfy all the validation requirements [**numbers and strings only**]
+- "**field_description**": "" # a description of the component for documentation and error reporting
 
 Error Handling
 --------------
@@ -101,6 +116,7 @@ Errors created from improper model specification will raise a ModelValidationErr
         'model_schema': {
             'datetime': 1456000345.543713,
             'address': {
+                'country_code': 0,
                 'city': 'New Orleans',
                 'postal_code': '',
                 'region': 'LA',
@@ -108,6 +124,7 @@ Errors created from improper model specification will raise a ModelValidationErr
             },
             'comments': [ '@GerardMaras Rock the shrimp bouillabaisse!' ],
             'active': True,
+            'rating': 8,
             'userID': 'gY3Cv81QwL0Fs',
             'emoticon': 'aGFwcHk=',
         },
@@ -115,7 +132,7 @@ Errors created from improper model specification will raise a ModelValidationErr
         'input_criteria': {
             'required_field': True,
             'value_datatype': <class 'dict'>,
-            'maximum_scope': [ 'datetime', 'address', 'active', 'userID', 'comments', 'emoticon' ],
+            'maximum_scope': [ 'datetime', 'address', 'active', 'userID', 'comments', 'rating', 'emoticon' ],
             'extra_fields': False
         },
         'failed_test': 'extra_fields',
@@ -138,8 +155,8 @@ __________
 Values (or Items):
 __________________
 #. Datatype of value
-#. Non-empty value
-#. Other value qualifiers
+#. Other value qualifiers based upon datatype
+#. Identity, Lambda and URL qualifiers **# TODO**
 
 To help the process of error handling and client-server negotiation, both the schema for the model as well as the the map of conditional qualifiers for the field that raised the error are included in the error dictionary.
 

@@ -1,14 +1,16 @@
 {
   "schema": {
     "userID": "gY3Cv81QwL0Fs",
-    "datetime": 1456000345.543713,
+    "datetime": 1456190345.543713,
     "active": true,
     "emoticon": "aGFwcHk=",
+    "rating": 8,
     "address": {
       "city": "New Orleans",
       "region": "LA",
       "postal_code": "",
-      "country": "United States"
+      "country": "United States",
+      "country_code": 0
     },
     "comments": [ "@GerardMaras Rock the shrimp bouillabaisse!" ]
   },
@@ -19,39 +21,38 @@
     ".userID": {
       "min_length": 13,
       "max_length": 13,
-      "must_not_contain": [ "[^\\w]", "_" ],
-      "must_contain": [ "g" ],
-      "default_value": "ghjKe34TSbhde",
-      "example_values": [ "ghjKe3400bhde" ],
-      "discrete_values": [ "ghjKe3400bhde", "ghjKe34TSbhde", "gY3Cv81QwL0Fs" ]
+      "must_not_contain": [ "[^\\w]", "_" ]
     },
     ".emoticon": {
-      "required_field": false,
+      "required_field": true,
       "byte_data": true,
       "example_values": [ "aGFwcHIk=" ]
     },
-    ".datetime": {
+    ".rating": {
       "required_field": false,
-      "default_value": 1500,
-      "max_value": 2000000000,
-      "min_value": 1499.99,
-      "integer_only": false,
-      "discrete_values": [ 1500, 10000, 1456000345.543713 ],
-      "example_values": [ 10000.0 ]
+      "max_value": 10,
+      "min_value": 1,
+      "default_value": 5,
+      "integer_only": true
     },
     ".address.city": {
       "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
       "required_field": false,
       "default_value": "New York"
     },
+    ".address.country_code":{
+      "discrete_values": [ 36, 124, 554, 826, 840 ]
+    },
     ".comments": {
       "required_field": false,
-      "min_size": 3,
+      "min_size": 1,
       "max_size": 3,
       "unique_values": true
     },
     ".comments[0]": {
-      "max_length": 120
+      "max_length": 140,
+      "must_contain": [ "[a-zA-Z]{2,}" ],
+      "example_values": [ "couldn't find the place", "hidden gem!!!!" ]
     }
   }
 }

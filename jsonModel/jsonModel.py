@@ -67,7 +67,8 @@ class mapModel(object):
             if isinstance(value, dict):
                 criteria_dict['extra_fields'] = False
             if isinstance(value, bool) or isinstance(value, str) or isinstance(value, int) or isinstance(value, float):
-                criteria_dict['declared_value'] = value
+                if value:
+                    criteria_dict['declared_value'] = value
             key_criteria.append(criteria_dict)
             if isinstance(value, dict):
                 self.dict(input_dict=input_dict[key], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
@@ -76,17 +77,20 @@ class mapModel(object):
         return key_name, key_criteria
 
     def list(self, input_list, path_to_root, key_name, key_criteria):
-        key_path = path_to_root + '[0]'
-        key_name.append(key_path)
-        criteria_dict = {
-            'required_field': False,
-            'value_datatype': input_list[0].__class__
-        }
-        key_criteria.append(criteria_dict)
-        if isinstance(input_list[0], dict):
-            self.dict(input_dict=input_list[0], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
-        elif isinstance(input_list[0], list):
-            self.list(input_list=input_list[0], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
+        if input_list:
+            key_path = path_to_root + '[0]'
+            key_name.append(key_path)
+            criteria_dict = {
+                'required_field': False,
+                'value_datatype': input_list[0].__class__
+            }
+            if isinstance(input_list[0], bool) or isinstance(input_list[0], str) or isinstance(input_list[0], int) or isinstance(input_list[0], float):
+                criteria_dict['declared_value'] = input_list[0]
+            key_criteria.append(criteria_dict)
+            if isinstance(input_list[0], dict):
+                self.dict(input_dict=input_list[0], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
+            elif isinstance(input_list[0], list):
+                self.list(input_list=input_list[0], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
         return key_name, key_criteria
 
 class jsonModel(object):
@@ -199,7 +203,7 @@ class jsonModel(object):
                 elif not isinstance(v, type_dict[k].__class__):
                     raise ModelValidationError('Value for data model "components%s.%s" must be a %s datatype.' % (key, k, type_dict[k].__class__))
 
-    # validate individual qualifier field values
+    # validate internal logic of each qualifier value declaration
                 if k == 'must_not_contain' or k == 'must_contain':
                     for item in v:
                         if not isinstance(item, str):
@@ -229,10 +233,98 @@ class jsonModel(object):
                             message = '"unique_values": true requires value at data model path .components.%s[0] to be a string or number primitive.' % key
                             raise ModelValidationError(message)
 
-    # validate default value declaration against other criteria
-            declared_values = [ 'declared_value', 'default_value' ]
+    # validate numerical qualifiers against each other
+            numerical_qualifiers = [ 'min_length', 'max_length', 'min_value', 'max_value', 'min_size', 'max_size' ]
+            for qualifier in numerical_qualifiers:
+                if qualifier in value.keys():
+                    default = value[qualifier]
+                    value_path = '.components%s.%s' % (key, qualifier)
+                    header = 'Value %s at data model path %s' % (default, value_path)
+                    if 'min_value' in value.keys():
+                        if default < value['min_value']:
+                            message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
+                            raise ModelValidationError(message)
+                    if 'max_value' in value.keys():
+                        if default > value['max_value']:
+                            message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
+                            raise ModelValidationError(message)
+                    if 'min_size' in value.keys():
+                        if default < value['min_size']:
+                            message = '%s must not be less than %s "min_size".' % (header, value['min_size'])
+                            raise ModelValidationError(message)
+                    if 'max_size' in value.keys():
+                        if default > value['max_size']:
+                            message = '%s must not be greater than %s "max_size".' % (header, value['max_size'])
+                            raise ModelValidationError(message)
+                    if 'integer_only' in value.keys():
+                        if value['integer_only']:
+                            if not isinstance(default, int):
+                                message = '%s must be an "integer_only".' % header
+                                raise ModelValidationError(message)
+                    if 'min_length' in value.keys():
+                        if default < value['min_length']:
+                            message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
+                            raise ModelValidationError(message)
+                    if 'max_length' in value.keys():
+                        if default > value['max_length']:
+                            message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
+                            raise ModelValidationError(message)
+
+    # validate discrete values qualifiers against other criteria
+            if 'discrete_values' in value.keys():
+                for i in range(len(value['discrete_values'])):
+                    example = value['discrete_values'][i]
+                    if isinstance(example, str):
+                        example_value = '"%s"' % example
+                    else:
+                        example_value = example
+                    header = 'Value %s at data model path .components%s.discrete_values[%s]' % (example_value, key, i)
+                    if 'min_value' in value.keys():
+                        if example < value['min_value']:
+                            message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
+                            raise ModelValidationError(message)
+                    if 'max_value' in value.keys():
+                        if example > value['max_value']:
+                            message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
+                            raise ModelValidationError(message)
+                    if 'integer_only' in value.keys():
+                        if value['integer_only']:
+                            if not isinstance(example, int):
+                                message = '%s must be an "integer_only".' % header
+                                raise ModelValidationError(message)
+                    if 'min_length' in value.keys():
+                        if len(example) < value['min_length']:
+                            message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
+                            raise ModelValidationError(message)
+                    if 'max_length' in value.keys():
+                        if len(example) > value['max_length']:
+                            message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
+                            raise ModelValidationError(message)
+                    if 'must_not_contain' in value.keys():
+                        for regex in value['must_not_contain']:
+                            regex_pattern = re.compile(regex)
+                            if regex_pattern.findall(example):
+                                message = '%s matches regex pattern "%s" in "must_not_contain".' % (header, regex)
+                                raise ModelValidationError(message)
+                    if 'must_contain' in value.keys():
+                        for regex in value['must_contain']:
+                            regex_pattern = re.compile(regex)
+                            if not regex_pattern.findall(example):
+                                message = '%s does not match regex pattern "%s" in "must_contain".' % (header, regex)
+                                raise ModelValidationError(message)
+                    if 'byte_data' in value.keys():
+                        message = '%s cannot be base64 decoded to "byte_data".' % header
+                        try:
+                            decoded_bytes = b64decode(example)
+                        except:
+                            raise ModelValidationError(message)
+                        if not isinstance(decoded_bytes, bytes):
+                            raise ModelValidationError(message)
+
+    # validate declared value and default value qualifiers against other criteria
+            declared_qualifiers = [ 'declared_value', 'default_value' ]
             schema_field = self.keyCriteria[self.keyName.index(key)]
-            for qualifier in declared_values:
+            for qualifier in declared_qualifiers:
                 if qualifier in value.keys() or qualifier in schema_field:
                     if qualifier in value.keys():
                         default = value[qualifier]
@@ -278,10 +370,6 @@ class jsonModel(object):
                             if not regex_pattern.findall(default):
                                 message = '%s does not match regex pattern "%s" in "must_contain".' % (header, regex)
                                 raise ModelValidationError(message)
-                    if 'discrete_values' in value.keys():
-                        if default not in value['discrete_values']:
-                            message = '%s is not found in "discrete_values".' % header
-                            raise ModelValidationError(message)
                     if 'byte_data' in value.keys():
                         message = '%s cannot be base64 decoded to "byte_data".' % header
                         try:
@@ -290,15 +378,20 @@ class jsonModel(object):
                             raise ModelValidationError(message)
                         if not isinstance(decoded_bytes, bytes):
                             raise ModelValidationError(message)
+                    if 'discrete_values' in value.keys():
+                        if default not in value['discrete_values']:
+                            message = '%s is not found in "discrete_values".' % header
+                            raise ModelValidationError(message)
 
-    # validate example values declarations against other criteria
+    # validate example value qualifiers against other criteria
             if 'example_values' in value.keys():
                 for i in range(len(value['example_values'])):
                     example = value['example_values'][i]
                     if isinstance(example, str):
-                        header = 'Value "%s" at data model path .components%s.example_values[%s]' % (example, key, i)
+                        example_value = '"%s"' % example
                     else:
-                        header = 'Value %s at data model path .components%s.example_values[%s]' % (example, key, i)
+                        example_value = example
+                    header = 'Value %s at data model path .components%s.example_values[%s]' % (example_value, key, i)
                     if 'min_value' in value.keys():
                         if example < value['min_value']:
                             message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
@@ -332,10 +425,6 @@ class jsonModel(object):
                             if not regex_pattern.findall(example):
                                 message = '%s does not match regex pattern "%s" in "must_contain".' % (header, regex)
                                 raise ModelValidationError(message)
-                    if 'discrete_values' in value.keys():
-                        if example not in value['discrete_values']:
-                            message = '%s is not found in "discrete_values".' % header
-                            raise ModelValidationError(message)
                     if 'byte_data' in value.keys():
                         message = '%s cannot be base64 decoded to "byte_data".' % header
                         try:
@@ -344,10 +433,10 @@ class jsonModel(object):
                             raise ModelValidationError(message)
                         if not isinstance(decoded_bytes, bytes):
                             raise ModelValidationError(message)
-
-    # TODO: validate discrete values declarations against other criteria
-
-    # TODO: validate integer_only against min_value and max_value declarations
+                    if 'discrete_values' in value.keys():
+                        if example not in value['discrete_values']:
+                            message = '%s is not found in "discrete_values".' % header
+                            raise ModelValidationError(message)
 
     # construct keyMap from components, key names and key criteria
         self.keyMap = {}
@@ -379,9 +468,9 @@ class jsonModel(object):
             input_keys.append(input_key_name)
             input_key_list.append(key)
 
-    # TODO: validate identical to qualifier for dictionary
+    # TODO: validate top-level key and values against identical to reference
 
-    # TODO: incorporate lambda function and validation url methods
+    # TODO: run lambda function and call validation
 
     # construct lists of keys in schema dictionary
         max_keys = []
@@ -500,13 +589,13 @@ class jsonModel(object):
             if len(input_list) < list_rules['min_size']:
                 list_error['failed_test'] = 'min_size'
                 list_error['error_value'] = len(input_list)
-                list_error['error_code'] = 4010
+                list_error['error_code'] = 4012
                 raise InputValidationError(list_error)
         if 'max_size' in list_rules.keys():
             if len(input_list) > list_rules['max_size']:
                 list_error['failed_test'] = 'max_size'
                 list_error['error_value'] = len(input_list)
-                list_error['error_code'] = 4011
+                list_error['error_code'] = 4013
                 raise InputValidationError(list_error)
 
     # construct item error report template
@@ -548,10 +637,12 @@ class jsonModel(object):
             if len(set(input_list)) < len(input_list):
                 list_error['failed_test'] = 'unique_values'
                 list_error['error_value'] = input_list
-                list_error['error_code'] = 4012
+                list_error['error_code'] = 4014
                 raise InputValidationError(list_error)
 
-    # TODO: validate identical to references
+    # TODO: validate top-level item values against identical to reference
+
+    # TODO: run lambda function and call validation url
 
         return input_list
 
@@ -573,11 +664,40 @@ class jsonModel(object):
             'error_value': input_number,
             'error_code': 4001
         }
+        if 'integer_only' in input_criteria.keys():
+            if input_criteria['integer_only'] and not isinstance(input_number, int):
+                error_dict['failed_test'] = 'integer_only'
+                error_dict['error_code'] = 4009
+                raise InputValidationError(error_dict)
+        if 'min_value' in input_criteria.keys():
+            if input_number < input_criteria['min_value']:
+                error_dict['failed_test'] = 'min_value'
+                error_dict['error_code'] = 4010
+                raise InputValidationError(error_dict)
+        if 'max_value' in input_criteria.keys():
+            if input_number > input_criteria['max_value']:
+                error_dict['failed_test'] = 'max_value'
+                error_dict['error_code'] = 4011
+                raise InputValidationError(error_dict)
+        if 'discrete_values' in input_criteria.keys():
+            if input_number not in input_criteria['discrete_values']:
+                error_dict['failed_test'] = 'discrete_values'
+                error_dict['error_code'] = 4015
+                raise InputValidationError(error_dict)
 
+    # TODO: validate number against identical to reference
+
+    # TODO: run lambda function and call validation url
 
         return input_number
 
     def string(self, input_string, path_to_root):
+        '''
+            a helper method for recursively validating properties of a string
+
+        :return: input_string
+        '''
+
         rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
         input_criteria = self.keyMap[rules_path_to_root]
         error_dict = {
@@ -588,6 +708,49 @@ class jsonModel(object):
             'error_value': input_string,
             'error_code': 4001
         }
+        if 'byte_data' in input_criteria.keys():
+            if input_criteria['byte_data']:
+                error_dict['failed_test'] = 'byte_data'
+                error_dict['error_code'] = 4004
+                try:
+                    decoded_bytes = b64decode(input_string)
+                except:
+                    raise InputValidationError(error_dict)
+                if not isinstance(decoded_bytes, bytes):
+                    raise InputValidationError(error_dict)
+        if 'min_length' in input_criteria.keys():
+            if len(input_string) < input_criteria['min_length']:
+                error_dict['failed_test'] = 'min_length'
+                error_dict['error_code'] = 4005
+                raise InputValidationError(error_dict)
+        if 'max_length' in input_criteria.keys():
+            if len(input_string) > input_criteria['max_length']:
+                error_dict['failed_test'] = 'max_length'
+                error_dict['error_code'] = 4006
+                raise InputValidationError(error_dict)
+        if 'must_not_contain' in input_criteria.keys():
+            for regex in input_criteria['must_not_contain']:
+                regex_pattern = re.compile(regex)
+                if regex_pattern.findall(input_string):
+                    error_dict['failed_test'] = 'must_not_contain'
+                    error_dict['error_code'] = 4007
+                    raise InputValidationError(error_dict)
+        if 'must_contain' in input_criteria.keys():
+            for regex in input_criteria['must_contain']:
+                regex_pattern = re.compile(regex)
+                if not regex_pattern.findall(input_string):
+                    error_dict['failed_test'] = 'must_contain'
+                    error_dict['error_code'] = 4008
+                    raise InputValidationError(error_dict)
+        if 'discrete_values' in input_criteria.keys():
+            if input_string not in input_criteria['discrete_values']:
+                error_dict['failed_test'] = 'discrete_values'
+                error_dict['error_code'] = 4015
+                raise InputValidationError(error_dict)
+
+    # TODO: validate string against identical to reference
+
+    # TODO: run lambda function and call validation url
 
         return input_string
 
@@ -602,6 +765,10 @@ class jsonModel(object):
             'error_value': input_boolean,
             'error_code': 4001
         }
+
+    # TODO: validate boolean against identical to reference
+
+    # TODO: run lambda function and call validation url
 
         return input_boolean
 
@@ -625,13 +792,13 @@ class jsonModel(object):
         try:
             self.validate(invalid_list)
         except InputValidationError as err:
+            assert err.error['model_schema']
             assert err.error['failed_test'] == 'value_datatype'
         extra_key_input = deepcopy(valid_input)
         extra_key_input['extraKey'] = 'string'
         try:
             self.validate(extra_key_input)
         except InputValidationError as err:
-            assert err.error['model_schema']
             assert err.error['failed_test'] == 'extra_fields'
         missing_key_input = deepcopy(valid_input)
         del missing_key_input['active']
@@ -639,12 +806,14 @@ class jsonModel(object):
             self.validate(missing_key_input)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'required_field'
-        default_input = deepcopy(valid_input)
-        del default_input['datetime']
-        new_default_input = self.validate(default_input)
-        assert new_default_input['datetime'] == 1500
+        optional_key = deepcopy(valid_input)
+        del optional_key['comments']
+        assert not 'comments' in self.validate(optional_key).keys()
+        default_rating = deepcopy(valid_input)
+        new_default_rating = self.validate(default_rating)
+        assert new_default_rating['rating'] == 5
         short_list = deepcopy(valid_input)
-        short_list['comments'].pop()
+        short_list['comments'] = []
         try:
             self.validate(short_list)
         except InputValidationError as err:
@@ -667,6 +836,66 @@ class jsonModel(object):
             self.validate(duplicate_list)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'unique_values'
+        integers_only = deepcopy(valid_input)
+        integers_only['rating'] = 3.5
+        try:
+            self.validate(integers_only)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'integer_only'
+        max_number = deepcopy(valid_input)
+        max_number['rating'] = 11
+        try:
+            self.validate(max_number)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'max_value'
+        min_number = deepcopy(valid_input)
+        min_number['rating'] = 0
+        try:
+            self.validate(min_number)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'min_value'
+        discrete_number = deepcopy(valid_input)
+        discrete_number['address']['country_code'] = 20
+        try:
+            self.validate(discrete_number)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'discrete_values'
+        byte_string = deepcopy(valid_input)
+        byte_string['emoticon'] = 'happy'
+        try:
+            self.validate(byte_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'byte_data'
+        max_string = deepcopy(valid_input)
+        max_string['userID'] = 'LongAlphaNumericID'
+        try:
+            self.validate(max_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'max_length'
+        min_string = deepcopy(valid_input)
+        min_string['userID'] = 'ShortID'
+        try:
+            self.validate(min_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'min_length'
+        discrete_string = deepcopy(valid_input)
+        discrete_string['address']['city'] = 'Boston'
+        try:
+            self.validate(discrete_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'discrete_values'
+        prohibited_string = deepcopy(valid_input)
+        prohibited_string['userID'] = '6nPb/9gTwLz3f'
+        try:
+            self.validate(prohibited_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'must_not_contain'
+        required_words = deepcopy(valid_input)
+        required_words['comments'][0] = 'a'
+        try:
+            self.validate(required_words)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'must_contain'
         print(self.validate(valid_input))
         return self
 

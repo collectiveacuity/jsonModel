@@ -1,10 +1,10 @@
 {
-  "userID": "gY3Cv91QwL0Fs",
-  "datetime": 1460000000,
+  "userID": "6nPbM9gTwLz3f",
+  "datetime": 1449179763.312077,
   "active": false,
+  "emoticon": "aGFwcHIk=",
   "comments": [ "gold", "silver", "bronze" ],
   "address": {
-      "city": "New York",
       "region": "NY",
       "country": "United States"
   }
