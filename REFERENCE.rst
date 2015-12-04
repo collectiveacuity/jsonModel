@@ -114,7 +114,7 @@ Errors created from improper model specification will raise a ModelValidationErr
 
     self.error = {
         'model_schema': {
-            'datetime': 1456000345.543713,
+            'datetime': 1456190345.543713,
             'address': {
                 'country_code': 0,
                 'city': 'New Orleans',
@@ -156,7 +156,7 @@ Values (or Items):
 __________________
 #. Datatype of value
 #. Other value qualifiers based upon datatype
-#. Identity, Lambda and URL qualifiers **# TODO**
+#. Identity, Lambda and URL qualifiers # **TODO**
 
 To help the process of error handling and client-server negotiation, both the schema for the model as well as the the map of conditional qualifiers for the field that raised the error are included in the error dictionary.
 
