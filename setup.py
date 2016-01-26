@@ -3,8 +3,18 @@ __created__ = '2015.11'
 
 from setuptools import setup, find_packages
 
-# For more examples, see
-#   https://the-hitchhikers-guide-to-packaging.readthedocs.org/en/latest/creation.html
+'''
+References:
+
+https://the-hitchhikers-guide-to-packaging.readthedocs.org/en/latest/creation.html
+
+Commands:
+python setup.py sdist --formats=gztar,zip
+python setup.py develop (for local on-the-fly updating)
+python setup.py install
+python setup.py register (for PyPi)
+python setup.py sdist upload (for PyPi)
+'''
 
 setup(
    name="jsonmodel",

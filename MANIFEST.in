@@ -8,3 +8,6 @@ recursive-exclude .git *
 recursive-exclude .idea *
 recursive-exclude cred *
 recursive-exclude notes *
+recursive-include * *.json
+include *.rst
+include *.txt
