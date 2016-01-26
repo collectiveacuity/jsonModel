@@ -63,6 +63,12 @@ The default validation process can be modified, and other (less common) conditio
             "required_field": false,
             "default_value": "New York"
         },
+        ".address.region":{
+            "contains_either": [ "[A-Z]{2}", "[A-Z][a-z]+" ]
+        },
+        ".address.country_code":{
+            "discrete_values": [ 36, 124, 554, 826, 840 ]
+        },
         ".comments": {
             "required_field": false,
             "min_size": 1,
