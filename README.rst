@@ -84,7 +84,7 @@ To declare the model::
 
 To initialize the class object::
 
-    from jsonModel import *
+    from jsonModel.classes import jsonModel, json
 
     sampleModel = json.loads(open('sample-model.json').read())
     validModel = jsonModel(sampleModel)

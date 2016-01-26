@@ -3,7 +3,7 @@ __created__ = '2015.11'
 
 import json
 import re
-from base64 import b64encode, b64decode
+from base64 import b64decode
 from copy import deepcopy
 
 class ModelValidationError(Exception):
@@ -589,13 +589,13 @@ class jsonModel(object):
             if len(input_list) < list_rules['min_size']:
                 list_error['failed_test'] = 'min_size'
                 list_error['error_value'] = len(input_list)
-                list_error['error_code'] = 4012
+                list_error['error_code'] = 4031
                 raise InputValidationError(list_error)
         if 'max_size' in list_rules.keys():
             if len(input_list) > list_rules['max_size']:
                 list_error['failed_test'] = 'max_size'
                 list_error['error_value'] = len(input_list)
-                list_error['error_code'] = 4013
+                list_error['error_code'] = 4032
                 raise InputValidationError(list_error)
 
     # construct item error report template
@@ -637,7 +637,7 @@ class jsonModel(object):
             if len(set(input_list)) < len(input_list):
                 list_error['failed_test'] = 'unique_values'
                 list_error['error_value'] = input_list
-                list_error['error_code'] = 4014
+                list_error['error_code'] = 4033
                 raise InputValidationError(list_error)
 
     # TODO: validate top-level item values against identical to reference
@@ -667,22 +667,22 @@ class jsonModel(object):
         if 'integer_only' in input_criteria.keys():
             if input_criteria['integer_only'] and not isinstance(input_number, int):
                 error_dict['failed_test'] = 'integer_only'
-                error_dict['error_code'] = 4009
+                error_dict['error_code'] = 4021
                 raise InputValidationError(error_dict)
         if 'min_value' in input_criteria.keys():
             if input_number < input_criteria['min_value']:
                 error_dict['failed_test'] = 'min_value'
-                error_dict['error_code'] = 4010
+                error_dict['error_code'] = 4022
                 raise InputValidationError(error_dict)
         if 'max_value' in input_criteria.keys():
             if input_number > input_criteria['max_value']:
                 error_dict['failed_test'] = 'max_value'
-                error_dict['error_code'] = 4011
+                error_dict['error_code'] = 4023
                 raise InputValidationError(error_dict)
         if 'discrete_values' in input_criteria.keys():
             if input_number not in input_criteria['discrete_values']:
                 error_dict['failed_test'] = 'discrete_values'
-                error_dict['error_code'] = 4015
+                error_dict['error_code'] = 4041
                 raise InputValidationError(error_dict)
 
     # TODO: validate number against identical to reference
@@ -711,7 +711,7 @@ class jsonModel(object):
         if 'byte_data' in input_criteria.keys():
             if input_criteria['byte_data']:
                 error_dict['failed_test'] = 'byte_data'
-                error_dict['error_code'] = 4004
+                error_dict['error_code'] = 4011
                 try:
                     decoded_bytes = b64decode(input_string)
                 except:
@@ -721,31 +721,41 @@ class jsonModel(object):
         if 'min_length' in input_criteria.keys():
             if len(input_string) < input_criteria['min_length']:
                 error_dict['failed_test'] = 'min_length'
-                error_dict['error_code'] = 4005
+                error_dict['error_code'] = 4012
                 raise InputValidationError(error_dict)
         if 'max_length' in input_criteria.keys():
             if len(input_string) > input_criteria['max_length']:
                 error_dict['failed_test'] = 'max_length'
-                error_dict['error_code'] = 4006
+                error_dict['error_code'] = 4013
                 raise InputValidationError(error_dict)
         if 'must_not_contain' in input_criteria.keys():
             for regex in input_criteria['must_not_contain']:
                 regex_pattern = re.compile(regex)
                 if regex_pattern.findall(input_string):
                     error_dict['failed_test'] = 'must_not_contain'
-                    error_dict['error_code'] = 4007
+                    error_dict['error_code'] = 4014
                     raise InputValidationError(error_dict)
         if 'must_contain' in input_criteria.keys():
             for regex in input_criteria['must_contain']:
                 regex_pattern = re.compile(regex)
                 if not regex_pattern.findall(input_string):
                     error_dict['failed_test'] = 'must_contain'
-                    error_dict['error_code'] = 4008
+                    error_dict['error_code'] = 4015
                     raise InputValidationError(error_dict)
+        if 'contains_either' in input_criteria.keys():
+            regex_match = False
+            for regex in input_criteria['contains_either']:
+                regex_pattern = re.compile(regex)
+                if regex_pattern.findall(input_string):
+                    regex_match = True
+            if not regex_match:
+                error_dict['failed_test'] = 'contains_either'
+                error_dict['error_code'] = 4016
+                raise InputValidationError(error_dict)
         if 'discrete_values' in input_criteria.keys():
             if input_string not in input_criteria['discrete_values']:
                 error_dict['failed_test'] = 'discrete_values'
-                error_dict['error_code'] = 4015
+                error_dict['error_code'] = 4041
                 raise InputValidationError(error_dict)
 
     # TODO: validate string against identical to reference
@@ -896,6 +906,12 @@ class jsonModel(object):
             self.validate(required_words)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'must_contain'
+        optional_words = deepcopy(valid_input)
+        optional_words['address']['region'] = 'N1'
+        try:
+            self.validate(optional_words)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'contains_either'
         print(self.validate(valid_input))
         return self
 
@@ -908,8 +924,3 @@ class requestModel(object):
 
     def request(self, request_input):
         return request_input
-
-
-testModel = json.loads(open('../models/sample-model.json').read())
-testInput = json.loads(open('../models/sample-input.json').read())
-jsonModel(testModel).unitTests(testInput)

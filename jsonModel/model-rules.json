@@ -20,6 +20,7 @@
       "max_length": 0,
       "must_not_contain": [],
       "must_contain": [],
+      "contains_either": [],
       "discrete_values": [],
       "identical_to": ".similar_string",
       "lambda_function": "",
