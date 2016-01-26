@@ -5,8 +5,8 @@ import json
 import re
 from base64 import b64decode
 from copy import deepcopy
-from jsonModel.exceptions import InputValidationError, ModelValidationError
-from jsonModel.mapping import mapModel
+from jsonmodel.exceptions import InputValidationError, ModelValidationError
+from jsonmodel.mapping import mapModel
 
 class jsonModel(object):
 
@@ -18,7 +18,7 @@ class jsonModel(object):
             a method for testing data model declaration & initializing the class
 
         :param data_model: dictionary with json model architecture
-        :return: jsonModel object
+        :return: jsonmodel object
         '''
 
     # validate schema input

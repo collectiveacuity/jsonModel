@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 #   https://the-hitchhikers-guide-to-packaging.readthedocs.org/en/latest/creation.html
 
 setup(
-   name="jsonModel",
+   name="jsonmodel",
    version="1.0",
    author = __author__,
    include_package_data=True,  # Checks MANIFEST.in for explicit rules
