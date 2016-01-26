@@ -13,7 +13,7 @@ Top-Level Classes
 
 Features
 --------
-- Alternative to json schema
+- Alternative to json schema module
 - Schema declaration is self-valid
 - Built-in validation of model declaration
 - Flat structure to declarations of property attributes
@@ -84,7 +84,7 @@ To declare the model::
 
 To initialize the class object::
 
-    from jsonModel.classes import jsonModel, json
+    from jsonModel.validators import jsonModel, json
 
     sampleModel = json.loads(open('sample-model.json').read())
     validModel = jsonModel(sampleModel)

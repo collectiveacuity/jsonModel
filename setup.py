@@ -1,17 +1,28 @@
 __author__ = 'rcj1492'
-__created__ = '2015.10'
+__created__ = '2015.11'
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # For more examples, see
 #   https://the-hitchhikers-guide-to-packaging.readthedocs.org/en/latest/creation.html
+
 setup(
-   name="labAWS",
-   version="0.1",
+   name="jsonModel",
+   version="1.0",
    author = __author__,
-   packages = ["labAWS"],
+   include_package_data=True,  # Checks MANIFEST.in for explicit rules
+   packages=find_packages(),
    license="LICENSE.txt",
-   description="A Collection of Tools for Managing Backend Infrastructure on Amazon Web Services",
+   description="A Collection of Methods for Validating JSON Structured Data",
    long_description=open('README.rst').read(),
-   install_requires=["paramiko >= 1.15.2"]
+   install_requires=[],
+   classifiers=[
+      'Development Status :: Beta',
+      'Environment :: Web Environment',
+      'Intended Audience :: Developers',
+      'License :: OSI Approved :: MIT License',
+      'Natural Language :: English',
+      'Programming Language :: Python',
+      'Programming Language :: Python :: 3.4'
+   ]
 )
