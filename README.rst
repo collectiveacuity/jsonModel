@@ -12,7 +12,7 @@ Top-Level Classes
 
 Features
 --------
-- Validates native json datatype
+- Validates native json datatypes
 - Validates byte data as base64 encoded strings
 - Alternative to json schema module
 - Schema declaration is self-valid
