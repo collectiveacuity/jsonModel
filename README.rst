@@ -3,7 +3,6 @@ jsonModel
 =========
 *A Collection of Methods for Validating JSON Structured Data*
 
-:Documentation: http://jsonModel.readthedocs.org/
 :Downloads: http://pypi.python.org/pypi/jsonModel
 :Source: https://github.com/collectiveacuity/jsonModel
 
