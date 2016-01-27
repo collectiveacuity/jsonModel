@@ -1,0 +1,74 @@
+{
+"schema": {
+        "string_fields": "",
+        "similar_string": "",
+        "number_fields": 0.0,
+        "similar_number": 0,
+        "boolean_fields": false,
+        "similar_boolean": false,
+        "map_fields": {},
+        "similar_map": {},
+        "list_fields": [],
+        "similar_list": []
+    },
+    "components": {
+        ".string_fields": {
+            "required_field": false,
+            "default_value": "",
+            "byte_data": false,
+            "min_length": 0,
+            "max_length": 0,
+            "must_not_contain": [],
+            "must_contain": [],
+            "contains_either": [],
+            "discrete_values": [],
+            "identical_to": ".similar_string",
+            "lambda_function": "",
+            "validation_url": "",
+            "example_values": [],
+            "field_description": ""
+        },
+        ".number_fields": {
+            "required_field": false,
+            "default_value": 0.0,
+            "min_value": 0.0,
+            "max_value": 0.0,
+            "integer_only": false,
+            "discrete_values": [],
+            "identical_to": ".similar_number",
+            "lambda_function": "",
+            "validation_url": "",
+            "example_values": [],
+            "field_description": ""
+        },
+        ".boolean_fields": {
+            "required_field": false,
+            "default_value": false,
+            "identical_to": ".similar_boolean",
+            "lambda_function": "",
+            "validation_url": "",
+            "field_description": ""
+        },
+        ".map_fields": {
+            "required_field": false,
+            "extra_fields": false,
+            "identical_to": ".similar_map",
+            "lambda_function": "",
+            "validation_url": "",
+            "field_description": ""
+        },
+        ".list_fields": {
+            "required_field": false,
+            "min_size": 0,
+            "max_size": 0,
+            "unique_values": false,
+            "identical_to": ".similar_list",
+            "lambda_function": "",
+            "validation_url": "",
+            "field_description": ""
+        }
+    },
+    "title": "",
+    "url": "",
+    "max_size": 0
+}
