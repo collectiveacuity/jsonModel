@@ -77,11 +77,7 @@ To declare the model::
         "schema": {
             "property": "value"
         },
-        "components": {
-            ".property": {
-                "max_length": 256
-            }
-        },
+        "components": {},
         "title": "my cool data model",
         "url": "https://collectiveacuity.com/api/mycoolresource?jsonmodel=true",
         "max_size": 1024,
