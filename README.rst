@@ -13,11 +13,14 @@ Top-Level Classes
 
 Features
 --------
+- Validates native json datatypes
+- Validates byte data as base64 encoded strings
 - Alternative to json schema module
 - Schema declaration is self-valid
 - Built-in validation of model declaration
-- Flat structure to declarations of property attributes
-- Accommodates additional functions for property validation #TODO
+- Flat structure to object property attribute declarations
+- Validates size of data object inputs #TODO
+- Accommodates function extension for object property validation #TODO
 
 Installation
 ^^^^^^^^^^^^
@@ -74,7 +77,11 @@ To declare the model::
         "schema": {
             "property": "value"
         },
-        "components": {},
+        "components": {
+            ".property": {
+                "max_length": 256
+            }
+        },
         "title": "my cool data model",
         "url": "https://collectiveacuity.com/api/mycoolresource?jsonmodel=true",
         "max_size": 1024,
@@ -82,11 +89,17 @@ To declare the model::
 
 *[all fields except schema are optional]*
 
-To initialize the class object::
+To import the model::
 
-    from jsonmodel.validators import jsonModel, json
+    import json
 
     sampleModel = json.loads(open('sample-model.json').read())
+
+
+To initialize the class object::
+
+    from jsonmodel.validators import jsonModel
+
     validModel = jsonModel(sampleModel)
 
 

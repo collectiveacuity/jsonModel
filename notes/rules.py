@@ -1,11 +1,14 @@
-{
-"schema": {
+__author__ = 'rcj1492'
+__created__ = '2016.01'
+
+modelRules = {
+    "schema": {
         "string_fields": "",
         "similar_string": "",
         "number_fields": 0.0,
         "similar_number": 0,
-        "boolean_fields": false,
-        "similar_boolean": false,
+        "boolean_fields": False,
+        "similar_boolean": False,
         "map_fields": {},
         "similar_map": {},
         "list_fields": [],
@@ -13,9 +16,9 @@
     },
     "components": {
         ".string_fields": {
-            "required_field": false,
+            "required_field": False,
             "default_value": "",
-            "byte_data": false,
+            "byte_data": False,
             "min_length": 0,
             "max_length": 0,
             "must_not_contain": [],
@@ -29,11 +32,11 @@
             "field_description": ""
         },
         ".number_fields": {
-            "required_field": false,
+            "required_field": False,
             "default_value": 0.0,
             "min_value": 0.0,
             "max_value": 0.0,
-            "integer_only": false,
+            "integer_only": False,
             "discrete_values": [],
             "identical_to": ".similar_number",
             "lambda_function": "",
@@ -42,26 +45,26 @@
             "field_description": ""
         },
         ".boolean_fields": {
-            "required_field": false,
-            "default_value": false,
+            "required_field": False,
+            "default_value": False,
             "identical_to": ".similar_boolean",
             "lambda_function": "",
             "validation_url": "",
             "field_description": ""
         },
         ".map_fields": {
-            "required_field": false,
-            "extra_fields": false,
+            "required_field": False,
+            "extra_fields": False,
             "identical_to": ".similar_map",
             "lambda_function": "",
             "validation_url": "",
             "field_description": ""
         },
         ".list_fields": {
-            "required_field": false,
+            "required_field": False,
             "min_size": 0,
             "max_size": 0,
-            "unique_values": false,
+            "unique_values": False,
             "identical_to": ".similar_list",
             "lambda_function": "",
             "validation_url": "",
