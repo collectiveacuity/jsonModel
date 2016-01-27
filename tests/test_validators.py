@@ -3,8 +3,8 @@ __created__ = '2016.01'
 
 import json
 from copy import deepcopy
-from jsonmodel.exceptions import InputValidationError
-from jsonmodel.validators import jsonModel
+from jsonstuff.exceptions import InputValidationError
+from jsonstuff.validators import jsonModel
 
 class jsonModelTests(jsonModel):
 

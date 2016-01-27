@@ -3,13 +3,13 @@ __created__ = '2015.11'
 
 import re
 from base64 import b64decode
-from jsonmodel.exceptions import InputValidationError, ModelValidationError
-from jsonmodel.loader import jsonLoader
-from jsonmodel.mapping import mapModel
+from jsonstuff.exceptions import InputValidationError, ModelValidationError
+from jsonstuff.loader import jsonLoader
+from jsonstuff.mapping import mapModel
 
 class jsonModel(object):
 
-    __rules__ = jsonLoader('jsonmodel', 'model-rules.json')
+    __rules__ = jsonLoader('jsonstuff', 'model-rules.json')
 
     def __init__(self, data_model):
 
@@ -17,7 +17,7 @@ class jsonModel(object):
             a method for testing data model declaration & initializing the class
 
         :param data_model: dictionary with json model architecture
-        :return: jsonmodel object
+        :return: jsonstuff object
         '''
 
     # validate schema input
