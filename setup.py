@@ -17,7 +17,7 @@ python setup.py sdist upload  # for PyPi
 '''
 
 setup(
-    name="sonmodel",
+    name="jsonmodel",
     version="1.0",
     author = __author__,
     include_package_data=True,  # Checks MANIFEST.in for explicit rules
