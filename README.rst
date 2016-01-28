@@ -120,4 +120,4 @@ To handle invalid inputs::
 
 For more details about how to use jsonModel, refer to the
 `Reference Documentation on Github
-<https://github.com/collectiveacuity/jsonModel/REFERENCE.rst>`_
+<https://github.com/collectiveacuity/jsonModel/blob/master/REFERENCE.rst>`_
