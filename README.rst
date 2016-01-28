@@ -1,3 +1,10 @@
+.. image:: https://img.shields.io/pypi/v/jsonmodel.svg
+    :target: https://pypi.python.org/pypi/jsonmodel
+.. image:: https://img.shields.io/pypi/dm/jsonmodel.svg
+    :target: https://pypi.python.org/pypi/jsonmodel
+.. image:: https://img.shields.io/pypi/l/jsonmodel.svg
+    :target: https://pypi.python.org/pypi/jsonmodel
+
 =========
 jsonModel
 =========
@@ -12,7 +19,7 @@ Top-Level Classes
 
 Features
 --------
-- Validates native json file datatypes
+- Validates native json datatypes
 - Validates byte data as base64 encoded strings
 - Alternative to json schema module
 - Schema declaration is self-valid
