@@ -5,3 +5,4 @@ recursive-exclude notes *
 recursive-include jsonmodel *.json
 include *.rst
 include *.txt
+include *.md

@@ -32,9 +32,10 @@ pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz
 setup(
     name="jsonmodel",
     version="1.0",
-    author = __author__,
+    author=__author__,
+    maintainer_email="support@collectiveacuity.com",
     include_package_data=True,  # Checks MANIFEST.in for explicit rules
-    packages=find_packages(),
+    packages=find_packages(exclude=['cred','tests','models','notes']),  # Needed for bdist
     license="MIT",
     description="A Collection of Methods for Validating JSON Structured Data",
     long_description=open('README.rst').read(),
