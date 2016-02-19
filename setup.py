@@ -24,6 +24,9 @@ pip install [module]
 python setup.py develop  # for local on-the-fly file updates
 python setup.py install  # when possessing distribution files
 
+Uninstall:
+pip uninstall [module]
+
 Old Methods:
 python setup.py sdist bdist_wheel upload  # for PyPi
 pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz

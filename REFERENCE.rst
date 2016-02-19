@@ -1,7 +1,7 @@
 =============================
 jsonModel Reference Materials
 =============================
-*Documentation for model declaration and error handling for jsonModel validation.*
+*Documentation for model declaration and error handling for jsonModel validation*
 
 Schema Default Behavior
 -----------------------
