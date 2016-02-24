@@ -3,6 +3,7 @@ recursive-exclude keys *
 recursive-exclude tests *
 recursive-exclude models *
 recursive-exclude notes *
+recursive-exclude docs *
 recursive-include jsonmodel *.json
 include *.rst
 include *.txt
