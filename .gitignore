@@ -11,6 +11,10 @@ __pycache__/
 
 # Credential Files
 cred/
+keys/
+
+# Local Data Files
+data/
 
 # Distribution / packaging
 .Python

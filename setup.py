@@ -26,6 +26,7 @@ python setup.py install  # when possessing distribution files
 
 Uninstall:
 pip uninstall [module]
+python setup.py develop --uninstall # for removing symbolic link
 
 Old Methods:
 python setup.py sdist bdist_wheel upload  # for PyPi

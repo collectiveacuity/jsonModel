@@ -1,4 +1,5 @@
 recursive-exclude cred *
+recursive-exclude keys *
 recursive-exclude tests *
 recursive-exclude models *
 recursive-exclude notes *
