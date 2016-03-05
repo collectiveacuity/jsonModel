@@ -518,7 +518,7 @@ class jsonModel(object):
             'input_criteria': item_rules,
             'failed_test': 'value_datatype',
             'input_path': initial_key,
-            'error_value': input_list[0],
+            'error_value': None,
             'error_code': 4001
         }
 

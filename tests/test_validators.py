@@ -121,12 +121,23 @@ class jsonModelTests(jsonModel):
             self.validate(required_words)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'must_contain'
+
+    # test contains_either exception
         optional_words = deepcopy(valid_input)
         optional_words['address']['region'] = 'N1'
         try:
             self.validate(optional_words)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'contains_either'
+
+    # test empty list
+        empty_list = deepcopy(valid_input)
+        empty_list['comments'] = []
+        input_value = self.keyMap['.comments']['min_size']
+        self.keyMap['.comments']['min_size'] = 0
+        assert self.validate(empty_list)
+        self.keyMap['.comments']['min_size'] = input_value
+
         # print(self.validate(valid_input))
         return self
 

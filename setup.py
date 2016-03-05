@@ -35,7 +35,7 @@ pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz
 
 setup(
     name="jsonmodel",
-    version="1.0",
+    version="1.1",
     author=__author__,
     maintainer_email="support@collectiveacuity.com",
     include_package_data=True,  # Checks MANIFEST.in for explicit rules
