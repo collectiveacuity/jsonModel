@@ -141,7 +141,7 @@ class jsonModelTests(jsonModel):
         # print(self.validate(valid_input))
         return self
 
-testModel = json.loads(open('../models/sample-model.json').read())
-testInput = json.loads(open('../models/sample-input.json').read())
-
-jsonModelTests(testModel).unitTests(testInput)
+if __name__ == '__main__':
+    testModel = json.loads(open('../models/sample-model.json').read())
+    testInput = json.loads(open('../models/sample-input.json').read())
+    jsonModelTests(testModel).unitTests(testInput)
