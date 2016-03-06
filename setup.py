@@ -17,7 +17,7 @@ python setup.py sdist --format=gztar,zip bdist_wheel
 
 Upload Distributions to PyPi:
 twine register dist/*
-twine upload dist/*
+twine upload dist/[module-version]*
 
 Installation:
 pip install [module]
