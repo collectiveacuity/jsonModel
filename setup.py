@@ -1,5 +1,7 @@
 __author__ = 'rcj1492'
 __created__ = '2015.11'
+__version__ = '1.1'
+__module__ = 'jsonmodel'
 
 from setuptools import setup, find_packages
 
@@ -7,6 +9,8 @@ from setuptools import setup, find_packages
 References:
 https://python-packaging-user-guide.readthedocs.org/en/latest/
 https://docs.python.org/3.5/distutils/index.html
+https://github.com/jgehrcke/python-cmdline-bootstrap
+http://www.pyinstaller.org/
 
 Installation Packages:
 pip install wheel
@@ -27,6 +31,17 @@ python setup.py install  # when possessing distribution files
 Uninstall:
 pip uninstall [module]
 python setup.py develop --uninstall # for removing symbolic link
+# remove command line tool in ../Python/Python35-32/Scripts/
+
+CLI Installation:
+command = 'name of command'
+module = 'name of module'
+    entry_points = {
+        "console_scripts": ['%s = %s.cli:cli' % (command, module)]
+    },
+
+System Installation:
+# http://www.pyinstaller.org/
 
 Old Methods:
 python setup.py sdist bdist_wheel upload  # for PyPi
@@ -34,8 +49,8 @@ pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz
 '''
 
 setup(
-    name="jsonmodel",
-    version="1.1",
+    name=__module__,
+    version=__version__,
     author=__author__,
     maintainer_email="support@collectiveacuity.com",
     include_package_data=True,  # Checks MANIFEST.in for explicit rules
