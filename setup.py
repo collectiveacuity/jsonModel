@@ -1,8 +1,4 @@
-__author__ = 'rcj1492'
-__created__ = '2015.11'
-__version__ = '1.1'
-__module__ = 'jsonmodel'
-
+import re
 from setuptools import setup, find_packages
 
 '''
@@ -48,11 +44,19 @@ python setup.py sdist bdist_wheel upload  # for PyPi
 pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz
 '''
 
+config_file = open('jsonmodel/__init__.py').read()
+version = re.search("^__version__\s*=\s*'(.*)'", config_file, re.M).group(1)
+command = re.search("^__command__\s*=\s*'(.*)'", config_file, re.M).group(1)
+module = re.search("^__module__\s*=\s*'(.*)'", config_file, re.M).group(1)
+author = re.search("^__author__\s*=\s*'(.*)'", config_file, re.M).group(1)
+email = re.search("^__email__\s*=\s*'(.*)'", config_file, re.M).group(1)
+author_list = re.search("^__authors__\s*=\s*'(.*)'", config_file, re.M).group(1)
+
 setup(
-    name=__module__,
-    version=__version__,
-    author=__author__,
-    maintainer_email="support@collectiveacuity.com",
+    name=module,
+    version=version,
+    author=author,
+    maintainer_email=email,
     include_package_data=True,  # Checks MANIFEST.in for explicit rules
     packages=find_packages(exclude=['cred','keys','docs','tests','models','notes']),  # Needed for bdist
     license="MIT",
