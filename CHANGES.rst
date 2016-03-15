@@ -12,6 +12,7 @@ ChangeLog
 
 TODO
 ----
+* Validate a specific component in keyMap (ignore references to other keys)
 * Allow declaration of multiple datatypes for key values in maps
 * Validate size of data object inputs
 * Allow declaration of a lambda function for further validation
