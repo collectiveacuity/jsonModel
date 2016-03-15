@@ -25,22 +25,23 @@ Features
 - Schema declaration is self-valid
 - Built-in validation of model declaration
 - Flat structure to object property attribute declarations
-- Validates size of data object inputs #TODO
-- Accommodates function extension for object property validation #TODO
+- Validates size of data object inputs **#TODO**
+- Accommodates function extension for object property validation **#TODO**
 
+============
 Installation
-^^^^^^^^^^^^
+============
 From PyPi::
 
     $ pip install jsonmodel
 
 From GitHub::
 
-    $ pip install git+https://github.com/collectiveacuity/jsonModel
-
+    $ git clone https://github.com/collectiveacuity/jsonModel
+    $ python setup.py install
 
 Getting Started
-^^^^^^^^^^^^^^^
+---------------
 This module is designed to facilitate the process of implementing data validation against a declared json data model. jsonModel offers a more intuitive declaration process than other schema enforcement modules currently available by relying upon the architecture of json itself to validate datatypes, requirements and defaults. For many data models, full validation can be achieved from an example declaration::
 
     "schema": {
@@ -119,5 +120,5 @@ To handle invalid inputs::
 
 
 For more details about how to use jsonModel, refer to the
-`Reference Documentation on Github
+`Reference Documentation on GitHub
 <https://github.com/collectiveacuity/jsonModel/blob/master/REFERENCE.rst>`_
