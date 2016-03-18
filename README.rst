@@ -40,6 +40,7 @@ From PyPi::
 From GitHub::
 
     $ git clone https://github.com/collectiveacuity/jsonModel
+    $ cd jsonModel
     $ python setup.py install
 
 Getting Started
