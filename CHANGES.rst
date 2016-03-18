@@ -3,9 +3,11 @@ ChangeLog
 
 1.2
 ---
-* **FEATURE** Method to validate a specific component in keyMap
+* **FEATURE ADDED** jsonModel.component(input, path_to_root)
+* Method to validate input against a specific component in keyMap
 * Helper method to reconstruct a schema endpoint from the path to root
 * Additional documentation and unittest improvements
+* Home brew path conjunction in jsonLoader replaced by path.join
 
 1.1
 ---
