@@ -119,6 +119,12 @@ To handle invalid inputs::
         assert err.error['error_code'] > 4000
 
 
+To validate input against specific component declaration::
+
+    path_to_root = '.property'
+    validModel.component(input, path_to_root)
+
+
 For more details about how to use jsonModel, refer to the
 `Reference Documentation on GitHub
 <https://github.com/collectiveacuity/jsonModel/blob/master/REFERENCE.rst>`_
