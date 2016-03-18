@@ -25,6 +25,8 @@ Features
 - Schema declaration is self-valid
 - Built-in validation of model declaration
 - Flat structure to object property attribute declarations
+- Ability to assign default values to inputs
+- Validates individual components in a model **#NEW FEATURE**
 - Validates size of data object inputs **#TODO**
 - Accommodates function extension for object property validation **#TODO**
 
