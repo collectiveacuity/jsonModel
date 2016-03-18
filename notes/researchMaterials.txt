@@ -1,5 +1,0 @@
-json schema
------------
-- http://json-schema.org/
-- https://pypi.python.org/pypi/jsonschema
-

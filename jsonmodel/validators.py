@@ -563,7 +563,7 @@ class jsonModel(object):
     def number(self, input_number, path_to_root):
 
         '''
-            a helper method for recursively validating properties of a number
+            a helper method for validating properties of a number
 
         :return: input_number
         '''
@@ -606,8 +606,9 @@ class jsonModel(object):
         return input_number
 
     def string(self, input_string, path_to_root):
+
         '''
-            a helper method for recursively validating properties of a string
+            a helper method for validating properties of a string
 
         :return: input_string
         '''
@@ -679,6 +680,13 @@ class jsonModel(object):
         return input_string
 
     def boolean(self, input_boolean, path_to_root):
+
+        '''
+            a helper method for validating properties of a boolean
+
+        :return: input_boolean
+        '''
+
         rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
         input_criteria = self.keyMap[rules_path_to_root]
         error_dict = {
@@ -697,6 +705,17 @@ class jsonModel(object):
         return input_boolean
 
     def validate(self, input_dict):
+
+        '''
+            a core method for validating input against the model
+
+        :param input_dict: dictionary to validate
+        :return: input_dict
+        '''
+
+        __name__ = '%s.validate' % self.__class__.__name__
+
+    # validate input
         if not isinstance(input_dict, dict):
             error_dict = {
                 'model_schema': self.schema,
@@ -707,6 +726,76 @@ class jsonModel(object):
                 'error_code': 4001
             }
             raise InputValidationError(error_dict)
+
+    # run validation through helpers
         input_dict = self.dict(input_dict, self.schema, '')
+
         return input_dict
 
+    def reconstruct(self, path_to_root):
+
+        '''
+            a helper method for finding the schema endpoint from a path to root
+
+        :return: list, dict, string, number, or boolean at path to root
+        '''
+
+    # split path to root into segments
+        item_pattern = re.compile('\d+\\]')
+        dot_pattern = re.compile('\\.|\\[')
+        path_segments = dot_pattern.split(path_to_root)
+
+    # construct schema endpoint from segments
+        schema_endpoint = self.schema
+        for i in range(1,len(path_segments)):
+            if item_pattern.match(path_segments[i]):
+                schema_endpoint = schema_endpoint[0]
+            else:
+                schema_endpoint = schema_endpoint[path_segments[i]]
+
+        return schema_endpoint
+
+    def component(self, input_data, path_to_root):
+
+        '''
+            a core method for validating input against a model component
+
+        :param input_data: list, dict, string, number, or boolean to validate
+        :param path_to_root: string with dot-path of component
+        :return: input_data: list, dict, string, number, or boolean validated
+        '''
+
+        __name__ = '%s.component' % self.__class__.__name__
+        _path_arg = '%s(path_to_root="...")' % __name__
+
+    # validate path to root
+        if not isinstance(path_to_root, str):
+            raise ModelValidationError('%s must be a string.' % _path_arg)
+        elif not path_to_root in self.keyMap.keys():
+            raise ModelValidationError('%s does not exist in components %s.' % (_path_arg, self.keyMap.keys()))
+        elif input_data.__class__ != self.keyMap[path_to_root]['value_datatype']:
+            error_dict = {
+                'model_schema': self.schema,
+                'input_criteria': self.keyMap[path_to_root],
+                'failed_test': 'value_datatype',
+                'input_path': path_to_root,
+                'error_value': input_data.__class__,
+                'error_code': 4001
+            }
+            raise InputValidationError(error_dict)
+
+    # run helper method appropriate to data type
+        if isinstance(input_data, bool):
+            input_data = self.boolean(input_data, path_to_root)
+        elif isinstance(input_data, int) or isinstance(input_data, float):
+            input_data = self.number(input_data, path_to_root)
+        elif isinstance(input_data, str):
+            input_data = self.string(input_data, path_to_root)
+        elif isinstance(input_data, list):
+            schema_list = self.reconstruct(path_to_root)
+            input_data = self.list(input_data, schema_list, path_to_root)
+        elif isinstance(input_data, dict):
+            schema_dict = self.reconstruct(path_to_root)
+            input_data = self.dict(input_data, schema_dict, path_to_root)
+
+        return input_data
