@@ -122,7 +122,7 @@ To handle invalid inputs::
         assert err.error['error_code'] > 4000
 
 
-To validate input against specific component declaration::
+To validate input against an individual component::
 
     path_to_root = '.property'
     validModel.component(input, path_to_root)
