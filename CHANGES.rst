@@ -20,7 +20,9 @@ ChangeLog
 
 TODO
 ----
-* Update loader to use join instead of home brew path method
+* Add component path declaration to validate method
+* Construct a validated output from kwargs input
+* Allow validation of null datatype declarations
 * Allow declaration of multiple datatypes for key values in maps
 * Validate size of data object inputs
 * Allow declaration of a lambda function for further validation
