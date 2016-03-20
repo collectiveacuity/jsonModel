@@ -26,7 +26,7 @@ Features
 - Built-in validation of model declaration
 - Flat structure to object property attribute declarations
 - Ability to assign default values to inputs
-- Validates individual components in a model **#NEW FEATURE**
+- Validates individual components in a model
 - Ingests arbitrary keyword data and outputs model valid dictionary **#NEW FEATURE**
 - Validates size of data object inputs **#TODO**
 - Accommodates function extension for object property validation **#TODO**
