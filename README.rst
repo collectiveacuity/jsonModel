@@ -114,6 +114,12 @@ To validate input against model declaration::
     validModel.validate(input)
 
 
+To validate input against an individual component::
+
+    path_to_root = '.property'
+    validModel.validate(input, path_to_root)
+
+
 To handle invalid inputs::
 
     try:
@@ -122,10 +128,17 @@ To handle invalid inputs::
         assert err.error['error_code'] > 4000
 
 
-To validate input against an individual component::
+Ingest Data
+-----------
+This module also supports the ingestion of keyword arguments. The process of ingestion recursively walks the valid model searching for key-value pairs which match the keyword arguments of the input. For each match it finds, it constructs a dictionary using the following rules (in order):
+[#] value in kwargs if field passes all its component validation tests
+[#] default value declared for the key in the model
+[#] empty value appropriate to datatype of key in the model
+As a result, ingestion will produce an output which contains all the keys declared in the model. If there is a default value declared for each key in the model, it is also guaranteed to return a dictionary that will pass a model validation test. Extra keyword arguments are ignored unless extra fields is True in the model declaration.
 
-    path_to_root = '.property'
-    validModel.validate(input, path_to_root)
+To ingest kwargs::
+
+    output_dict = validModel.ingest(**kwargs)
 
 
 For more details about how to use jsonModel, refer to the

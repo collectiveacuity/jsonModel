@@ -17,21 +17,28 @@ class jsonModelTests(jsonModel):
         # print(self.keyMap)
 
     # test empty path to root
-        assert self.validate(valid_input)
+        v_input = deepcopy(valid_input)
+        assert self.validate(v_input)
 
     # test dot-path to root
-        assert self.validate(valid_input, '.')
+        v_input = deepcopy(valid_input)
+        assert self.validate(v_input, '.')
 
     # test individual component validation
-        assert self.validate(valid_input['datetime'], '.datetime') == \
-               valid_input['datetime']
-        assert self.validate(valid_input['userID'], '.userID') == \
-               valid_input['userID']
-        assert not self.validate(valid_input['active'], '.active')
-        assert self.validate(valid_input['comments'], '.comments') == \
-               valid_input['comments']
-        assert self.validate(valid_input['address'], '.address') == \
-               valid_input['address']
+        v_input = deepcopy(valid_input)
+        assert self.validate(v_input['datetime'], '.datetime') == \
+               v_input['datetime']
+        v_input = deepcopy(valid_input)
+        assert self.validate(v_input['userID'], '.userID') == \
+               v_input['userID']
+        v_input = deepcopy(valid_input)
+        assert not self.validate(v_input['active'], '.active')
+        v_input = deepcopy(valid_input)
+        assert self.validate(v_input['comments'], '.comments') == \
+               v_input['comments']
+        v_input = deepcopy(valid_input)
+        assert self.validate(v_input['address'], '.address') == \
+               v_input['address']
 
     # test invalid input type
         invalid_list = []
@@ -42,14 +49,16 @@ class jsonModelTests(jsonModel):
             assert err.error['failed_test'] == 'value_datatype'
 
     # test non-existent path to root exception
+        v_input = deepcopy(valid_input)
         try:
-            self.validate(valid_input, '.not_a_path')
+            self.validate(v_input, '.not_a_path')
         except ModelValidationError as err:
             assert str(err).find('Model declaration is invalid')
 
     # test path to root not a string
+        v_input = deepcopy(valid_input)
         try:
-            self.validate(valid_input, [ '.datetime' ])
+            self.validate(v_input, [ '.datetime' ])
         except ModelValidationError as err:
             assert str(err).find('Model declaration is invalid')
 
@@ -224,11 +233,12 @@ class jsonModelTests(jsonModel):
         assert isinstance(self._reconstruct('.comments[0]'), str)
 
     # test ingest valid input
-        self.ingest(**valid_input)
+        ingest_input = deepcopy(valid_input)
+        self.ingest(**ingest_input)
 
     # test missing default input injection
         missing_default = deepcopy(valid_input)
-        del missing_default['rating']
+        assert not 'rating' in missing_default.keys()
         valid_output = self.ingest(**missing_default)
         assert valid_output['rating'] == 5
 
@@ -266,25 +276,47 @@ class jsonModelTests(jsonModel):
         assert not valid_output['userID']
 
     # test strip extra field input
-        valid_output = self.ingest(**extra_key_input)
-        assert 'extraKey' in extra_key_input.keys()
+        ingest_input = deepcopy(extra_key_input)
+        valid_output = self.ingest(**ingest_input)
+        assert 'extraKey' in ingest_input.keys()
         assert not 'extraKey' in valid_output.keys()
 
     # test tag along of extra fields in input
         self.keyMap['.']['extra_fields'] = True
-        valid_output = self.ingest(**extra_key_input)
-        assert 'extraKey' in extra_key_input.keys()
+        ingest_input = deepcopy(extra_key_input)
+        valid_output = self.ingest(**ingest_input)
+        assert 'extraKey' in ingest_input.keys()
         assert 'extraKey' in valid_output.keys()
         self.keyMap['.']['extra_fields'] = False
 
-    # test mass injection of defaults
+    # test mass injection of defaults and nulls
         valid_output = self.ingest(**{})
         for key in self.schema.keys():
             assert key in valid_output.keys()
         assert valid_output['rating'] == 5
+        assert not valid_output['userID']
+        assert not valid_output['comments']
+        assert valid_output['address']
+        ex_int = 0
+        assert valid_output['address']['country_code'].__class__ == ex_int.__class__
+
+    # test nested default injection
+        ingest_input = deepcopy(valid_input)
+        assert not 'city' in ingest_input['address'].keys()
+        valid_output = self.ingest(**ingest_input)
+        assert valid_output['address']['city'] == 'New York'
+
+    # test max list length ingestion
+        long_list = deepcopy(valid_input)
+        long_list['comments'].insert(0, 'peuter')
+        assert len(long_list['comments']) == 4
+        valid_output = self.ingest(**long_list)
+        assert len(valid_output['comments']) == 3
+        assert 'bronze' not in valid_output['comments']
 
         # print(self.validate(valid_input))
-        print(self.ingest(**{}))
+        # print(self.ingest(**valid_input))
+        # print(self.ingest(**{}))
 
         return self
 

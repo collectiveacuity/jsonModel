@@ -709,6 +709,172 @@ class jsonModel(object):
 
         return input_boolean
 
+    def _ingest_dict(self, input_dict, schema_dict, path_to_root):
+
+        '''
+            a helper method for ingesting keys, value pairs in a dictionary
+
+        :return: valid_dict
+        '''
+
+        valid_dict = {}
+
+    # construct path to root for rules
+        rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+
+    # iterate over keys in schema dict
+        for key, value in schema_dict.items():
+            key_path = path_to_root
+            if not key_path == '.':
+                key_path += '.'
+            key_path += key
+            rules_key_path = re.sub('\[\d+\]', '[0]', key_path)
+            if key in input_dict.keys():
+                if value == None:
+                    valid_dict[key] = input_dict[key]
+                elif isinstance(value, bool):
+                    valid_dict[key] = self._ingest_boolean(input_dict[key], key_path)
+                elif isinstance(value, int) or isinstance(value, float):
+                    valid_dict[key] = self._ingest_number(input_dict[key], key_path)
+                elif isinstance(value, str):
+                    valid_dict[key] = self._ingest_string(input_dict[key], key_path)
+                elif isinstance(value, dict):
+                    valid_dict[key] = self._ingest_dict(input_dict[key], schema_dict[key], key_path)
+                elif isinstance(value, list):
+                    valid_dict[key] = self._ingest_list(input_dict[key], schema_dict[key], key_path)
+            else:
+                value_datatype = self.keyMap[rules_key_path]['value_datatype']
+                ex_int = 0
+                ex_float = 0.0
+                if 'default_value' in self.keyMap[rules_key_path]:
+                    valid_dict[key] = self.keyMap[rules_key_path]['default_value']
+                elif value_datatype == None:
+                    valid_dict[key] = None
+                elif value_datatype == False.__class__:
+                    valid_dict[key] = False
+                elif value_datatype == ex_int.__class__:
+                    valid_dict[key] = 0
+                elif value_datatype == ex_float.__class__:
+                    valid_dict[key] = 0.0
+                elif value_datatype == ''.__class__:
+                    valid_dict[key] = ''
+                elif value_datatype == [].__class__:
+                    valid_dict[key] = []
+                elif value_datatype == {}.__class__:
+                    valid_dict[key] = self._ingest_dict({}, schema_dict[key], key_path)
+
+    # add extra fields if set to True
+        if self.keyMap[rules_path_to_root]['extra_fields']:
+            for k, v in input_dict.items():
+                if k not in valid_dict:
+                    valid_dict[k] = v
+
+        return valid_dict
+
+    def _ingest_list(self, input_list, schema_list, path_to_root):
+
+        '''
+            a helper method for ingesting items in a list
+
+        :return: valid_list
+        '''
+
+        valid_list = []
+
+    # construct max list size
+        max_size = None
+        rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+        if 'max_size' in self.keyMap[rules_path_to_root].keys():
+            if not self.keyMap[rules_path_to_root]['max_size']:
+                return valid_list
+            else:
+                max_size = self.keyMap[rules_path_to_root]['max_size']
+
+    # iterate over items in input list
+        if input_list:
+            for i in range(len(input_list)):
+                item_path = '%s[%s]' % (path_to_root, i)
+                rules_datatype = schema_list[0].__class__
+                if isinstance(input_list[i], rules_datatype):
+                    try:
+                        if isinstance(input_list[i], bool):
+                            valid_list.append(self._validate_boolean(input_list[i], item_path))
+                        elif isinstance(input_list[i], int) or isinstance(input_list[i], float):
+                            valid_list.append(self._validate_number(input_list[i], item_path))
+                        elif isinstance(input_list[i], str):
+                            valid_list.append(self._validate_string(input_list[i], item_path))
+                        elif isinstance(input_list[i], dict):
+                            valid_list.append(self._ingest_dict(input_list[i], schema_list[0], item_path))
+                        elif isinstance(input_list[i], list):
+                            valid_list.append(self._ingest_list(input_list[i], schema_list[0], item_path))
+                    except:
+                        pass
+                if isinstance(max_size, int):
+                    if len(valid_list) == max_size:
+                        return valid_list
+
+        return valid_list
+
+    def _ingest_number(self, input_number, path_to_root):
+
+        '''
+            a helper method for ingesting a number
+
+        :return: valid_number
+        '''
+
+        try:
+            valid_number = self._validate_number(input_number, path_to_root)
+        except:
+            rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+            datatype = self.keyMap[rules_path_to_root]['value_datatype']
+            if 'default_value' in self.keyMap[rules_path_to_root]:
+                valid_number = self.keyMap[rules_path_to_root]['default_value']
+            elif isinstance(0, datatype):
+                valid_number = 0
+            else:
+                valid_number = 0.0
+
+        return valid_number
+
+    def _ingest_string(self, input_string, path_to_root):
+
+        '''
+            a helper method for ingesting a string
+
+        :return: valid_string
+        '''
+
+        valid_string = ''
+
+        try:
+            valid_string = self._validate_string(input_string, path_to_root)
+        except:
+            rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+            if 'default_value' in self.keyMap[rules_path_to_root]:
+                valid_string = self.keyMap[rules_path_to_root]['default_value']
+
+        return valid_string
+
+    def _ingest_boolean(self, input_boolean, path_to_root):
+
+        '''
+            a helper method for ingesting a boolean
+
+        :return: valid_boolean
+        '''
+
+        valid_boolean = False
+
+        try:
+            valid_boolean = self._validate_boolean(input_boolean, path_to_root)
+        except:
+            rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
+            if 'default_value' in self.keyMap[rules_path_to_root]:
+                valid_boolean = self.keyMap[rules_path_to_root]['default_value']
+
+        return valid_boolean
+
     def _reconstruct(self, path_to_root):
 
         '''
@@ -785,46 +951,7 @@ class jsonModel(object):
 
         return input_data
 
-    def _ingest_number(self, input_number, path_to_root):
-
-        '''
-            a helper method for ingesting a number
-
-        :return: valid_number
-        '''
-
-        try:
-            valid_number = self._validate_number(input_number, path_to_root)
-        except:
-            datatype = self.keyMap[path_to_root]['value_datatype']
-            if 'default_value' in self.keyMap[path_to_root]:
-                valid_number = self.keyMap[path_to_root]['default_value']
-            elif isinstance(0, datatype):
-                valid_number = 0
-            else:
-                valid_number = 0.0
-
-        return valid_number
-
-    def _ingest_boolean(self, input_boolean, path_to_root):
-
-        '''
-            a helper method for ingesting a boolean
-
-        :return: valid_boolean
-        '''
-
-        try:
-            valid_boolean = self._validate_boolean(input_boolean, path_to_root)
-        except:
-            if 'default_value' in self.keyMap[path_to_root]:
-                valid_boolean = self.keyMap[path_to_root]['default_value']
-            else:
-                valid_boolean = False
-
-        return valid_boolean
-
-    def ingested(self, **kwargs):
+    def ingest(self, **kwargs):
 
         '''
             a core method to ingest and validate arbitrary keyword data
@@ -838,9 +965,16 @@ class jsonModel(object):
                 2. default value declared for the key in the model
                 3. empty value appropriate to datatype of key in the model
 
-            if 'extra_fields' is True, the key, value pair of all fields
-             in kwargs which are not declared in the model will also be
-             added to the corresponding dictionary data
+            **NOTE: as long as a default value is provided for each key-
+             value, returned data will be model valid
+
+            **NOTE: if 'extra_fields' is True for a dictionary, the key-
+             value pair of all fields in kwargs which are not declared in
+             the model will also be added to the corresponding dictionary
+             data
+
+            **NOTE: if 'max_size' is declared for a list, method will
+             stop adding input to the list once it reaches max size
 
         :param kwargs: key, value pairs
         :return: dictionary with keys and value
@@ -848,77 +982,9 @@ class jsonModel(object):
 
         __name__ = '%s.ingest' % self.__class__.__name__
 
-        valid_data = {}
+        schema_dict = self.schema
+        path_to_root = '.'
 
-        for key, value in self.schema.keys():
-            path_to_root = '.%s' % key
-            if key in kwargs.keys():
-                if value == None:
-                    valid_data[key] = kwargs[key]
-                elif isinstance(value, bool):
-                    valid_data[key] = self._ingest_boolean(kwargs[key], path_to_root)
-                elif isinstance(value, int) or isinstance(value, float):
-                    valid_data[key] = self._ingest_number(kwargs[key], path_to_root)
-
-        if self.keyMap['.']['extra_fields']:
-            for k, v in kwargs.items():
-                if k not in valid_data:
-                    valid_data[k] = v
-
-        return valid_data
-
-    def ingest(self, **kwargs):
-
-        valid_data = {}
-
-        for key in self.schema.keys():
-            if key in kwargs.keys():
-                try:
-                    path_to_root = '.%s' % key
-                    valid_data[key] = self.validate(kwargs[key], path_to_root)
-                except InputValidationError as err:
-                    value_datatype = err.error['input_criteria']['value_datatype']
-                    if 'default_value' in err.error['input_criteria']:
-                        default_value = err.error['input_criteria']['default_value']
-                        valid_data[key] = default_value
-                    elif value_datatype == None:
-                        valid_data[key] = None
-                    elif isinstance(False, value_datatype):
-                        valid_data[key] = False
-                    elif isinstance(0, value_datatype):
-                        valid_data[key] = 0
-                    elif isinstance(0.0, value_datatype):
-                        valid_data[key] = 0.0
-                    elif isinstance('', value_datatype):
-                        valid_data[key] = ''
-                    elif isinstance([], value_datatype):
-                        valid_data[key] = []
-                    elif isinstance({}, value_datatype):
-                        valid_data[key] = {}
-            else:
-                path_to_root = '.%s' % key
-                value_datatype = self.keyMap[path_to_root]['value_datatype']
-                if 'default_value' in self.keyMap[path_to_root]:
-                    default_value = self.keyMap[path_to_root]['default_value']
-                    valid_data[key] = default_value
-                elif value_datatype == None:
-                    valid_data[key] = None
-                elif isinstance(False, value_datatype):
-                    valid_data[key] = False
-                elif isinstance(0, value_datatype):
-                    valid_data[key] = 0
-                elif isinstance(0.0, value_datatype):
-                    valid_data[key] = 0.0
-                elif isinstance('', value_datatype):
-                    valid_data[key] = ''
-                elif isinstance([], value_datatype):
-                    valid_data[key] = []
-                elif isinstance({}, value_datatype):
-                    valid_data[key] = {}
-
-        if self.keyMap['.']['extra_fields']:
-            for k, v in kwargs.items():
-                if k not in valid_data:
-                    valid_data[k] = v
+        valid_data = self._ingest_dict(kwargs, schema_dict, path_to_root)
 
         return valid_data
