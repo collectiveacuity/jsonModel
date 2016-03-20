@@ -125,7 +125,7 @@ To handle invalid inputs::
 To validate input against an individual component::
 
     path_to_root = '.property'
-    validModel.component(input, path_to_root)
+    validModel.validate(input, path_to_root)
 
 
 For more details about how to use jsonModel, refer to the

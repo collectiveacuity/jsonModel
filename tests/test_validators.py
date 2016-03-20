@@ -2,6 +2,7 @@ __author__ = 'rcj1492'
 __created__ = '2016.01'
 
 import json
+import pytest
 from copy import deepcopy
 from jsonmodel.exceptions import InputValidationError, ModelValidationError
 from jsonmodel.validators import jsonModel
@@ -15,12 +16,47 @@ class jsonModelTests(jsonModel):
 
         # print(self.keyMap)
 
+    # test empty path to root
+        assert self.validate(valid_input)
+
+    # test dot-path to root
+        assert self.validate(valid_input, '.')
+
+    # test individual component validation
+        assert self.validate(valid_input['datetime'], '.datetime') == \
+               valid_input['datetime']
+        assert self.validate(valid_input['userID'], '.userID') == \
+               valid_input['userID']
+        assert not self.validate(valid_input['active'], '.active')
+        assert self.validate(valid_input['comments'], '.comments') == \
+               valid_input['comments']
+        assert self.validate(valid_input['address'], '.address') == \
+               valid_input['address']
+
     # test invalid input type
         invalid_list = []
         try:
             self.validate(invalid_list)
         except InputValidationError as err:
             assert err.error['model_schema']
+            assert err.error['failed_test'] == 'value_datatype'
+
+    # test non-existent path to root exception
+        try:
+            self.validate(valid_input, '.not_a_path')
+        except ModelValidationError as err:
+            assert str(err).find('Model declaration is invalid')
+
+    # test path to root not a string
+        try:
+            self.validate(valid_input, [ '.datetime' ])
+        except ModelValidationError as err:
+            assert str(err).find('Model declaration is invalid')
+
+    # test invalid input data type
+        try:
+            self.validate('1449179763.312077', '.datetime')
+        except InputValidationError as err:
             assert err.error['failed_test'] == 'value_datatype'
 
     # test extra_fields exception
@@ -177,42 +213,78 @@ class jsonModelTests(jsonModel):
         assert self.validate(empty_list)
         self.keyMap['.comments']['min_size'] = input_value
 
-    # test path to root not a string
-        try:
-            self.component(valid_input['datetime'], [ '.datetime' ])
-        except ModelValidationError as err:
-            assert str(err).find('Model declaration is invalid')
-
-    # test non-existence path to root
-        try:
-            self.component(valid_input['datetime'], '.date')
-        except ModelValidationError as err:
-            assert str(err).find('Model declaration is invalid')
-
-    # test invalid input data type
-        try:
-            self.component('1449179763.312077', '.datetime')
-        except InputValidationError as err:
-            assert err.error['failed_test'] == 'value_datatype'
-
     # test list reconstruction
-        assert isinstance(self.reconstruct('.comments'), list)
+        assert isinstance(self._reconstruct('.comments'), list)
 
     # test dict reconstruction
-        assert isinstance(self.reconstruct('.address'), dict)
+        assert isinstance(self._reconstruct('.address'), dict)
 
     # test nested reconstruction
-        assert isinstance(self.reconstruct('.address.country_code'), int)
-        assert isinstance(self.reconstruct('.comments[0]'), str)
+        assert isinstance(self._reconstruct('.address.country_code'), int)
+        assert isinstance(self._reconstruct('.comments[0]'), str)
 
-    # test component validations
-        assert self.component(valid_input['datetime'], '.datetime') == valid_input['datetime']
-        assert self.component(valid_input['userID'], '.userID') == valid_input['userID']
-        assert not self.component(valid_input['active'], '.active')
-        assert self.component(valid_input['comments'], '.comments') == valid_input['comments']
-        assert self.component(valid_input['address'], '.address') == valid_input['address']
+    # test ingest valid input
+        self.ingest(**valid_input)
+
+    # test missing default input injection
+        missing_default = deepcopy(valid_input)
+        del missing_default['rating']
+        valid_output = self.ingest(**missing_default)
+        assert valid_output['rating'] == 5
+
+    # test malformed default input replacement
+        malformed_default = deepcopy(valid_input)
+        malformed_default['rating'] = '5'
+        valid_output = self.ingest(**malformed_default)
+        assert valid_output['rating'] == 5
+
+    # test invalid default input replacement
+        invalid_default = deepcopy(valid_input)
+        invalid_default['rating'] = 11
+        valid_output = self.ingest(**invalid_default)
+        assert valid_output['rating'] == 5
+
+    # test missing input null injection
+        missing_string = deepcopy(valid_input)
+        del missing_string['userID']
+        valid_output = self.ingest(**missing_string)
+        assert isinstance(valid_output['userID'], str)
+        assert not valid_output['userID']
+
+    # test malformed input null injection
+        malformed_string = deepcopy(valid_input)
+        malformed_string['userID'] = { "key": "value" }
+        valid_output = self.ingest(**malformed_string)
+        assert isinstance(valid_output['userID'], str)
+        assert not valid_output['userID']
+
+    # test invalid input null injection
+        invalid_string = deepcopy(valid_input)
+        invalid_string['userID'] = 'tooShort'
+        valid_output = self.ingest(**invalid_string)
+        assert isinstance(valid_output['userID'], str)
+        assert not valid_output['userID']
+
+    # test strip extra field input
+        valid_output = self.ingest(**extra_key_input)
+        assert 'extraKey' in extra_key_input.keys()
+        assert not 'extraKey' in valid_output.keys()
+
+    # test tag along of extra fields in input
+        self.keyMap['.']['extra_fields'] = True
+        valid_output = self.ingest(**extra_key_input)
+        assert 'extraKey' in extra_key_input.keys()
+        assert 'extraKey' in valid_output.keys()
+        self.keyMap['.']['extra_fields'] = False
+
+    # test mass injection of defaults
+        valid_output = self.ingest(**{})
+        for key in self.schema.keys():
+            assert key in valid_output.keys()
+        assert valid_output['rating'] == 5
 
         # print(self.validate(valid_input))
+        print(self.ingest(**{}))
 
         return self
 

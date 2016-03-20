@@ -361,7 +361,7 @@ class jsonModel(object):
                 for k, v in self.components[key].items():
                     self.keyMap[key][k] = v
 
-    def dict(self, input_dict, schema_dict, path_to_root):
+    def _validate_dict(self, input_dict, schema_dict, path_to_root):
 
         '''
             a helper method for recursively validating keys in dictionaries
@@ -370,15 +370,14 @@ class jsonModel(object):
         '''
 
     # construct lists of keys in input dictionary
-        if path_to_root:
-            top_level_key = path_to_root
-        else:
-            top_level_key = '.'
-        rules_top_level_key = re.sub('\[\d+\]', '[0]', top_level_key)
+        rules_top_level_key = re.sub('\[\d+\]', '[0]', path_to_root)
         input_keys = []
         input_key_list = []
         for key in input_dict.keys():
-            input_key_name = path_to_root + '.' + key
+            if path_to_root == '.':
+                input_key_name = path_to_root + key
+            else:
+                input_key_name = path_to_root + '.' + key
             input_keys.append(input_key_name)
             input_key_list.append(key)
 
@@ -392,7 +391,10 @@ class jsonModel(object):
         req_keys = []
         req_key_list = []
         for key in schema_dict.keys():
-            schema_key_name = path_to_root + '.' + key
+            if path_to_root == '.':
+                schema_key_name = path_to_root + key
+            else:
+                schema_key_name = path_to_root + '.' + key
             max_keys.append(schema_key_name)
             max_key_list.append(key)
             rules_schema_key_name = re.sub('\[\d+\]', '[0]', schema_key_name)
@@ -407,7 +409,7 @@ class jsonModel(object):
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'required_field',
-                'input_path': top_level_key,
+                'input_path': path_to_root,
                 'error_value': req_key_list,
                 'error_code': 4002
             }
@@ -425,7 +427,7 @@ class jsonModel(object):
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'extra_fields',
-                'input_path': top_level_key,
+                'input_path': path_to_root,
                 'error_value': extra_key_list,
                 'error_code': 4003
             }
@@ -434,7 +436,10 @@ class jsonModel(object):
 
     # validate datatype of value
         for key, value in input_dict.items():
-            input_key_name = path_to_root + '.' + key
+            if path_to_root == '.':
+                input_key_name = path_to_root + key
+            else:
+                input_key_name = path_to_root + '.' + key
             rules_input_key_name = re.sub('\[\d+\]', '[0]', input_key_name)
             if input_key_name in max_keys:
                 input_criteria = self.keyMap[rules_input_key_name]
@@ -454,15 +459,15 @@ class jsonModel(object):
 
     # call appropriate validation sub-routine for datatype of value
                 if isinstance(value, bool):
-                    input_dict[key] = self.boolean(value, input_key_name)
+                    input_dict[key] = self._validate_boolean(value, input_key_name)
                 elif isinstance(value, int) or isinstance(value, float):
-                    input_dict[key] = self.number(value, input_key_name)
+                    input_dict[key] = self._validate_number(value, input_key_name)
                 elif isinstance(value, str):
-                    input_dict[key] = self.string(value, input_key_name)
+                    input_dict[key] = self._validate_string(value, input_key_name)
                 elif isinstance(value, dict):
-                    input_dict[key] = self.dict(value, schema_dict[key], input_key_name)
+                    input_dict[key] = self._validate_dict(value, schema_dict[key], input_key_name)
                 elif isinstance(value, list):
-                    input_dict[key] = self.list(value, schema_dict[key], input_key_name)
+                    input_dict[key] = self._validate_list(value, schema_dict[key], input_key_name)
 
     # set default values for empty optional fields
         for key in max_key_list:
@@ -474,7 +479,7 @@ class jsonModel(object):
 
         return input_dict
 
-    def list(self, input_list, schema_list, path_to_root):
+    def _validate_list(self, input_list, schema_list, path_to_root):
 
         '''
             a helper method for recursively validating items in a list
@@ -536,15 +541,15 @@ class jsonModel(object):
 
     # call appropriate validation sub-routine for datatype of item
             if isinstance(item, bool):
-                input_list[i] = self.boolean(item, input_path)
+                input_list[i] = self._validate_boolean(item, input_path)
             elif isinstance(item, int) or isinstance(item, float):
-                input_list[i] = self.number(item, input_path)
+                input_list[i] = self._validate_number(item, input_path)
             elif isinstance(item, str):
-                input_list[i] = self.string(item, input_path)
+                input_list[i] = self._validate_string(item, input_path)
             elif isinstance(item, dict):
-                input_list[i] = self.dict(item, schema_list[0], input_path)
+                input_list[i] = self._validate_dict(item, schema_list[0], input_path)
             elif isinstance(item, list):
-                input_list[i] = self.list(item, schema_list[0], input_path)
+                input_list[i] = self._validate_list(item, schema_list[0], input_path)
 
     # validate unique values in list
         if 'unique_values' in list_rules.keys():
@@ -560,7 +565,7 @@ class jsonModel(object):
 
         return input_list
 
-    def number(self, input_number, path_to_root):
+    def _validate_number(self, input_number, path_to_root):
 
         '''
             a helper method for validating properties of a number
@@ -605,7 +610,7 @@ class jsonModel(object):
 
         return input_number
 
-    def string(self, input_string, path_to_root):
+    def _validate_string(self, input_string, path_to_root):
 
         '''
             a helper method for validating properties of a string
@@ -679,7 +684,7 @@ class jsonModel(object):
 
         return input_string
 
-    def boolean(self, input_boolean, path_to_root):
+    def _validate_boolean(self, input_boolean, path_to_root):
 
         '''
             a helper method for validating properties of a boolean
@@ -704,35 +709,7 @@ class jsonModel(object):
 
         return input_boolean
 
-    def validate(self, input_dict):
-
-        '''
-            a core method for validating input against the model
-
-        :param input_dict: dictionary to validate
-        :return: input_dict
-        '''
-
-        __name__ = '%s.validate' % self.__class__.__name__
-
-    # validate input
-        if not isinstance(input_dict, dict):
-            error_dict = {
-                'model_schema': self.schema,
-                'input_criteria': self.keyMap['.'],
-                'failed_test': 'value_datatype',
-                'input_path': '.',
-                'error_value': input_dict.__class__,
-                'error_code': 4001
-            }
-            raise InputValidationError(error_dict)
-
-    # run validation through helpers
-        input_dict = self.dict(input_dict, self.schema, '')
-
-        return input_dict
-
-    def reconstruct(self, path_to_root):
+    def _reconstruct(self, path_to_root):
 
         '''
             a helper method for finding the schema endpoint from a path to root
@@ -747,33 +724,41 @@ class jsonModel(object):
 
     # construct schema endpoint from segments
         schema_endpoint = self.schema
-        for i in range(1,len(path_segments)):
-            if item_pattern.match(path_segments[i]):
-                schema_endpoint = schema_endpoint[0]
-            else:
-                schema_endpoint = schema_endpoint[path_segments[i]]
+        if path_segments[1]:
+            for i in range(1,len(path_segments)):
+                if item_pattern.match(path_segments[i]):
+                    schema_endpoint = schema_endpoint[0]
+                else:
+                    schema_endpoint = schema_endpoint[path_segments[i]]
 
         return schema_endpoint
 
-    def component(self, input_data, path_to_root):
+    def validate(self, input_data, path_to_root=''):
 
         '''
-            a core method for validating input against a model component
+            a core method for validating input against the model
+
+            input_data is only returned if all data is valid
 
         :param input_data: list, dict, string, number, or boolean to validate
-        :param path_to_root: string with dot-path of component
-        :return: input_data: list, dict, string, number, or boolean validated
+        :param path_to_root: [optional] string with dot-path of model component
+        :return: input_data (or InputValidationError)
         '''
 
-        __name__ = '%s.component' % self.__class__.__name__
+        __name__ = '%s.validate' % self.__class__.__name__
         _path_arg = '%s(path_to_root="...")' % __name__
 
-    # validate path to root
-        if not isinstance(path_to_root, str):
-            raise ModelValidationError('%s must be a string.' % _path_arg)
-        elif not path_to_root in self.keyMap.keys():
-            raise ModelValidationError('%s does not exist in components %s.' % (_path_arg, self.keyMap.keys()))
-        elif input_data.__class__ != self.keyMap[path_to_root]['value_datatype']:
+    # validate input
+        if path_to_root:
+            if not isinstance(path_to_root, str):
+                raise ModelValidationError('%s must be a string.' % _path_arg)
+            elif not path_to_root in self.keyMap.keys():
+                raise ModelValidationError('%s does not exist in components %s.' % (_path_arg, self.keyMap.keys()))
+        else:
+            path_to_root = '.'
+
+    # validate input data type
+        if input_data.__class__ != self.keyMap[path_to_root]['value_datatype']:
             error_dict = {
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[path_to_root],
@@ -786,16 +771,154 @@ class jsonModel(object):
 
     # run helper method appropriate to data type
         if isinstance(input_data, bool):
-            input_data = self.boolean(input_data, path_to_root)
+            input_data = self._validate_boolean(input_data, path_to_root)
         elif isinstance(input_data, int) or isinstance(input_data, float):
-            input_data = self.number(input_data, path_to_root)
+            input_data = self._validate_number(input_data, path_to_root)
         elif isinstance(input_data, str):
-            input_data = self.string(input_data, path_to_root)
+            input_data = self._validate_string(input_data, path_to_root)
         elif isinstance(input_data, list):
-            schema_list = self.reconstruct(path_to_root)
-            input_data = self.list(input_data, schema_list, path_to_root)
+            schema_list = self._reconstruct(path_to_root)
+            input_data = self._validate_list(input_data, schema_list, path_to_root)
         elif isinstance(input_data, dict):
-            schema_dict = self.reconstruct(path_to_root)
-            input_data = self.dict(input_data, schema_dict, path_to_root)
+            schema_dict = self._reconstruct(path_to_root)
+            input_data = self._validate_dict(input_data, schema_dict, path_to_root)
 
         return input_data
+
+    def _ingest_number(self, input_number, path_to_root):
+
+        '''
+            a helper method for ingesting a number
+
+        :return: valid_number
+        '''
+
+        try:
+            valid_number = self._validate_number(input_number, path_to_root)
+        except:
+            datatype = self.keyMap[path_to_root]['value_datatype']
+            if 'default_value' in self.keyMap[path_to_root]:
+                valid_number = self.keyMap[path_to_root]['default_value']
+            elif isinstance(0, datatype):
+                valid_number = 0
+            else:
+                valid_number = 0.0
+
+        return valid_number
+
+    def _ingest_boolean(self, input_boolean, path_to_root):
+
+        '''
+            a helper method for ingesting a boolean
+
+        :return: valid_boolean
+        '''
+
+        try:
+            valid_boolean = self._validate_boolean(input_boolean, path_to_root)
+        except:
+            if 'default_value' in self.keyMap[path_to_root]:
+                valid_boolean = self.keyMap[path_to_root]['default_value']
+            else:
+                valid_boolean = False
+
+        return valid_boolean
+
+    def ingested(self, **kwargs):
+
+        '''
+            a core method to ingest and validate arbitrary keyword data
+
+            **NOTE: data is always returned with this method**
+
+            for each key in the model, a value is returned according
+             to the following priority:
+
+                1. value in kwargs if field passes validation test
+                2. default value declared for the key in the model
+                3. empty value appropriate to datatype of key in the model
+
+            if 'extra_fields' is True, the key, value pair of all fields
+             in kwargs which are not declared in the model will also be
+             added to the corresponding dictionary data
+
+        :param kwargs: key, value pairs
+        :return: dictionary with keys and value
+        '''
+
+        __name__ = '%s.ingest' % self.__class__.__name__
+
+        valid_data = {}
+
+        for key, value in self.schema.keys():
+            path_to_root = '.%s' % key
+            if key in kwargs.keys():
+                if value == None:
+                    valid_data[key] = kwargs[key]
+                elif isinstance(value, bool):
+                    valid_data[key] = self._ingest_boolean(kwargs[key], path_to_root)
+                elif isinstance(value, int) or isinstance(value, float):
+                    valid_data[key] = self._ingest_number(kwargs[key], path_to_root)
+
+        if self.keyMap['.']['extra_fields']:
+            for k, v in kwargs.items():
+                if k not in valid_data:
+                    valid_data[k] = v
+
+        return valid_data
+
+    def ingest(self, **kwargs):
+
+        valid_data = {}
+
+        for key in self.schema.keys():
+            if key in kwargs.keys():
+                try:
+                    path_to_root = '.%s' % key
+                    valid_data[key] = self.validate(kwargs[key], path_to_root)
+                except InputValidationError as err:
+                    value_datatype = err.error['input_criteria']['value_datatype']
+                    if 'default_value' in err.error['input_criteria']:
+                        default_value = err.error['input_criteria']['default_value']
+                        valid_data[key] = default_value
+                    elif value_datatype == None:
+                        valid_data[key] = None
+                    elif isinstance(False, value_datatype):
+                        valid_data[key] = False
+                    elif isinstance(0, value_datatype):
+                        valid_data[key] = 0
+                    elif isinstance(0.0, value_datatype):
+                        valid_data[key] = 0.0
+                    elif isinstance('', value_datatype):
+                        valid_data[key] = ''
+                    elif isinstance([], value_datatype):
+                        valid_data[key] = []
+                    elif isinstance({}, value_datatype):
+                        valid_data[key] = {}
+            else:
+                path_to_root = '.%s' % key
+                value_datatype = self.keyMap[path_to_root]['value_datatype']
+                if 'default_value' in self.keyMap[path_to_root]:
+                    default_value = self.keyMap[path_to_root]['default_value']
+                    valid_data[key] = default_value
+                elif value_datatype == None:
+                    valid_data[key] = None
+                elif isinstance(False, value_datatype):
+                    valid_data[key] = False
+                elif isinstance(0, value_datatype):
+                    valid_data[key] = 0
+                elif isinstance(0.0, value_datatype):
+                    valid_data[key] = 0.0
+                elif isinstance('', value_datatype):
+                    valid_data[key] = ''
+                elif isinstance([], value_datatype):
+                    valid_data[key] = []
+                elif isinstance({}, value_datatype):
+                    valid_data[key] = {}
+
+        if self.keyMap['.']['extra_fields']:
+            for k, v in kwargs.items():
+                if k not in valid_data:
+                    valid_data[k] = v
+
+        return valid_data

@@ -1,6 +1,17 @@
 ChangeLog
 =========
 
+1.3 (2016.03.20)
+----------------
+* **FEATURE ADDED** jsonModel.ingest(**kwargs)
+* Method to construct a valid output from arbitrary keyword args
+* Keywords which do not validate against top-level keys in schema are skipped
+* Instead, skipped keywords receive default values (if declared) or empty values
+* **DEPRECATED** jsonModel.component has been removed
+* Validate individual components using jsonModel.validate(input_data, path_to_root='')
+* input_dict arg has been changed to input_data in validate positional arguments
+* Additional documentation and unittest improvements
+
 1.2 (2016.03.18)
 ----------------
 * **FEATURE ADDED** jsonModel.component(input, path_to_root)
