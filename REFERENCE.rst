@@ -177,6 +177,68 @@ The process of ingestion recursively walks the valid model searching for key-val
 
 Like the core validation method, the recursive walk of ingestion will also walk through each item in a list value in the kwargs if the item is also a list or dictionary. However, because invalid data will be replaced by empty values appropriate to the datatype declared in the model, unlike the core validation model, output data from ingest may not be model valid data. If it is desirable to ensure that the data is valid, a 'default_value' should be declared for each key in the components section of the data model and 'min_size' of each list should not be greater than 0.
 
+**Sample Kwargs**::
+
+    {
+        "userID": "6nPbM9gTwLz3f",
+        "datetime": 1449179763.312077,
+        "active": false,
+        "emoticon": "aGFwcHIk=",
+        "comments": [ "gold", "silver", "bronze" ],
+        "address": {
+            "region": "NY",
+            "country": "United States"
+      }
+    }
+
+
+**Ingest Sample**::
+
+    output = jsonModel.ingest(**sample_kwargs)
+
+
+**Sample Output**::
+
+    {
+        'userID': '6nPbM9gTwLz3f',
+        'datetime': 1449179763.312077,
+        'active': False,
+        'rating': 5,
+        'emoticon': 'aGFwcHIk='
+        'comments': ['gold', 'silver', 'bronze'],
+        'address': {
+            'postal_code': '',
+            'city': 'New York',
+            'country_code': 0,
+            'region': 'NY',
+            'country': 'United States'
+        }
+    }
+
+
+**Ingest Empty**::
+
+    output = jsonModel.ingest(**{})
+
+
+**Empty Output**::
+
+    {
+        'userID': '',
+        'datetime': 0.0,
+        'active': False,
+        'rating': 5,
+        'emoticon': ''
+        'comments': [],
+        'address': {
+            'postal_code': '',
+            'city': 'New York',
+            'country_code': 0,
+            'region': '',
+            'country': ''
+        }
+    }
+
 Extra Keywords
 ^^^^^^^^^^^^^^
 If 'extra_fields' is declared True in the components for a dictionary in the model, then any extraneous keys in the corresponding dictionary in the kwargs will be added to the output.
