@@ -308,7 +308,7 @@ class jsonModelTests(jsonModel):
 
     # test max list length ingestion
         long_list = deepcopy(valid_input)
-        long_list['comments'].insert(0, 'peuter')
+        long_list['comments'].insert(0, 'pewter')
         assert len(long_list['comments']) == 4
         valid_output = self.ingest(**long_list)
         assert len(valid_output['comments']) == 3

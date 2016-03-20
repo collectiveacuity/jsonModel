@@ -184,7 +184,7 @@ Like the core validation method, the recursive walk of ingestion will also walk 
         "datetime": 1449179763.312077,
         "active": false,
         "emoticon": "aGFwcHIk=",
-        "comments": [ "gold", "silver", "bronze" ],
+        "comments": [ "gold", "silver", "bronze", "pewter" ],
         "address": {
             "region": "NY",
             "country": "United States"
