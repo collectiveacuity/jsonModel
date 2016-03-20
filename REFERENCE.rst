@@ -178,11 +178,11 @@ The process of ingestion recursively walks the valid model searching for key-val
 Like the core validation method, the recursive walk of ingestion will also walk through each item in a list value in the kwargs if the item is also a list or dictionary. However, because invalid data will be replaced by empty values appropriate to the datatype declared in the model, unlike the core validation model, output data from ingest may not be model valid data. If it is desirable to ensure that the data is valid, a 'default_value' should be declared for each key in the components section of the data model and 'min_size' of each list should not be greater than 0.
 
 Extra Keywords
-______________
+^^^^^^^^^^^^^^
 If 'extra_fields' is declared True in the components for a dictionary in the model, then any extraneous keys in the corresponding dictionary in the kwargs will be added to the output.
 
 Too Many Items
-______________
+^^^^^^^^^^^^^^
 Items are only added to a list from those items in kwargs if they are valid. If the number of valid items in a list in the kwargs exceeds the 'max_size' of the corresponding list in the model, then extra items are ignored.
 
 
