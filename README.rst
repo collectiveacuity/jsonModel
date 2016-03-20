@@ -128,12 +128,14 @@ To handle invalid inputs::
         assert err.error['error_code'] > 4000
 
 
-Ingest Data
------------
+Ingest Kwargs
+-------------
 This module also supports the ingestion of keyword arguments. The process of ingestion recursively walks the valid model searching for key-value pairs which match the keyword arguments of the input. For each match it finds, it constructs a dictionary using the following rules (in order):
+
 1. value in kwargs if field passes all its component validation tests
 2. default value declared for the key in the model
 3. empty value appropriate to datatype of key in the model
+
 As a result, ingestion will produce an output which contains all the keys declared in the model. If there is a default value declared for each key in the model, it is also guaranteed to return a dictionary that will pass a model validation test. Extra keyword arguments are ignored unless extra fields is True in the model declaration.
 
 To ingest kwargs::
