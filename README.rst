@@ -131,7 +131,7 @@ To handle invalid inputs::
 
 Ingest Kwargs
 -------------
-This module also supports the ingestion of keyword arguments. The process of ingestion recursively walks the valid model searching for key-value pairs which match the keyword arguments of the input. For each match it finds, it constructs a dictionary using the following rules (in order):
+This module also supports the ingestion of keyword arguments. The process of ingestion recursively walks the valid model searching for key-value pairs which match the keyword arguments of the input. For each match it finds, it constructs a key-value pair in the dictionary using the following rules (in order):
 
 1. Value in kwargs if field passes all its component validation tests
 2. Default value declared for the key in the model
