@@ -31,6 +31,7 @@ ChangeLog
 
 TODO
 ----
+* Sort dictionary keys alphabetically prior to evaluation
 * Allow validation of null datatype declarations
 * Allow declaration of multiple datatypes for key values in maps
 * Validate size of data object inputs

@@ -149,7 +149,7 @@ Errors created from improper model specification will raise a ModelValidationErr
 
 Order of Exceptions
 ^^^^^^^^^^^^^^^^^^^
-The validation process will raise an error as soon as it encounters one, so there is no guarantee that the error that is reported is the only error in the input. Since there is no order to the set of keys in a dictionaries, there is also no guaranteed a priori order to the evaluation process. However below is an overview of the order of the steps of the validation process:
+The validation process will raise an error as soon as it encounters one, so there is no guarantee that the error that is reported is the only error in the input. Since there is no set order to the keys in a dictionary, there is also no guaranteed a priori order to the evaluation process. However below is an overview of the order of the steps of the validation process:
 
 Structure:
 __________
