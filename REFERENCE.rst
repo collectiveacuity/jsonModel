@@ -175,7 +175,7 @@ The process of ingestion recursively walks the valid model searching for key-val
 2. Default value declared for the key in the model
 3. Empty value appropriate to datatype of key in the model
 
-Like the core validation method, the recursive walk of ingestion will also walk through each item in a list value in the kwargs if the item is also a list or dictionary. However, because invalid data will be replaced by empty values appropriate to the datatype declared in the model, unlike the core validation model, output data from ingest may not be model valid data. If it is desirable to ensure that the data is valid, a 'default_value' should be declared for each key in the components section of the data model and 'min_size' of each list should not be greater than 0.
+Like the core validation method, ingestion will also walk through each item in a list field of the kwargs if the item type itself is also a list or dictionary. However, because invalid data will be replaced by empty values appropriate to the datatype declared in the model, unlike the core validation model, output data from ingest may not be model valid data. If it is desirable to ensure that the data is valid, a 'default_value' should be declared for each key in the components section of the data model and the 'min_size' of each list declaration should only be set to 0.
 
 **Sample Kwargs**::
 
@@ -245,7 +245,7 @@ If 'extra_fields' is declared True in the components for a dictionary in the mod
 
 Too Many Items
 ^^^^^^^^^^^^^^
-Items are only added to a list from those items in kwargs if they are valid. If the number of valid items in a list in the kwargs exceeds the 'max_size' of the corresponding list in the model, then extra items are ignored.
+Items are only added to a list from those items in kwargs if they are valid. If the number of valid items in a list in the kwargs exceeds the 'max_size' of the corresponding list in the model, then subsequent items are not added to the list once the list reaches its maximum size.
 
 
 
