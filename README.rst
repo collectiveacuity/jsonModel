@@ -15,7 +15,7 @@ jsonModel
 
 Top-Level Classes
 -----------------
-* **jsonModel**: a schema-enforced class for json data validation
+* **jsonModel**: a schema-enforceable class for json data validation
 
 Features
 --------
