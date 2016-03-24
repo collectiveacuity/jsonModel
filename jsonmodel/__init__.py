@@ -1,5 +1,5 @@
 __author__ = 'rcj1492'
 __created__ = '2015.12'
-__version__ = '1.3'
+__version__ = '1.4'
 __module__ = 'jsonmodel'
 __email__ = 'support@collectiveacuity.com'
