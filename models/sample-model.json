@@ -21,12 +21,14 @@
     ".userID": {
       "min_length": 13,
       "max_length": 13,
-      "must_not_contain": [ "[^\\w]", "_" ]
+      "must_not_contain": [ "[^\\w]", "_" ],
+      "field_description": "13 digit unique base 64 url safe key"
     },
     ".emoticon": {
       "required_field": true,
       "byte_data": true,
-      "example_values": [ "aGFwcHIk=" ]
+      "example_values": [ "aGFwcHIk=" ],
+      "field_metadata": { "endpoint": "http://collectiveacuity.com/icons/" }
     },
     ".rating": {
       "required_field": false,

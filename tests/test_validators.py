@@ -2,7 +2,6 @@ __author__ = 'rcj1492'
 __created__ = '2016.01'
 
 import json
-import pytest
 from copy import deepcopy
 from jsonmodel.exceptions import InputValidationError, ModelValidationError
 from jsonmodel.validators import jsonModel
@@ -15,6 +14,30 @@ class jsonModelTests(jsonModel):
     def unitTests(self, valid_input):
 
         # print(self.keyMap)
+
+    # test declarative fields in model keyMap
+        assert self.keyMap['.userID']['required_field']
+        assert self.keyMap['.rating']['default_value']
+        assert self.keyMap['.emoticon']['byte_data']
+        assert self.keyMap['.rating']['integer_only']
+        assert self.keyMap['.userID']['min_length']
+        assert self.keyMap['.comments[0]']['max_length']
+        assert self.keyMap['.rating']['min_value']
+        assert self.keyMap['.rating']['max_value']
+        assert self.keyMap['.comments']['min_size']
+        assert self.keyMap['.comments']['max_size']
+        assert self.keyMap['.comments']['unique_values']
+        assert self.keyMap['.userID']['must_not_contain']
+        assert self.keyMap['.comments[0]']['must_contain']
+        assert self.keyMap['.address.region']['contains_either']
+        assert self.keyMap['.address.country_code']['discrete_values']
+        assert self.keyMap['.emoticon']['example_values']
+        assert self.keyMap['.userID']['field_description']
+        assert self.keyMap['.emoticon']['field_metadata']
+
+        # TODO: "identical_to": ".similar_string",
+        # TODO: "lambda_function": "",
+        # TODO: "validation_url": "",
 
     # test empty path to root
         v_input = deepcopy(valid_input)

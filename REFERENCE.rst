@@ -44,12 +44,14 @@ The default validation process can be modified, and other (less common) conditio
         ".userID": {
             "min_length": 13,
             "max_length": 13,
-            "must_not_contain": [ "[^\\w]", "_" ]
+            "must_not_contain": [ "[^\\w]", "_" ],
+            "field_description": "13 digit unique base 64 url safe key"
         },
         ".emoticon": {
             "required_field": false,
             "byte_data": true,
-            "example_values": [ "aGFwcHIk=" ]
+            "example_values": [ "aGFwcHIk=" ],
+            "field_metadata": { "endpoint": "http://collectiveacuity.com/icons/" }
         },
         ".rating": {
             "required_field": false,
@@ -112,6 +114,7 @@ List of Field Conditionals (and default values)
 - "**validation_url**": "", # **TODO** / an uri which can be called to validate the value of this component with its input in the body of the request, uri response must return true (valid) or false (invalid)
 - "**example_values**": [], # a list of values which satisfy all the validation requirements [**numbers and strings only**]
 - "**field_description**": "" # a description of the component for documentation and error reporting
+- "**field_metadata**": {} # a dictionary for metadata about the component that passes through validation check
 
 Error Handling
 --------------

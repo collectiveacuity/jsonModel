@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+1.4 (2016.03.23)
+----------------
+* **FEATURE ADDED** 'field_metadata' added to list of field conditional options
+* Dictionary for metadata about a field which is ignored during validation checks
+* Additional documentation and unittest improvements
+
 1.3 (2016.03.20)
 ----------------
 * **FEATURE ADDED** jsonModel.ingest(**kwargs)
@@ -33,7 +39,7 @@ TODO
 ----
 * Sort dictionary keys alphabetically prior to evaluation
 * Allow validation of null datatype declarations
-* Allow declaration of multiple datatypes for key values in maps
+* Allow declaration of multiple datatypes for key values
 * Validate size of data object inputs
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
