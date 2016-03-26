@@ -51,12 +51,26 @@ class jsonModel(object):
                 raise ModelValidationError('Value for data model path .title must be a string.')
             self.title = data_model['title']
 
-    # validate title input & construct title method
+    # validate description input & construct description method
+        self.description = ''
+        if 'description' in data_model.keys():
+            if not isinstance(data_model['description'], str):
+                raise ModelValidationError('Value for data model path .description must be a string.')
+            self.description = data_model['description']
+
+    # validate url input & construct title method
         self.url = ''
         if 'url' in data_model.keys():
             if not isinstance(data_model['url'], str):
                 raise ModelValidationError('Value for data model path .url must be a string.')
             self.title = data_model['url']
+
+    # validate metadata input & construct metadata method
+        self.metadata = {}
+        if 'metadata' in data_model.keys():
+            if not isinstance(data_model['metadata'], dict):
+                raise ModelValidationError('Value for data model path .metadata must be a dictionary.')
+            self.metadata = data_model['metadata']
 
     # validate max size input & construct max size method
         self.maxSize = None

@@ -1,6 +1,13 @@
 ChangeLog
 =========
 
+1.5 (2016.03.26)
+----------------
+* **FEATURE ADDED** 'metadata' and 'description' added to top-level model declaration
+* Metadata dictionary allows developer to inject arbitrary object metadata into model
+* Description string allows developer to add a description to the model itself
+* Additional documentation and unittest improvements
+
 1.4 (2016.03.23)
 ----------------
 * **FEATURE ADDED** 'field_metadata' added to list of field conditional options
@@ -37,6 +44,7 @@ ChangeLog
 
 TODO
 ----
+* Toggle to add all the criteria defaults for a key type in the keyMap
 * Sort dictionary keys alphabetically prior to evaluation
 * Allow validation of null datatype declarations
 * Allow declaration of multiple datatypes for key values

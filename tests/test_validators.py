@@ -15,6 +15,13 @@ class jsonModelTests(jsonModel):
 
         # print(self.keyMap)
 
+    # test model fields
+        assert isinstance(self.title, str)
+        assert isinstance(self.description, str)
+        assert isinstance(self.url, str)
+        assert isinstance(self.metadata, dict)
+        assert isinstance(self.maxSize, int)
+
     # test declarative fields in model keyMap
         assert self.keyMap['.userID']['required_field']
         assert self.keyMap['.rating']['default_value']

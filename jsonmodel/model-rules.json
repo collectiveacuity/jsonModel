@@ -1,5 +1,5 @@
 {
-"schema": {
+    "schema": {
         "string_fields": "",
         "similar_string": "",
         "number_fields": 0.0,
@@ -74,6 +74,8 @@
         }
     },
     "title": "",
+    "description": "",
     "url": "",
+    "metadata": {},
     "max_size": 0
 }

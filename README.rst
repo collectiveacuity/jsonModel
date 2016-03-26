@@ -90,6 +90,8 @@ To declare the model::
         },
         "components": {},
         "title": "my cool data model",
+        "description": "model for performance analytics records of my sweet app",
+        "metadata": { "version": "1.1.1" },
         "url": "https://collectiveacuity.com/api/mycoolresource?jsonmodel=true",
         "max_size": 1024,
     }
