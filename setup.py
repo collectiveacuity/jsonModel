@@ -46,6 +46,7 @@ pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz
 
 config_file = open('jsonmodel/__init__.py').read()
 version = re.search("^__version__\s*=\s*'(.*)'", config_file, re.M).group(1)
+license = re.search("^__license__\s*=\s*'(.*)'", config_file, re.M).group(1)
 # command = re.search("^__command__\s*=\s*'(.*)'", config_file, re.M).group(1)
 module = re.search("^__module__\s*=\s*'(.*)'", config_file, re.M).group(1)
 author = re.search("^__author__\s*=\s*'(.*)'", config_file, re.M).group(1)
@@ -59,7 +60,7 @@ setup(
     maintainer_email=email,
     include_package_data=True,  # Checks MANIFEST.in for explicit rules
     packages=find_packages(exclude=['cred','keys','docs','tests','models','notes']),  # Needed for bdist
-    license="MIT",
+    license=license,
     description="A Collection of Methods for Validating JSON Structured Data",
     long_description=open('README.rst').read(),
     install_requires=[],

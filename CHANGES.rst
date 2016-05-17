@@ -1,6 +1,11 @@
 ChangeLog
 =========
 
+1.6 (2016.05.17)
+----------------
+* **FEATURE ADDED** 'field_title' added to component declarations
+* Updates to documentation and unittests
+
 1.5 (2016.03.26)
 ----------------
 * **FEATURE ADDED** 'metadata' and 'description' added to top-level model declaration

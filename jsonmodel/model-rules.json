@@ -26,6 +26,7 @@
             "lambda_function": "",
             "validation_url": "",
             "example_values": [],
+            "field_title": "",
             "field_description": "",
             "field_metadata": {}
         },
@@ -40,6 +41,7 @@
             "lambda_function": "",
             "validation_url": "",
             "example_values": [],
+            "field_title": "",
             "field_description": "",
             "field_metadata": {}
         },
@@ -49,6 +51,7 @@
             "identical_to": ".similar_boolean",
             "lambda_function": "",
             "validation_url": "",
+            "field_title": "",
             "field_description": "",
             "field_metadata": {}
         },
@@ -58,6 +61,7 @@
             "identical_to": ".similar_map",
             "lambda_function": "",
             "validation_url": "",
+            "field_title": "",
             "field_description": "",
             "field_metadata": {}
         },
@@ -69,6 +73,7 @@
             "identical_to": ".similar_list",
             "lambda_function": "",
             "validation_url": "",
+            "field_title": "",
             "field_description": "",
             "field_metadata": {}
         }

@@ -48,7 +48,8 @@
       "default_value": "New York"
     },
     ".address.region":{
-      "contains_either": [ "[A-Z]{2}", "[A-Z][a-z]+" ]
+      "contains_either": [ "[A-Z]{2}", "[A-Z][a-z]+" ],
+      "field_title": "State or Province"
     },
     ".address.country_code":{
       "discrete_values": [ 36, 124, 554, 826, 840 ]

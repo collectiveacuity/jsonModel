@@ -39,6 +39,7 @@ class jsonModelTests(jsonModel):
         assert self.keyMap['.address.region']['contains_either']
         assert self.keyMap['.address.country_code']['discrete_values']
         assert self.keyMap['.emoticon']['example_values']
+        assert self.keyMap['.address.region']['field_title']
         assert self.keyMap['.userID']['field_description']
         assert self.keyMap['.emoticon']['field_metadata']
 
