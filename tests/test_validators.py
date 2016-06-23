@@ -1,6 +1,13 @@
 __author__ = 'rcj1492'
 __created__ = '2016.01'
 
+try:
+    import pytest
+except:
+    import sys
+    print('test_validators requires the pytest module. try "pip install pytest".')
+    sys.exit()
+
 import json
 from copy import deepcopy
 from jsonmodel.exceptions import InputValidationError, ModelValidationError
@@ -181,6 +188,22 @@ class jsonModelTests(jsonModel):
         except InputValidationError as err:
             assert err.error['failed_test'] == 'min_value'
 
+    # test min_value for strings exception
+        low_string = deepcopy(valid_input)
+        low_string['userID'] = '0000000000000'
+        try:
+            self.validate(low_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'min_value'
+
+    # test max_value for strings exception
+        high_string = deepcopy(valid_input)
+        high_string['userID'] = 'zzzzzzzzzzzzz'
+        try:
+            self.validate(high_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'max_value'
+
     # test discrete_values exception
         discrete_number = deepcopy(valid_input)
         discrete_number['address']['country_code'] = 20
@@ -212,6 +235,22 @@ class jsonModelTests(jsonModel):
             self.validate(min_string)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'min_length'
+
+    # test excluded_values for strings exception
+        excluded_string = deepcopy(valid_input)
+        excluded_string['emoticon'] = 'c2Fk'
+        try:
+            self.validate(excluded_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'excluded_values'
+
+    # test excluded_values for strings exception
+        excluded_number = deepcopy(valid_input)
+        excluded_number['rating'] = 7
+        try:
+            self.validate(excluded_number)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'excluded_values'
 
     # test discrete_values exception
         discrete_string = deepcopy(valid_input)
@@ -348,6 +387,80 @@ class jsonModelTests(jsonModel):
         # print(self.validate(valid_input))
         # print(self.ingest(**valid_input))
         # print(self.ingest(**{}))
+
+        test_model = {
+            'schema': self.schema,
+            'components': self.components,
+            'metadata': self.metadata,
+            'title': self.title,
+            'description': self.description,
+            'max_size': self.maxSize,
+            'url': self.url
+        }
+
+    # test empty schema exception
+        empty_schema = deepcopy(test_model)
+        empty_schema['schema'] = {}
+        try:
+            jsonModel(empty_schema)
+        except ModelValidationError as err:
+            assert err
+
+    # test wrong datatype qualifier keys in components exception
+        integer_criteria_error = deepcopy(test_model)
+        integer_criteria_error['components']['.rating']['must_not_contain'] = [ '\\w' ]
+        try:
+            jsonModel(integer_criteria_error)
+        except ModelValidationError as err:
+            assert str(err).find('components.rating') > 0
+
+    # test wrong datatype qualifier values in components exception
+        contains_either_error = deepcopy(test_model)
+        contains_either_error['components']['.address.region']['contains_either'].append(2)
+        try:
+            jsonModel(contains_either_error)
+        except ModelValidationError as err:
+            assert str(err).find('components.address.region.contains_either') > 0
+
+    # test wrong datatype qualifier values in components exception
+        min_size_error = deepcopy(test_model)
+        min_size_error['components']['.comments']['min_size'] = -2
+        try:
+            jsonModel(min_size_error)
+        except ModelValidationError as err:
+            assert str(err).find('components.comments.min_size') > 0
+
+    # test wrong datatype qualifier values in components exception
+        max_value_error = deepcopy(test_model)
+        max_value_error['components']['.rating']['max_value'] = '10'
+        try:
+            jsonModel(max_value_error)
+        except ModelValidationError as err:
+            assert str(err).find('components.rating.max_value') > 0
+
+    # test wrong datatype qualifier values in components exception
+        field_description_error = deepcopy(test_model)
+        field_description_error['components']['.userID']['field_description'] = []
+        try:
+            jsonModel(field_description_error)
+        except ModelValidationError as err:
+            assert str(err).find('components.userID.field_description') > 0
+
+    # test conflicting declared and excluded values in schema exception
+        excluded_value_error = deepcopy(test_model)
+        excluded_value_error['components']['.address.city']['excluded_values'] = [ 'New Orleans']
+        try:
+            jsonModel(excluded_value_error)
+        except ModelValidationError as err:
+            assert str(err).find('schema.address.city') > 0
+
+    # test conflicting discrete and excluded values in schema exception
+        discrete_value_error = deepcopy(test_model)
+        discrete_value_error['components']['.address.city']['excluded_values'] = [ 'Miami' ]
+        try:
+            jsonModel(discrete_value_error)
+        except ModelValidationError as err:
+            assert str(err).find('components.address.city.discrete_values') > 0
 
         return self
 

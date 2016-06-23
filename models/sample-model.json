@@ -26,13 +26,16 @@
     ".userID": {
       "min_length": 13,
       "max_length": 13,
+      "min_value": "1111111111111",
+      "max_value": "yyyyyyyyyyyyy",
       "must_not_contain": [ "[^\\w]", "_" ],
       "field_description": "13 digit unique base 64 url safe key"
     },
     ".emoticon": {
       "required_field": true,
       "byte_data": true,
-      "example_values": [ "aGFwcHIk=" ],
+      "example_values": [ "aGFwcHk=" ],
+      "excluded_values": [ "c2Fk" ],
       "field_metadata": { "endpoint": "http://collectiveacuity.com/icons/" }
     },
     ".rating": {
@@ -40,6 +43,7 @@
       "max_value": 10,
       "min_value": 1,
       "default_value": 5,
+      "excluded_values": [ 7, 9 ],
       "integer_only": true
     },
     ".address.city": {
