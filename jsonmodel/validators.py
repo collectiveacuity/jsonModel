@@ -35,6 +35,10 @@ class jsonModel(object):
         self.keyName = mapModel(self.schema).keyName
         self.keyCriteria = mapModel(self.schema).keyCriteria
 
+    # construct protected type classes
+        self._datatype_names = mapModel._datatype_names
+        self._datatype_classes = mapModel._datatype_classes
+
     # validate absence of item designators in keys
         item_pattern = re.compile('\[\d+\]')
         for i in range(len(self.keyName)):
@@ -48,10 +52,10 @@ class jsonModel(object):
     # validate existence of first item in list declarations
         key_set = set(self.keyName)
         for i in range(len(self.keyName)):
-            if isinstance([], self.keyCriteria[i]['value_datatype']):
+            if self.keyCriteria[i]['value_datatype'] == 'list':
                 item_key = self.keyName[i] + '[0]'
                 if not item_key in key_set:
-                    message = 'List at data model path .schema%s must declare an initial item for the list.' % self.keyName[i]
+                    message = 'List at data model path schema%s must declare an initial item for the list.' % self.keyName[i]
                     raise ModelValidationError(message)
 
     # validate title input & construct title method
@@ -96,62 +100,54 @@ class jsonModel(object):
         self.components = {}
         if 'components' in data_model.keys():
             if not isinstance(data_model['components'], dict):
-                raise ModelValidationError('Value for data model path .components must be a dictionary.')
-            self.components = data_model['components']
+                raise ModelValidationError('Value for data model path components must be a dictionary.')
+            self.components = self._validate_fields(data_model['components'], 'components')
 
-    # construct dummy classes
-        _dummy_int = 2
-        _dummy_float = 2.2
-
-    # validate key names in components
+    # construct keyMap from components, key names and key criteria
+        self.keyMap = {}
+        for i in range(len(self.keyName)):
+            self.keyMap[self.keyName[i]] = self.keyCriteria[i]
         for key, value in self.components.items():
-            number_field = False
-            string_field = False
+            if key in self.keyMap.keys():
+                for k, v in self.components[key].items():
+                    self.keyMap[key][k] = v
+
+    def _validate_fields(self, fields_dict, model_feature):
+
+    # validate key names in fields
+        for key, value in fields_dict.items():
             if key not in self.keyName:
-                raise ModelValidationError('Data model path .components%s is not declared in "schema".' % key)
+                raise ModelValidationError('Component %s is not a field declared in "schema".' % key)
             elif not isinstance(value, dict):
-                raise ModelValidationError('Value for data model path .components%s must be a dictionary.' % key)
+                raise ModelValidationError('Value for component %s must be a dictionary.' % key)
 
-    # validate component qualifier fields are appropriate to component datatype
-            data_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
+    # validate field criteria are appropriate to field datatype
+            value_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
             type_dict = {}
-            if isinstance("string", data_type):
-                type_dict = self.__rules__['components']['.string_fields']
-                string_field = True
-            elif isinstance(2, data_type):
-                type_dict = self.__rules__['components']['.number_fields']
-                number_field = True
-            elif isinstance(2.2, data_type):
-                type_dict = self.__rules__['components']['.number_fields']
-                number_field = True
-            elif isinstance(True, data_type):
-                type_dict = self.__rules__['components']['.boolean_fields']
-            elif isinstance([], data_type):
-                type_dict = self.__rules__['components']['.list_fields']
-            elif isinstance({}, data_type):
-                type_dict = self.__rules__['components']['.map_fields']
-            elif isinstance(None, data_type):
-                type_dict = self.__rules__['components']['.null_fields']
+            if value_type == 'string':
+                type_dict = self.__rules__[model_feature]['.string_fields']
+            elif value_type == 'number':
+                type_dict = self.__rules__[model_feature]['.number_fields']
+            elif value_type == 'boolean':
+                type_dict = self.__rules__[model_feature]['.boolean_fields']
+            elif value_type == 'list':
+                type_dict = self.__rules__[model_feature]['.list_fields']
+            elif value_type == 'map':
+                type_dict = self.__rules__[model_feature]['.map_fields']
+            elif value_type == 'null':
+                type_dict = self.__rules__[model_feature]['.null_fields']
             if set(value.keys()) - set(type_dict.keys()):
-                raise ModelValidationError('Data model "components%s" may only have datatype %s qualifiers %s.' % (key, data_type, set(type_dict.keys())))
+                raise ModelValidationError('Data model "components%s" may only have datatype %s qualifiers %s.' % (key, value_type, set(type_dict.keys())))
 
-    # validate component qualifier field values are appropriate value datatype
+    # validate criteria qualifier values are appropriate datatype
             for k, v in value.items():
-                if k == 'default_value':
-                    if number_field:
-                        if not isinstance(v, int) and not isinstance(v, float):
-                            raise ModelValidationError('Value for data model "components%s.%s"default_value" must be a number.' % key)
-                    elif not isinstance(v, data_type):
-                        raise ModelValidationError('Value for data model "components%s.default_value" must be a %s datatype.' % (key, data_type))
-                elif k in ('min_value', 'max_value'):
-                    if number_field:
-                        if v.__class__ != _dummy_int.__class__ and v.__class__ != _dummy_float.__class__:
-                            raise ModelValidationError('Value for data model "components%s.%s" must be a number.' % (key, k))
-                    elif string_field:
-                        if not isinstance(v, str):
-                            raise ModelValidationError('Value for data model "components%s.%s" must be a string.' % (key, k))
-                elif not isinstance(v, type_dict[k].__class__):
-                    raise ModelValidationError('Value for data model "components%s.%s" must be a %s datatype.' % (key, k, type_dict[k].__class__))
+                v_index = self._datatype_classes.index(v.__class__)
+                v_type = self._datatype_names[v_index]
+                qualifier_index = self._datatype_classes.index(type_dict[k].__class__)
+                qualifier_type = self._datatype_names[qualifier_index]
+                if v_type != qualifier_type:
+                    raise ModelValidationError(
+                        'Value for data model components%s.%s" must be a %s datatype.' % (key, k, qualifier_type))
 
     # validate internal logic of each qualifier value declaration
                 if k in ('must_not_contain', 'must_contain', 'contains_either'):
@@ -165,9 +161,10 @@ class jsonModel(object):
                         raise ModelValidationError(message)
                 if k in ('discrete_values', 'excluded_values', 'example_values'):
                     for item in v:
-                        if number_field:
+                        if value_type == 'number':
                             if not isinstance(item, int) and not isinstance(item, float):
-                                raise ModelValidationError('Each item in data model "components%s.%s" list must be a number.' % (key, k))
+                                raise ModelValidationError(
+                                    'Each item in data model "components%s.%s" list must be a number.' % (key, k))
                         elif not isinstance(item, str):
                             message = 'Each item in list at data model path .components%s.%s must be a string.' % (key, k)
                             raise ModelValidationError(message)
@@ -178,13 +175,13 @@ class jsonModel(object):
                 if k == 'unique_values':
                     if v:
                         item_name = key + '[0]'
-                        item_datatype = self.keyCriteria[self.keyName.index(item_name)]['value_datatype']
-                        if not isinstance("string", item_datatype) and not isinstance(2, item_datatype) and not isinstance(2.2, item_datatype):
-                            message = '"unique_values": true requires value at data model path .components.%s[0] to be a string or number primitive.' % key
+                        item_type = self.keyCriteria[self.keyName.index(item_name)]['value_datatype']
+                        if not item_type in ('number', 'string'):
+                            message = '"unique_values": true requires value at data model path components%s[0] to be either a string or number.' % key
                             raise ModelValidationError(message)
 
     # validate size qualifiers against each other
-            size_qualifiers = [ 'min_size', 'max_size' ]
+            size_qualifiers = ['min_size', 'max_size']
             for qualifier in size_qualifiers:
                 if qualifier in value.keys():
                     test_value = value[qualifier]
@@ -200,7 +197,7 @@ class jsonModel(object):
                             raise ModelValidationError(message)
 
     # validate length qualifiers against each other
-            length_qualifiers = [ 'min_length', 'max_length' ]
+            length_qualifiers = ['min_length', 'max_length']
             for qualifier in length_qualifiers:
                 if qualifier in value.keys():
                     test_value = value[qualifier]
@@ -246,7 +243,7 @@ class jsonModel(object):
 
     # validate discrete value qualifiers against other criteria
             schema_field = self.keyCriteria[self.keyName.index(key)]
-            discrete_qualifiers = [ 'declared_value', 'default_value', 'excluded_values', 'discrete_values', 'example_values' ]
+            discrete_qualifiers = ['declared_value', 'default_value', 'excluded_values', 'discrete_values', 'example_values']
             for qualifier in discrete_qualifiers:
                 if qualifier in value.keys() or qualifier in schema_field:
                     multiple_values = False
@@ -301,7 +298,8 @@ class jsonModel(object):
                             for regex in value['must_contain']:
                                 regex_pattern = re.compile(regex)
                                 if not regex_pattern.findall(test_value):
-                                    message = '%s does not match regex pattern "%s" in "must_contain".' % (header, regex)
+                                    message = '%s does not match regex pattern "%s" in "must_contain".' % (
+                                    header, regex)
                                     raise ModelValidationError(message)
                         if 'contains_either' in value.keys():
                             regex_match = False
@@ -358,14 +356,7 @@ class jsonModel(object):
                                     message = '%s must be one of %s "discrete_values".' % (header, value['excluded_values'])
                                     raise ModelValidationError(message)
 
-    # construct keyMap from components, key names and key criteria
-        self.keyMap = {}
-        for i in range(len(self.keyName)):
-            self.keyMap[self.keyName[i]] = self.keyCriteria[i]
-        for key, value in self.components.items():
-            if key in self.keyMap.keys():
-                for k, v in self.components[key].items():
-                    self.keyMap[key][k] = v
+        return fields_dict
 
     def _validate_dict(self, input_dict, schema_dict, path_to_root):
 
@@ -448,31 +439,30 @@ class jsonModel(object):
                 input_key_name = path_to_root + '.' + key
             rules_input_key_name = re.sub('\[\d+\]', '[0]', input_key_name)
             if input_key_name in max_keys:
+                value_index = self._datatype_classes.index(value.__class__)
+                value_type = self._datatype_names[value_index]
                 input_criteria = self.keyMap[rules_input_key_name]
                 error_dict = {
                     'model_schema': self.schema,
                     'input_criteria': input_criteria,
                     'failed_test': 'value_datatype',
                     'input_path': input_key_name,
-                    'error_value': value.__class__,
+                    'error_value': value_type,
                     'error_code': 4001
                 }
-                if value.__class__ != input_criteria['value_datatype']:
-                    if isinstance(value, bool) or (not isinstance(value, int) and not isinstance(value, float)):
-                        raise InputValidationError(error_dict)
-                    elif not isinstance(2.2, input_criteria['value_datatype']) and not isinstance(2, input_criteria['value_datatype']):
-                        raise InputValidationError(error_dict)
+                if value_type != input_criteria['value_datatype']:
+                    raise InputValidationError(error_dict)
 
     # call appropriate validation sub-routine for datatype of value
-                if isinstance(value, bool):
+                if value_type == 'boolean':
                     input_dict[key] = self._validate_boolean(value, input_key_name)
-                elif isinstance(value, int) or isinstance(value, float):
+                elif value_type == 'number':
                     input_dict[key] = self._validate_number(value, input_key_name)
-                elif isinstance(value, str):
+                elif value_type == 'string':
                     input_dict[key] = self._validate_string(value, input_key_name)
-                elif isinstance(value, dict):
+                elif value_type == 'map':
                     input_dict[key] = self._validate_dict(value, schema_dict[key], input_key_name)
-                elif isinstance(value, list):
+                elif value_type == 'list':
                     input_dict[key] = self._validate_list(value, schema_dict[key], input_key_name)
 
     # set default values for empty optional fields
@@ -538,23 +528,22 @@ class jsonModel(object):
             input_path = path_to_root + '[%s]' % i
             item = input_list[i]
             item_error['input_path'] = input_path
-            item_error['error_value'] = item.__class__
-            if item.__class__ != item_rules['value_datatype']:
-                if isinstance(item, bool) or (not isinstance(item, int) and not isinstance(item, float)):
-                    raise InputValidationError(item_error)
-                elif not isinstance(2.2, item_rules['value_datatype']) and not isinstance(2, item_rules['value_datatype']):
-                    raise InputValidationError(item_error)
+            item_index = self._datatype_classes.index(item.__class__)
+            item_type = self._datatype_names[item_index]
+            item_error['error_value'] = item_type
+            if item_type != item_rules['value_datatype']:
+                raise InputValidationError(item_error)
 
     # call appropriate validation sub-routine for datatype of item
-            if isinstance(item, bool):
+            if item_type == 'boolean':
                 input_list[i] = self._validate_boolean(item, input_path)
-            elif isinstance(item, int) or isinstance(item, float):
+            elif item_type == 'number':
                 input_list[i] = self._validate_number(item, input_path)
-            elif isinstance(item, str):
+            elif item_type == 'string':
                 input_list[i] = self._validate_string(item, input_path)
-            elif isinstance(item, dict):
+            elif item_type == 'map':
                 input_list[i] = self._validate_dict(item, schema_list[0], input_path)
-            elif isinstance(item, list):
+            elif item_type == 'list':
                 input_list[i] = self._validate_list(item, schema_list[0], input_path)
 
     # validate unique values in list
@@ -756,37 +745,38 @@ class jsonModel(object):
             key_path += key
             rules_key_path = re.sub('\[\d+\]', '[0]', key_path)
             if key in input_dict.keys():
-                if value == None:
+                value_index = self._datatype_classes.index(value.__class__)
+                value_type = self._datatype_names[value_index]
+                if value_type == 'null':
                     valid_dict[key] = input_dict[key]
-                elif isinstance(value, bool):
+                elif value_type == 'boolean':
                     valid_dict[key] = self._ingest_boolean(input_dict[key], key_path)
-                elif isinstance(value, int) or isinstance(value, float):
+                elif value_type == 'number':
                     valid_dict[key] = self._ingest_number(input_dict[key], key_path)
-                elif isinstance(value, str):
+                elif value_type == 'string':
                     valid_dict[key] = self._ingest_string(input_dict[key], key_path)
-                elif isinstance(value, dict):
+                elif value_type == 'map':
                     valid_dict[key] = self._ingest_dict(input_dict[key], schema_dict[key], key_path)
-                elif isinstance(value, list):
+                elif value_type == 'list':
                     valid_dict[key] = self._ingest_list(input_dict[key], schema_dict[key], key_path)
             else:
-                value_datatype = self.keyMap[rules_key_path]['value_datatype']
-                ex_int = 0
-                ex_float = 0.0
+                value_type = self.keyMap[rules_key_path]['value_datatype']
                 if 'default_value' in self.keyMap[rules_key_path]:
                     valid_dict[key] = self.keyMap[rules_key_path]['default_value']
-                elif value_datatype == None:
+                elif value_type == 'null':
                     valid_dict[key] = None
-                elif value_datatype == False.__class__:
+                elif value_type == 'boolean':
                     valid_dict[key] = False
-                elif value_datatype == ex_int.__class__:
-                    valid_dict[key] = 0
-                elif value_datatype == ex_float.__class__:
+                elif value_type == 'number':
                     valid_dict[key] = 0.0
-                elif value_datatype == ''.__class__:
+                    if 'integer_only' in self.keyMap[rules_key_path].keys():
+                        if self.keyMap[rules_key_path]['integer_only']:
+                            valid_dict[key] = 0
+                elif value_type == 'string':
                     valid_dict[key] = ''
-                elif value_datatype == [].__class__:
+                elif value_type == 'list':
                     valid_dict[key] = []
-                elif value_datatype == {}.__class__:
+                elif value_type == 'map':
                     valid_dict[key] = self._ingest_dict({}, schema_dict[key], key_path)
 
     # add extra fields if set to True
@@ -818,20 +808,23 @@ class jsonModel(object):
 
     # iterate over items in input list
         if input_list:
+            rules_index = self._datatype_classes.index(schema_list[0].__class__)
+            rules_type = self._datatype_names[rules_index]
             for i in range(len(input_list)):
                 item_path = '%s[%s]' % (path_to_root, i)
-                rules_datatype = schema_list[0].__class__
-                if isinstance(input_list[i], rules_datatype):
+                item_index = self._datatype_classes.index(input_list[i].__class__)
+                item_type = self._datatype_names[item_index]
+                if item_type == rules_type:
                     try:
-                        if isinstance(input_list[i], bool):
+                        if item_type == 'boolean':
                             valid_list.append(self._validate_boolean(input_list[i], item_path))
-                        elif isinstance(input_list[i], int) or isinstance(input_list[i], float):
+                        elif item_type == 'number':
                             valid_list.append(self._validate_number(input_list[i], item_path))
-                        elif isinstance(input_list[i], str):
+                        elif item_type == 'string':
                             valid_list.append(self._validate_string(input_list[i], item_path))
-                        elif isinstance(input_list[i], dict):
+                        elif item_type == 'map':
                             valid_list.append(self._ingest_dict(input_list[i], schema_list[0], item_path))
-                        elif isinstance(input_list[i], list):
+                        elif item_type == 'number':
                             valid_list.append(self._ingest_list(input_list[i], schema_list[0], item_path))
                     except:
                         pass
@@ -849,17 +842,17 @@ class jsonModel(object):
         :return: valid_number
         '''
 
+        valid_number = 0.0
+
         try:
             valid_number = self._validate_number(input_number, path_to_root)
         except:
             rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
-            datatype = self.keyMap[rules_path_to_root]['value_datatype']
             if 'default_value' in self.keyMap[rules_path_to_root]:
                 valid_number = self.keyMap[rules_path_to_root]['default_value']
-            elif isinstance(0, datatype):
-                valid_number = 0
-            else:
-                valid_number = 0.0
+            elif 'integer_only' in self.keyMap[rules_path_to_root].keys():
+                if self.keyMap[rules_path_to_root]['integer_only']:
+                    valid_number = 0
 
         return valid_number
 
@@ -949,29 +942,33 @@ class jsonModel(object):
         else:
             path_to_root = '.'
 
+    # determine value type of input data
+        input_index = self._datatype_classes.index(input_data.__class__)
+        input_type = self._datatype_names[input_index]
+
     # validate input data type
-        if input_data.__class__ != self.keyMap[path_to_root]['value_datatype']:
+        if input_type != self.keyMap[path_to_root]['value_datatype']:
             error_dict = {
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[path_to_root],
                 'failed_test': 'value_datatype',
                 'input_path': path_to_root,
-                'error_value': input_data.__class__,
+                'error_value': input_type,
                 'error_code': 4001
             }
             raise InputValidationError(error_dict)
 
     # run helper method appropriate to data type
-        if isinstance(input_data, bool):
+        if input_type == 'boolean':
             input_data = self._validate_boolean(input_data, path_to_root)
-        elif isinstance(input_data, int) or isinstance(input_data, float):
+        elif input_type == 'number':
             input_data = self._validate_number(input_data, path_to_root)
-        elif isinstance(input_data, str):
+        elif input_type == 'string':
             input_data = self._validate_string(input_data, path_to_root)
-        elif isinstance(input_data, list):
+        elif input_type == 'list':
             schema_list = self._reconstruct(path_to_root)
             input_data = self._validate_list(input_data, schema_list, path_to_root)
-        elif isinstance(input_data, dict):
+        elif input_type == 'map':
             schema_dict = self._reconstruct(path_to_root)
             input_data = self._validate_dict(input_data, schema_dict, path_to_root)
 

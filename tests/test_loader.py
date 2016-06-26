@@ -1,5 +1,6 @@
 __author__ = 'rcj1492'
 __created__ = '2016.03'
+__license__ = 'MIT'
 
 import pytest
 from jsonmodel import __module__

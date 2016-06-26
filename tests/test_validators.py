@@ -406,6 +406,11 @@ class jsonModelTests(jsonModel):
         dot_ingested = dot_model.ingest(**{'.': {'.': 'test'}})
         assert dot_ingested['.']['.'] == 'test'
 
+    # test null value in model
+        null_schema = deepcopy(test_model)
+        null_schema['test'] = None
+        assert jsonModel(null_schema)
+
     # test empty schema exception
         empty_schema = deepcopy(test_model)
         empty_schema['schema'] = {}

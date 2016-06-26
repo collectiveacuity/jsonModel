@@ -78,7 +78,8 @@ The default validation process can be modified, and other (less common) conditio
             "field_title": "State or Province"
         },
         ".address.country_code":{
-            "discrete_values": [ 36, 124, 554, 826, 840 ]
+            "discrete_values": [ 36, 124, 554, 826, 840 ],
+            "integer_only": true
         },
         ".comments": {
             "required_field": false,
