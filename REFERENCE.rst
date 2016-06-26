@@ -31,6 +31,10 @@ Default Settings
 - **Datatype**: The validation process will assume that the datatype of each value in the input matches the datatype in the model. So, the example model expects to see a string for userID, a number for datetime, a boolean for active, etc... Special datatypes like bytes, integers and sets which json does not directly support must be handled by qualifiers in the components map.
 - **Requirements**: The validation process will assume a key with a non-empty value is a required input. Since lists must declare an item, all lists are assumed to be required fields in the model. So, all fields in the example are required except postal_code and country_code. The empty value for each datatype can be expressed with {}, 0, 0.0, false or "" and indicates that it is optional.
 
+Meta-Model Restrictions
+^^^^^^^^^^^^^^^^^^^^^^^
+A model validation error will occur if a key name in the schema contains an item designator pattern such as [2] or [35]. The module uses these patterns to validate inputs which contain lists of arbitrary size. As a result, there are limitations to the meta-model recursion of the module. It is not possible to use lists in model declarations which you wish to use as schemas in other model declarations.
+
 Components Map
 --------------
 The default validation process can be modified, and other (less common) conditionals can be added through the components map of the model. Whereas the schema map provides a transparent data architecture that is self-valid, the components map can be used to specify the conditions of acceptable data for any number of fields in the schema. The component map is an optional flat dictionary where each key in the component map designates a particular path in the schema using the dot-path ('.' and [0]) nomenclature of nesting and array identification.
@@ -44,13 +48,16 @@ The default validation process can be modified, and other (less common) conditio
         ".userID": {
             "min_length": 13,
             "max_length": 13,
+            "min_value": "1111111111111",
+            "max_value": "yyyyyyyyyyyyy",
             "must_not_contain": [ "[^\\w]", "_" ],
             "field_description": "13 digit unique base 64 url safe key"
         },
         ".emoticon": {
             "required_field": false,
             "byte_data": true,
-            "example_values": [ "aGFwcHIk=" ],
+            "example_values": [ "aGFwcHk=" ],
+            "excluded_values": [ "c2Fk" ],
             "field_metadata": { "endpoint": "http://collectiveacuity.com/icons/" }
         },
         ".rating": {
@@ -58,6 +65,7 @@ The default validation process can be modified, and other (less common) conditio
             "min_value": 1,
             "max_value": 10,
             "default_value": 5,
+            "excluded_values": [ 7, 9 ],
             "integer_only": true
         },
         ".address.city": {

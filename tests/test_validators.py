@@ -398,6 +398,14 @@ class jsonModelTests(jsonModel):
             'url': self.url
         }
 
+    # test . use in key names
+        dot_key_names = deepcopy(test_model)
+        dot_key_names['schema']['.'] = { '.': '' }
+        dot_key_names['components']['..'] = { 'required_field': False }
+        dot_model = jsonModel(dot_key_names)
+        dot_ingested = dot_model.ingest(**{'.': {'.': 'test'}})
+        assert dot_ingested['.']['.'] == 'test'
+
     # test empty schema exception
         empty_schema = deepcopy(test_model)
         empty_schema['schema'] = {}
@@ -461,6 +469,14 @@ class jsonModelTests(jsonModel):
             jsonModel(discrete_value_error)
         except ModelValidationError as err:
             assert str(err).find('components.address.city.discrete_values') > 0
+
+    # test item designator pattern used in schema keys
+        item_designator_error = deepcopy(test_model)
+        item_designator_error['schema']['[1]'] = ''
+        try:
+            jsonModel(item_designator_error)
+        except ModelValidationError as err:
+            assert str(err).find('schema.[1]') > 0
 
         return self
 

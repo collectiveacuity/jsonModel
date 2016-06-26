@@ -2,7 +2,6 @@ __author__ = 'rcj1492'
 __created__ = '2015.11'
 
 import re
-from copy import deepcopy
 from base64 import b64decode
 from jsonmodel.exceptions import InputValidationError, ModelValidationError
 from jsonmodel.loader import jsonLoader
@@ -35,6 +34,16 @@ class jsonModel(object):
         self.schema = data_model['schema']
         self.keyName = mapModel(self.schema).keyName
         self.keyCriteria = mapModel(self.schema).keyCriteria
+
+    # validate absence of item designators in keys
+        item_pattern = re.compile('\[\d+\]')
+        for i in range(len(self.keyName)):
+            patterns_found = item_pattern.findall(self.keyName[i])
+            if patterns_found:
+                for designator in patterns_found:
+                    if designator != '[0]':
+                        message = 'Key name at data model path schema%s must not contain the item designator pattern %s' % (self.keyName[i], designator)
+                        raise ModelValidationError(message)
 
     # validate existence of first item in list declarations
         key_set = set(self.keyName)

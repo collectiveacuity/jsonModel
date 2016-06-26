@@ -1,9 +1,17 @@
 ChangeLog
 =========
 
+1.7 (2016.06.24)
+----------------
+* **FEATURE ADDED** 'min_value' and 'max_value' extended to string fields
+* **FEATURE ADDED** 'excluded_values' added to component criteria
+* Fixed bug with init check of schema key names for item designator patterns
+* Added missing validation for correct 'contains_either' syntax in model init
+* Updates to documentation and unittests
+
 1.6 (2016.05.17)
 ----------------
-* **FEATURE ADDED** 'field_title' added to component declarations
+* **FEATURE ADDED** 'field_title' added to component criteria
 * Updates to documentation and unittests
 
 1.5 (2016.03.26)
