@@ -31,6 +31,10 @@
       "must_not_contain": [ "[^\\w]", "_" ],
       "field_description": "13 digit unique base 64 url safe key"
     },
+    ".datetime": {
+      "greater_than": 1.1,
+      "less_than": 2000000000.0
+    },
     ".emoticon": {
       "required_field": true,
       "byte_data": true,
@@ -52,6 +56,8 @@
       "default_value": "New York"
     },
     ".address.region":{
+      "greater_than": "AB",
+      "less_than": "Yyyyyyyyyyyyyyyyyyyyyyyy",
       "contains_either": [ "[A-Z]{2}", "[A-Z][a-z]+" ],
       "field_title": "State or Province"
     },

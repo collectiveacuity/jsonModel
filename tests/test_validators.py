@@ -78,14 +78,6 @@ class jsonModelTests(jsonModel):
         assert self.validate(v_input['address'], '.address') == \
                v_input['address']
 
-    # test invalid input type
-        invalid_list = []
-        try:
-            self.validate(invalid_list)
-        except InputValidationError as err:
-            assert err.error['model_schema']
-            assert err.error['failed_test'] == 'value_datatype'
-
     # test non-existent path to root exception
         v_input = deepcopy(valid_input)
         try:
@@ -100,11 +92,26 @@ class jsonModelTests(jsonModel):
         except ModelValidationError as err:
             assert str(err).find('Model declaration is invalid')
 
+    # test invalid input type
+        invalid_list = []
+        try:
+            self.validate(invalid_list)
+        except InputValidationError as err:
+            assert err.error['model_schema']
+            assert err.error['failed_test'] == 'value_datatype'
+
+    # test json structure of error message
+        try:
+            self.validate(invalid_list)
+        except InputValidationError as err:
+            assert json.dumps(err.error)
+
     # test invalid input data type
         try:
             self.validate('1449179763.312077', '.datetime')
         except InputValidationError as err:
             assert err.error['failed_test'] == 'value_datatype'
+            assert json.dumps(err.error)
 
     # test extra_fields exception
         extra_key_input = deepcopy(valid_input)
@@ -172,6 +179,14 @@ class jsonModelTests(jsonModel):
         except InputValidationError as err:
             assert err.error['failed_test'] == 'integer_only'
 
+    # test min_value exception
+        min_number = deepcopy(valid_input)
+        min_number['rating'] = 0
+        try:
+            self.validate(min_number)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'min_value'
+
     # test max_value exception
         max_number = deepcopy(valid_input)
         max_number['rating'] = 11
@@ -180,13 +195,21 @@ class jsonModelTests(jsonModel):
         except InputValidationError as err:
             assert err.error['failed_test'] == 'max_value'
 
-    # test min_value exception
-        min_number = deepcopy(valid_input)
-        min_number['rating'] = 0
+    # test greater_than exception for numbers
+        greater_number = deepcopy(valid_input)
+        greater_number['datetime'] = 0.1
         try:
-            self.validate(min_number)
+            self.validate(greater_number)
         except InputValidationError as err:
-            assert err.error['failed_test'] == 'min_value'
+            assert err.error['failed_test'] == 'greater_than'
+
+    # test less_than exception for numbers
+        less_number = deepcopy(valid_input)
+        less_number['datetime'] = 2000000000.1
+        try:
+            self.validate(less_number)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'less_than'
 
     # test min_value for strings exception
         low_string = deepcopy(valid_input)
@@ -203,6 +226,46 @@ class jsonModelTests(jsonModel):
             self.validate(high_string)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'max_value'
+
+    # test greater_than exception for strings
+        greater_string = deepcopy(valid_input)
+        greater_string['address']['region'] = 'AA'
+        try:
+            self.validate(greater_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'greater_than'
+
+    # test less_than exception for strings
+        less_string = deepcopy(valid_input)
+        less_string['address']['region'] = 'Zzzzzzzzzzzzzzzzzzzzzzzz'
+        try:
+            self.validate(less_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'less_than'
+
+    # test excluded_values for strings exception
+        excluded_string = deepcopy(valid_input)
+        excluded_string['emoticon'] = 'c2Fk'
+        try:
+            self.validate(excluded_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'excluded_values'
+
+    # test excluded_values for strings exception
+        excluded_number = deepcopy(valid_input)
+        excluded_number['rating'] = 7
+        try:
+            self.validate(excluded_number)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'excluded_values'
+
+    # test discrete_values exception
+        discrete_string = deepcopy(valid_input)
+        discrete_string['address']['city'] = 'Boston'
+        try:
+            self.validate(discrete_string)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'discrete_values'
 
     # test discrete_values exception
         discrete_number = deepcopy(valid_input)
@@ -235,30 +298,6 @@ class jsonModelTests(jsonModel):
             self.validate(min_string)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'min_length'
-
-    # test excluded_values for strings exception
-        excluded_string = deepcopy(valid_input)
-        excluded_string['emoticon'] = 'c2Fk'
-        try:
-            self.validate(excluded_string)
-        except InputValidationError as err:
-            assert err.error['failed_test'] == 'excluded_values'
-
-    # test excluded_values for strings exception
-        excluded_number = deepcopy(valid_input)
-        excluded_number['rating'] = 7
-        try:
-            self.validate(excluded_number)
-        except InputValidationError as err:
-            assert err.error['failed_test'] == 'excluded_values'
-
-    # test discrete_values exception
-        discrete_string = deepcopy(valid_input)
-        discrete_string['address']['city'] = 'Boston'
-        try:
-            self.validate(discrete_string)
-        except InputValidationError as err:
-            assert err.error['failed_test'] == 'discrete_values'
 
     # test must_not_contain exception
         prohibited_string = deepcopy(valid_input)
@@ -398,6 +437,9 @@ class jsonModelTests(jsonModel):
             'url': self.url
         }
 
+    # test json valid structure of model components
+        assert json.dumps(test_model)
+
     # test . use in key names
         dot_key_names = deepcopy(test_model)
         dot_key_names['schema']['.'] = { '.': '' }
@@ -425,7 +467,7 @@ class jsonModelTests(jsonModel):
         try:
             jsonModel(integer_criteria_error)
         except ModelValidationError as err:
-            assert str(err).find('components.rating') > 0
+            assert str(err).find('.rating') > 0
 
     # test wrong datatype qualifier values in components exception
         contains_either_error = deepcopy(test_model)
@@ -433,7 +475,7 @@ class jsonModelTests(jsonModel):
         try:
             jsonModel(contains_either_error)
         except ModelValidationError as err:
-            assert str(err).find('components.address.region.contains_either') > 0
+            assert str(err).find('.address.region') > 0
 
     # test wrong datatype qualifier values in components exception
         min_size_error = deepcopy(test_model)
@@ -441,7 +483,7 @@ class jsonModelTests(jsonModel):
         try:
             jsonModel(min_size_error)
         except ModelValidationError as err:
-            assert str(err).find('components.comments.min_size') > 0
+            assert str(err).find('.comments') > 0
 
     # test wrong datatype qualifier values in components exception
         max_value_error = deepcopy(test_model)
@@ -449,7 +491,7 @@ class jsonModelTests(jsonModel):
         try:
             jsonModel(max_value_error)
         except ModelValidationError as err:
-            assert str(err).find('components.rating.max_value') > 0
+            assert str(err).find('.rating') > 0
 
     # test wrong datatype qualifier values in components exception
         field_description_error = deepcopy(test_model)
@@ -457,7 +499,23 @@ class jsonModelTests(jsonModel):
         try:
             jsonModel(field_description_error)
         except ModelValidationError as err:
-            assert str(err).find('components.userID.field_description') > 0
+            assert str(err).find('.userID') > 0
+
+    # test conflicting byte data and range criteria exception
+        byte_range_error = deepcopy(test_model)
+        byte_range_error['components']['.emoticon']['min_value'] = 'Ng=='
+        try:
+            jsonModel(byte_range_error)
+        except ModelValidationError as err:
+            assert str(err).find('.emoticon') > 0
+
+    # test conflicting greater_than and contains_either exception
+        value_contains_error = deepcopy(test_model)
+        value_contains_error['components']['.address.region']['greater_than'] = '1B'
+        try:
+            jsonModel(value_contains_error)
+        except ModelValidationError as err:
+            assert str(err).find('.address.region') > 0
 
     # test conflicting declared and excluded values in schema exception
         excluded_value_error = deepcopy(test_model)
@@ -465,7 +523,7 @@ class jsonModelTests(jsonModel):
         try:
             jsonModel(excluded_value_error)
         except ModelValidationError as err:
-            assert str(err).find('schema.address.city') > 0
+            assert str(err).find('.address.city') > 0
 
     # test conflicting discrete and excluded values in schema exception
         discrete_value_error = deepcopy(test_model)
@@ -473,7 +531,7 @@ class jsonModelTests(jsonModel):
         try:
             jsonModel(discrete_value_error)
         except ModelValidationError as err:
-            assert str(err).find('components.address.city.discrete_values') > 0
+            assert str(err).find('.address.city') > 0
 
     # test item designator pattern used in schema keys
         item_designator_error = deepcopy(test_model)

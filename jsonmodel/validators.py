@@ -117,9 +117,9 @@ class jsonModel(object):
     # validate key names in fields
         for key, value in fields_dict.items():
             if key not in self.keyName:
-                raise ModelValidationError('Component %s is not a field declared in "schema".' % key)
+                raise ModelValidationError('Field %s is not a field declared in model schema.' % key)
             elif not isinstance(value, dict):
-                raise ModelValidationError('Value for component %s must be a dictionary.' % key)
+                raise ModelValidationError('Value for field %s must be a dictionary.' % key)
 
     # validate field criteria are appropriate to field datatype
             value_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
@@ -137,7 +137,7 @@ class jsonModel(object):
             elif value_type == 'null':
                 type_dict = self.__rules__[model_feature]['.null_fields']
             if set(value.keys()) - set(type_dict.keys()):
-                raise ModelValidationError('Data model "components%s" may only have datatype %s qualifiers %s.' % (key, value_type, set(type_dict.keys())))
+                raise ModelValidationError('Field %s may only have datatype %s qualifiers %s.' % (key, value_type, set(type_dict.keys())))
 
     # validate criteria qualifier values are appropriate datatype
             for k, v in value.items():
@@ -146,38 +146,38 @@ class jsonModel(object):
                 qualifier_index = self._datatype_classes.index(type_dict[k].__class__)
                 qualifier_type = self._datatype_names[qualifier_index]
                 if v_type != qualifier_type:
-                    raise ModelValidationError(
-                        'Value for data model components%s.%s" must be a %s datatype.' % (key, k, qualifier_type))
+                    message = 'Value for field %s qualifier %s must be a %s datatype.' % (key, k, qualifier_type)
+                    raise ModelValidationError(message)
 
     # validate internal logic of each qualifier value declaration
                 if k in ('must_not_contain', 'must_contain', 'contains_either'):
                     for item in v:
                         if not isinstance(item, str):
-                            message = 'Each item in list at data model path components%s.%s must be a string.' % (key, k)
+                            message = 'Each item in list field %s qualifier %s must be a string.' % (key, k)
                             raise ModelValidationError(message)
                 if k in ('min_length', 'max_length', 'min_size', 'max_size'):
                     if v < 0:
-                        message = 'Value for data model path components%s.%s cannot be negative.' % (key, k)
+                        message = 'Value for field %s qualifier %s cannot be negative.' % (key, k)
                         raise ModelValidationError(message)
                 if k in ('discrete_values', 'excluded_values', 'example_values'):
                     for item in v:
                         if value_type == 'number':
                             if not isinstance(item, int) and not isinstance(item, float):
-                                raise ModelValidationError(
-                                    'Each item in data model "components%s.%s" list must be a number.' % (key, k))
+                                message = 'Each item in field %s qualifier %s list must be a number.' % (key, k)
+                                raise ModelValidationError(message)
                         elif not isinstance(item, str):
-                            message = 'Each item in list at data model path .components%s.%s must be a string.' % (key, k)
+                            message = 'Each item in list for field %s qualifier %s must be a string.' % (key, k)
                             raise ModelValidationError(message)
                 if k == 'identical_to':
                     if not v in self.keyName:
-                        message = 'Value "%s" for data model path .components%s.%s not found in components keys.' % (v, key, k)
+                        message = 'Value "%s" for field %s qualifier %s not found in components keys.' % (v, key, k)
                         raise ModelValidationError(message)
                 if k == 'unique_values':
                     if v:
                         item_name = key + '[0]'
                         item_type = self.keyCriteria[self.keyName.index(item_name)]['value_datatype']
                         if not item_type in ('number', 'string'):
-                            message = '"unique_values": true requires value at data model path components%s[0] to be either a string or number.' % key
+                            message = 'Field %s[0] must be either a string or number if qualifier "unique_values": true' % key
                             raise ModelValidationError(message)
 
     # validate size qualifiers against each other
@@ -185,15 +185,15 @@ class jsonModel(object):
             for qualifier in size_qualifiers:
                 if qualifier in value.keys():
                     test_value = value[qualifier]
-                    value_path = 'components%s.%s' % (key, qualifier)
-                    header = 'Value %s at data model path %s' % (test_value, value_path)
+                    value_path = 'field %s qualifier %s' % (key, qualifier)
+                    header = 'Value %s for %s' % (test_value, value_path)
                     if 'min_size' in value.keys():
                         if test_value < value['min_size']:
-                            message = '%s must not be less than %s "min_size".' % (header, value['min_size'])
+                            message = '%s must not be less than "min_size": %s' % (header, value['min_size'])
                             raise ModelValidationError(message)
                     if 'max_size' in value.keys():
                         if test_value > value['max_size']:
-                            message = '%s must not be greater than %s "max_size".' % (header, value['max_size'])
+                            message = '%s must not be greater than "max_size": %s' % (header, value['max_size'])
                             raise ModelValidationError(message)
 
     # validate length qualifiers against each other
@@ -201,45 +201,83 @@ class jsonModel(object):
             for qualifier in length_qualifiers:
                 if qualifier in value.keys():
                     test_value = value[qualifier]
-                    value_path = 'components%s.%s' % (key, qualifier)
-                    header = 'Value %s at data model path %s' % (test_value, value_path)
+                    value_path = 'field %s qualifier %s' % (key, qualifier)
+                    header = 'Value %s for %s' % (test_value, value_path)
                     if 'min_length' in value.keys():
                         if test_value < value['min_length']:
-                            message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
+                            message = '%s must be at least "min_length": %s' % (header, value['min_length'])
                             raise ModelValidationError(message)
                     if 'max_length' in value.keys():
                         if test_value > value['max_length']:
-                            message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
+                            message = '%s cannot be more than "max_length": %s' % (header, value['max_length'])
                             raise ModelValidationError(message)
 
     # validate range qualifiers against each other & length qualifiers
-            range_qualifiers = ['min_value', 'max_value']
+            range_qualifiers = ['min_value', 'max_value', 'greater_than', 'less_than']
             for qualifier in range_qualifiers:
                 if qualifier in value.keys():
                     test_value = value[qualifier]
-                    value_path = 'components%s.%s' % (key, qualifier)
-                    header = 'Value %s at data model path %s' % (test_value, value_path)
+                    value_path = 'field %s qualifier %s' % (key, qualifier)
+                    quote_text = ''
+                    if isinstance(test_value, str):
+                        quote_text = '"'
+                    header = 'Value %s%s%s for %s' % (quote_text, test_value, quote_text, value_path)
                     if 'min_value' in value.keys():
                         if test_value < value['min_value']:
-                            message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
+                            message = '%s must not be less than "min_value": %s' % (header, value['min_value'])
                             raise ModelValidationError(message)
                     if 'max_value' in value.keys():
                         if test_value > value['max_value']:
-                            message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
+                            message = '%s must not be greater than "max_value": %s' % (header, value['max_value'])
+                            raise ModelValidationError(message)
+                    if 'greater_than' in value.keys():
+                        if test_value <= value['greater_than'] and not qualifier == 'greater_than':
+                            message = '%s must be "greater_than": %s' % (header, value['greater_than'])
+                            raise ModelValidationError(message)
+                    if 'less_than' in value.keys():
+                        if test_value >= value['less_than'] and not qualifier == 'less_than':
+                            message = '%s must be "less_than": %s' % (header, value['less_than'])
                             raise ModelValidationError(message)
                     if 'min_length' in value.keys():
                         if len(test_value) < value['min_length']:
-                            message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
+                            message = '%s must be at least "min_length": %s' % (header, value['min_length'])
                             raise ModelValidationError(message)
                     if 'max_length' in value.keys():
                         if len(test_value) > value['max_length']:
-                            message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
+                            message = '%s cannot be more than "max_length": %s' % (header, value['max_length'])
                             raise ModelValidationError(message)
                     if 'integer_only' in value.keys():
                         if value['integer_only']:
                             if not isinstance(test_value, int):
                                 message = '%s must be an "integer_only".' % header
                                 raise ModelValidationError(message)
+                    if 'must_not_contain' in value.keys():
+                        for regex in value['must_not_contain']:
+                            regex_pattern = re.compile(regex)
+                            if regex_pattern.findall(test_value):
+                                message = '%s matches regex pattern in "must_not_contain": ["%s"]' % (header, regex)
+                                raise ModelValidationError(message)
+                    if 'must_contain' in value.keys():
+                        for regex in value['must_contain']:
+                            regex_pattern = re.compile(regex)
+                            if not regex_pattern.findall(test_value):
+                                message = '%s does not match regex pattern in "must_contain": ["%s"].' % (header, regex)
+                                raise ModelValidationError(message)
+                    if 'contains_either' in value.keys():
+                        regex_match = False
+                        regex_patterns = []
+                        for regex in value['contains_either']:
+                            regex_patterns.append(regex)
+                            regex_pattern = re.compile(regex)
+                            if regex_pattern.findall(test_value):
+                                regex_match = True
+                        if not regex_match:
+                            message = '%s does not match any regex patterns in "contains_either": %s' % (header, regex_patterns)
+                            raise ModelValidationError(message)
+                    if 'byte_data' in value.keys():
+                        if value['byte_data']:
+                            message = '%s cannot be used with base64 encoded "byte_data".' % header
+                            raise ModelValidationError(message)
 
     # validate discrete value qualifiers against other criteria
             schema_field = self.keyCriteria[self.keyName.index(key)]
@@ -253,27 +291,33 @@ class jsonModel(object):
                             multiple_values = True
                         else:
                             test_list = [value[qualifier]]
-                        value_path = 'components%s.%s' % (key, qualifier)
                     else:
                         test_list = [schema_field[qualifier]]
-                        value_path = 'schema%s' % key
+                    value_path = 'field %s qualifier %s' % (key, qualifier)
                     for i in range(len(test_list)):
                         test_value = test_list[i]
+                        quote_text = ''
                         if isinstance(test_value, str):
-                            test_value_name = '"%s"' % test_value
-                        else:
-                            test_value_name = test_value
+                            quote_text = '"'
+                        item_text = ''
                         if multiple_values:
-                            header = 'Value %s at data model path %s[%s]' % (test_value_name, value_path, i)
-                        else:
-                            header = 'Value %s at data model path %s' % (test_value_name, value_path)
+                            item_text = '[%s]' % i
+                        header = 'Value %s%s%s for %s%s' % (quote_text, test_value, quote_text, value_path, item_text)
                         if 'min_value' in value.keys():
                             if test_value < value['min_value']:
-                                message = '%s must not be less than %s "min_value".' % (header, value['min_value'])
+                                message = '%s must not be less than "min_value": %s' % (header, value['min_value'])
                                 raise ModelValidationError(message)
                         if 'max_value' in value.keys():
                             if test_value > value['max_value']:
-                                message = '%s must not be greater than %s "max_value".' % (header, value['max_value'])
+                                message = '%s must not be greater than "max_value": %s' % (header, value['max_value'])
+                                raise ModelValidationError(message)
+                        if 'greater_than' in value.keys():
+                            if test_value <= value['greater_than']:
+                                message = '%s must be "greater_than": %s' % (header, value['greater_than'])
+                                raise ModelValidationError(message)
+                        if 'less_than' in value.keys():
+                            if test_value >= value['less_than']:
+                                message = '%s must be "less_than": %s' % (header, value['less_than'])
                                 raise ModelValidationError(message)
                         if 'integer_only' in value.keys():
                             if value['integer_only']:
@@ -282,24 +326,23 @@ class jsonModel(object):
                                     raise ModelValidationError(message)
                         if 'min_length' in value.keys():
                             if len(test_value) < value['min_length']:
-                                message = '%s must be at least %s characters "min_length".' % (header, value['min_length'])
+                                message = '%s must be at least "min_length": %s' % (header, value['min_length'])
                                 raise ModelValidationError(message)
                         if 'max_length' in value.keys():
                             if len(test_value) > value['max_length']:
-                                message = '%s cannot be more than %s characters "max_length".' % (header, value['max_length'])
+                                message = '%s cannot be more than "max_length": %s' % (header, value['max_length'])
                                 raise ModelValidationError(message)
                         if 'must_not_contain' in value.keys():
                             for regex in value['must_not_contain']:
                                 regex_pattern = re.compile(regex)
                                 if regex_pattern.findall(test_value):
-                                    message = '%s matches regex pattern "%s" in "must_not_contain".' % (header, regex)
+                                    message = '%s matches regex pattern in "must_not_contain": ["%s"]' % (header, regex)
                                     raise ModelValidationError(message)
                         if 'must_contain' in value.keys():
                             for regex in value['must_contain']:
                                 regex_pattern = re.compile(regex)
                                 if not regex_pattern.findall(test_value):
-                                    message = '%s does not match regex pattern "%s" in "must_contain".' % (
-                                    header, regex)
+                                    message = '%s does not match regex pattern in "must_contain": ["%s"]' % (header, regex)
                                     raise ModelValidationError(message)
                         if 'contains_either' in value.keys():
                             regex_match = False
@@ -310,7 +353,7 @@ class jsonModel(object):
                                 if regex_pattern.findall(test_value):
                                     regex_match = True
                             if not regex_match:
-                                message = '%s does not match any regex patterns %s in "contains_either".' % (header, regex_patterns)
+                                message = '%s does not match any regex patterns in "contains_either": %s' % (header, regex_patterns)
                                 raise ModelValidationError(message)
                         if 'byte_data' in value.keys():
                             message = '%s cannot be base64 decoded to "byte_data".' % header
@@ -331,29 +374,27 @@ class jsonModel(object):
                             multiple_values = True
                         else:
                             test_list = [value[qualifier]]
-                        value_path = 'components%s.%s' % (key, qualifier)
                     else:
                         test_list = [schema_field[qualifier]]
-                        value_path = 'schema%s' % key
+                    value_path = 'field %s qualifier %s' % (key, qualifier)
                     for i in range(len(test_list)):
                         test_value = test_list[i]
+                        quote_text = ''
                         if isinstance(test_value, str):
-                            test_value_name = '"%s"' % test_value
-                        else:
-                            test_value_name = test_value
+                            quote_text = '"'
+                        item_text = ''
                         if multiple_values:
-                            header = 'Value %s at data model path %s[%s]' % (test_value_name, value_path, i)
-                        else:
-                            header = 'Value %s at data model path %s' % (test_value_name, value_path)
+                            item_text = '[%s]' % i
+                        header = 'Value %s%s%s for %s%s' % (quote_text, test_value, quote_text, value_path, item_text)
                         if 'excluded_values' in value.keys():
                             if not qualifier == 'excluded_values':
                                 if test_value in value['excluded_values']:
-                                    message = '%s cannot be one of %s "excluded_values".' % (header, value['excluded_values'])
+                                    message = '%s cannot be one of "excluded_values": %s.' % (header, value['excluded_values'])
                                     raise ModelValidationError(message)
                         if 'discrete_values' in value.keys():
                             if not qualifier == 'excluded_values':
                                 if test_value not in value['discrete_values']:
-                                    message = '%s must be one of %s "discrete_values".' % (header, value['excluded_values'])
+                                    message = '%s must be one of "discrete_values": %s' % (header, value['excluded_values'])
                                     raise ModelValidationError(message)
 
         return fields_dict
@@ -593,6 +634,16 @@ class jsonModel(object):
                 error_dict['failed_test'] = 'max_value'
                 error_dict['error_code'] = 4023
                 raise InputValidationError(error_dict)
+        if 'greater_than' in input_criteria.keys():
+            if input_number <= input_criteria['greater_than']:
+                error_dict['failed_test'] = 'greater_than'
+                error_dict['error_code'] = 4024
+                raise InputValidationError(error_dict)
+        if 'less_than' in input_criteria.keys():
+            if input_number >= input_criteria['less_than']:
+                error_dict['failed_test'] = 'less_than'
+                error_dict['error_code'] = 4025
+                raise InputValidationError(error_dict)
         if 'discrete_values' in input_criteria.keys():
             if input_number not in input_criteria['discrete_values']:
                 error_dict['failed_test'] = 'discrete_values'
@@ -647,6 +698,16 @@ class jsonModel(object):
             if input_string > input_criteria['max_value']:
                 error_dict['failed_test'] = 'max_value'
                 error_dict['error_code'] = 4023
+                raise InputValidationError(error_dict)
+        if 'greater_than' in input_criteria.keys():
+            if input_string <= input_criteria['greater_than']:
+                error_dict['failed_test'] = 'greater_than'
+                error_dict['error_code'] = 4024
+                raise InputValidationError(error_dict)
+        if 'less_than' in input_criteria.keys():
+            if input_string >= input_criteria['less_than']:
+                error_dict['failed_test'] = 'less_than'
+                error_dict['error_code'] = 4025
                 raise InputValidationError(error_dict)
         if 'min_length' in input_criteria.keys():
             if len(input_string) < input_criteria['min_length']:
