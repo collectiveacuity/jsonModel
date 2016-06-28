@@ -11,6 +11,7 @@ except:
 import json
 from copy import deepcopy
 from jsonmodel.exceptions import InputValidationError, ModelValidationError
+from jsonmodel.exceptions import QueryValidationError
 from jsonmodel.validators import jsonModel
 
 class jsonModelTests(jsonModel):
@@ -18,7 +19,7 @@ class jsonModelTests(jsonModel):
     def __init__(self, data_model):
         jsonModel.__init__(self, data_model)
 
-    def unitTests(self, valid_input):
+    def unitTests(self, valid_input, valid_query):
 
         # print(self.keyMap)
 
@@ -539,15 +540,54 @@ class jsonModelTests(jsonModel):
         try:
             jsonModel(item_designator_error)
         except ModelValidationError as err:
-            assert str(err).find('schema.[1]') > 0
+            assert str(err).find('.[1]') > 0
+
+    # test query rules input
+        assert jsonModel(test_model, self.queryRules)
+
+    # test query rules extra field exception
+        query_rules_field = deepcopy(self.queryRules)
+        query_rules_field['.none_fields'] = {}
+        try:
+            jsonModel(test_model, query_rules_field)
+        except ModelValidationError as err:
+            assert str(err).find('.string_fields') > 0
+
+    # test query rules extra qualifier exception
+        query_rules_qualifier = deepcopy(self.queryRules)
+        query_rules_qualifier['.string_fields']['field_title'] = 'not a qualifier'
+        try:
+            jsonModel(test_model, query_rules_qualifier)
+        except ModelValidationError as err:
+            assert str(err).find('.string_fields') > 0
+
+    # test query rules qualifier value exception
+        query_rules_value = deepcopy(self.queryRules)
+        query_rules_value['.string_fields']['min_value'] = 0.0
+        try:
+            jsonModel(test_model, query_rules_value)
+        except ModelValidationError as err:
+            assert str(err).find('.string_fields') > 0
+
+    # test sample query
+        assert self.query(valid_query)
+
+    # test query criteria extra qualifier exception
+        query_qualifier_error = deepcopy(valid_query)
+        query_qualifier_error['.address.region']['required_field'] = False
+        try:
+            self.query(query_qualifier_error)
+        except QueryValidationError as err:
+            assert str(err).find('.address.region') > 0
 
         return self
 
 if __name__ == '__main__':
     from timeit import timeit as timer
     t0 = timer()
+    testQuery = json.loads(open('../models/sample-query.json').read())
     testModel = json.loads(open('../models/sample-model.json').read())
     testInput = json.loads(open('../models/sample-input.json').read())
-    jsonModelTests(testModel).unitTests(testInput)
+    jsonModelTests(testModel).unitTests(testInput, testQuery)
     t1 = timer()
     print(str(t1 - t0))

@@ -1,0 +1,60 @@
+{
+  ".boolean_fields": {
+    "identical_to": ".similar_boolean",
+    "lambda_function": "",
+    "validation_url": "",
+    "value_exists": false
+  },
+ ".list_fields": {
+    "identical_to": ".similar_list",
+    "lambda_function": "",
+    "max_size": 0,
+    "min_size": 0,
+    "unique_values": false,
+    "validation_url": "",
+    "value_exists": false
+ },
+ ".map_fields": {
+    "identical_to": ".similar_map",
+    "lambda_function": "",
+    "validation_url": "",
+    "value_exists": false
+ },
+ ".null_fields": {
+    "identical_to": ".similar_null",
+    "lambda_function": "",
+    "validation_url": "",
+    "value_exists": false
+ },
+ ".number_fields": {
+    "discrete_values": [],
+    "excluded_values": [],
+    "greater_than": 0.0,
+    "identical_to": ".similar_number",
+    "integer_only": false,
+    "lambda_function": "",
+    "less_than": 0.0,
+    "max_value": 0.0,
+    "min_value": 0.0,
+    "validation_url": "",
+    "value_exists": false
+ },
+  ".string_fields": {
+    "byte_data": false,
+    "contains_either": [],
+    "discrete_values": [],
+    "excluded_values": [],
+    "greater_than": "",
+    "identical_to": ".similar_string",
+    "lambda_function": "",
+    "less_than": "",
+    "max_length": 0,
+    "max_value": "",
+    "min_length": 0,
+    "min_value": "",
+    "must_contain": [],
+    "must_not_contain": [],
+    "validation_url": "",
+    "value_exists": false
+  }
+}

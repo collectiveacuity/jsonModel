@@ -3,10 +3,27 @@ __created__ = '2016.01'
 
 class ModelValidationError(Exception):
 
-    def __init__(self, message='', error=None):
+    def __init__(self, message='', error_dict=None):
         text = '\nModel declaration is invalid.\n%s' % message
+        self.error = {
+            'message': message
+        }
+        if error_dict:
+            if isinstance(error_dict, dict):
+                self.error = error_dict
         super(ModelValidationError, self).__init__(text)
-        self.error = error
+
+class QueryValidationError(Exception):
+
+    def __init__(self, message='', error_dict=None):
+        text = '\nQuery declaration is invalid.\n%s' % message
+        self.error = {
+            'message': message
+        }
+        if error_dict:
+            if isinstance(error_dict, dict):
+                self.error = error_dict
+        super(QueryValidationError, self).__init__(text)
 
 class InputValidationError(Exception):
 

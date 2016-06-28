@@ -1,0 +1,44 @@
+{
+  ".address.city": {
+    "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
+  },
+  ".address.country_code": {
+    "discrete_values": [36, 124, 554, 826, 840],
+    "integer_only": true
+  },
+  ".address.region": {
+    "contains_either": ["[A-Z]{2}", "[A-Z][a-z]+"],
+    "greater_than": "AB",
+    "less_than": "Yyyyyyyyyyyyyyyyyyyyyyyy"
+  },
+  ".comments": {
+    "max_size": 3,
+    "min_size": 1,
+    "unique_values": true
+  },
+  ".comments[0]": {
+    "max_length": 140,
+    "must_contain": ["[a-zA-Z]{2,}"]
+  },
+  ".datetime": {
+    "greater_than": 1.1,
+    "less_than": 2000000000.0
+  },
+  ".emoticon": {
+    "byte_data": true,
+    "excluded_values": ["c2Fk"]
+  },
+  ".rating": {
+    "excluded_values": [7, 9],
+    "integer_only": true,
+    "max_value": 10,
+    "min_value": 1
+  },
+  ".userID": {
+    "max_length": 13,
+    "max_value": "yyyyyyyyyyyyy",
+    "min_length": 13,
+    "min_value": "1111111111111",
+    "must_not_contain": ["[^\\w]", "_"]
+  }
+}

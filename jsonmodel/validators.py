@@ -4,6 +4,7 @@ __created__ = '2015.11'
 import re
 from base64 import b64decode
 from jsonmodel.exceptions import InputValidationError, ModelValidationError
+from jsonmodel.exceptions import QueryValidationError
 from jsonmodel.loader import jsonLoader
 from jsonmodel.mapping import mapModel
 
@@ -11,12 +12,13 @@ class jsonModel(object):
 
     __rules__ = jsonLoader('jsonmodel', 'model-rules.json')
 
-    def __init__(self, data_model):
+    def __init__(self, data_model, query_rules=None):
 
         '''
             a method for testing data model declaration & initializing the class
 
         :param data_model: dictionary with json model architecture
+        :param query_rules: [optional] dictionary with valid field type qualifiers
         :return: jsonmodel object
         '''
 
@@ -46,7 +48,7 @@ class jsonModel(object):
             if patterns_found:
                 for designator in patterns_found:
                     if designator != '[0]':
-                        message = 'Key name at data model path schema%s must not contain the item designator pattern %s' % (self.keyName[i], designator)
+                        message = 'Key name for schema field %s must not contain the item designator pattern %s' % (self.keyName[i], designator)
                         raise ModelValidationError(message)
 
     # validate existence of first item in list declarations
@@ -55,55 +57,55 @@ class jsonModel(object):
             if self.keyCriteria[i]['value_datatype'] == 'list':
                 item_key = self.keyName[i] + '[0]'
                 if not item_key in key_set:
-                    message = 'List at data model path schema%s must declare an initial item for the list.' % self.keyName[i]
+                    message = 'Schema field %s must declare an initial item for the list.' % self.keyName[i]
                     raise ModelValidationError(message)
 
     # validate title input & construct title method
         self.title = ''
         if 'title' in data_model.keys():
             if not isinstance(data_model['title'], str):
-                raise ModelValidationError('Value for data model path .title must be a string.')
+                raise ModelValidationError('Value for model title must be a string.')
             self.title = data_model['title']
 
     # validate description input & construct description method
         self.description = ''
         if 'description' in data_model.keys():
             if not isinstance(data_model['description'], str):
-                raise ModelValidationError('Value for data model path .description must be a string.')
+                raise ModelValidationError('Value for model description must be a string.')
             self.description = data_model['description']
 
     # validate url input & construct title method
         self.url = ''
         if 'url' in data_model.keys():
             if not isinstance(data_model['url'], str):
-                raise ModelValidationError('Value for data model path .url must be a string.')
+                raise ModelValidationError('Value for model url must be a string.')
             self.title = data_model['url']
 
     # validate metadata input & construct metadata method
         self.metadata = {}
         if 'metadata' in data_model.keys():
             if not isinstance(data_model['metadata'], dict):
-                raise ModelValidationError('Value for data model path .metadata must be a dictionary.')
+                raise ModelValidationError('Value for model metadata must be a dictionary.')
             self.metadata = data_model['metadata']
 
-    # validate max size input & construct max size method
+    # validate max size input & construct maxSize property
         self.maxSize = None
         if 'max_size' in data_model.keys():
             if not isinstance(data_model['max_size'], int):
-                raise ModelValidationError('Value for data model path .max_size must be a positive integer.')
+                raise ModelValidationError('Value for model max_size must be a positive integer.')
             elif data_model['max_size'] < 0:
-                raise ModelValidationError('Value for data model path .max_size must be a positive integer.')
+                raise ModelValidationError('Value for model max_size must be a positive integer.')
             elif data_model['max_size']:
                 self.maxSize = data_model['max_size']
 
-    # validate components input & construct component method
+    # validate components input & construct component property
         self.components = {}
         if 'components' in data_model.keys():
             if not isinstance(data_model['components'], dict):
-                raise ModelValidationError('Value for data model path components must be a dictionary.')
-            self.components = self._validate_fields(data_model['components'], 'components')
+                raise ModelValidationError('Value for model components must be a dictionary.')
+            self.components = self._validate_fields(data_model['components'], self.__rules__['components'])
 
-    # construct keyMap from components, key names and key criteria
+    # construct keyMap property from components, key names and key criteria
         self.keyMap = {}
         for i in range(len(self.keyName)):
             self.keyMap[self.keyName[i]] = self.keyCriteria[i]
@@ -112,7 +114,46 @@ class jsonModel(object):
                 for k, v in self.components[key].items():
                     self.keyMap[key][k] = v
 
-    def _validate_fields(self, fields_dict, model_feature):
+    # construct queryRules property from class model rules
+        self.queryRules = {}
+        for key, value in self.__rules__['components'].items():
+            remove_from_query = [ 'required_field', 'default_value', 'example_values', 'field_title', 'field_description', 'field_metadata', 'extra_fields' ]
+            field_qualifiers = {
+                'value_exists': False
+            }
+            for k, v in value.items():
+                if k not in remove_from_query:
+                    field_qualifiers[k] = v
+            self.queryRules[key] = field_qualifiers
+
+    # validate query rules input and replace queryRules property
+        if query_rules:
+            if not isinstance(query_rules, dict):
+                message = 'Value for query rules input must be a dictionary.'
+                raise ModelValidationError(message)
+            input_set = set(query_rules.keys())
+            req_set = set(self.queryRules.keys())
+            if input_set - req_set:
+                message = 'Query rules input may only have %s key names.' % req_set
+                raise ModelValidationError(message)
+            elif req_set - input_set:
+                message = 'Query rules input must have all %s key names.' % req_set
+                raise ModelValidationError(message)
+            for key in req_set:
+                input_qualifier_set = set(query_rules[key].keys())
+                req_qualifier_set = set(self.queryRules[key].keys())
+                if input_qualifier_set - req_qualifier_set:
+                    message = 'Query rules field %s may only have qualifiers %s' % (key, req_qualifier_set)
+                    raise ModelValidationError(message)
+                for k, v in query_rules[key].items():
+                    if v.__class__ != self.queryRules[key][k].__class__:
+                        qualifier_index = self._datatype_classes.index(self.queryRules[key][k].__class__)
+                        qualifier_type = self._datatype_names[qualifier_index]
+                        message = 'Value for query rules field %s qualifier %s must be a "%s" datatype.' % (key, k, qualifier_type)
+                        raise ModelValidationError(message)
+            self.queryRules = query_rules
+
+    def _validate_fields(self, fields_dict, fields_rules, declared_value=True):
 
     # validate key names in fields
         for key, value in fields_dict.items():
@@ -125,17 +166,17 @@ class jsonModel(object):
             value_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
             type_dict = {}
             if value_type == 'string':
-                type_dict = self.__rules__[model_feature]['.string_fields']
+                type_dict = fields_rules['.string_fields']
             elif value_type == 'number':
-                type_dict = self.__rules__[model_feature]['.number_fields']
+                type_dict = fields_rules['.number_fields']
             elif value_type == 'boolean':
-                type_dict = self.__rules__[model_feature]['.boolean_fields']
+                type_dict = fields_rules['.boolean_fields']
             elif value_type == 'list':
-                type_dict = self.__rules__[model_feature]['.list_fields']
+                type_dict = fields_rules['.list_fields']
             elif value_type == 'map':
-                type_dict = self.__rules__[model_feature]['.map_fields']
-            elif value_type == 'null':
-                type_dict = self.__rules__[model_feature]['.null_fields']
+                type_dict = fields_rules['.map_fields']
+            # elif value_type == 'null':
+            #     type_dict = field_rules['.null_fields']
             if set(value.keys()) - set(type_dict.keys()):
                 raise ModelValidationError('Field %s may only have datatype %s qualifiers %s.' % (key, value_type, set(type_dict.keys())))
 
@@ -283,7 +324,7 @@ class jsonModel(object):
             schema_field = self.keyCriteria[self.keyName.index(key)]
             discrete_qualifiers = ['declared_value', 'default_value', 'excluded_values', 'discrete_values', 'example_values']
             for qualifier in discrete_qualifiers:
-                if qualifier in value.keys() or qualifier in schema_field:
+                if qualifier in value.keys() or (qualifier in schema_field and declared_value):
                     multiple_values = False
                     if qualifier in value.keys():
                         if isinstance(value[qualifier], list):
@@ -1072,3 +1113,44 @@ class jsonModel(object):
         valid_data = self._ingest_dict(kwargs, schema_dict, path_to_root)
 
         return valid_data
+
+    def query(self, query_criteria):
+
+        '''
+            a core method for validating query criteria against model query scope
+
+            **NOTE: input is only returned if all fields & qualifiers are valid for model
+
+            :param query_criteria: dictionary with model field names and query qualifiers
+            :return: query_criteria (or QueryValidationError)
+
+            query_criteria = {
+                '.path.to.number': {
+                    'min_value': 4.5
+                },
+                '.path.to.string': {
+                    'must_contain': [ '\regex' ]
+                }
+            }
+        '''
+
+        __name__ = '%s.query' % self.__class__.__name__
+        _query_arg = '%s(query_criteria={...})' % __name__
+
+    # validate input
+        if not isinstance(query_criteria, dict):
+            raise ModelValidationError('%s must be a dictionary.' % _query_arg)
+
+    # validate query criteria against query rules
+        query_kwargs = {
+            'fields_dict': query_criteria,
+            'fields_rules': self.queryRules,
+            'declared_value': False
+        }
+        try:
+            query_criteria = self._validate_fields(**query_kwargs)
+        except ModelValidationError as err:
+            message = err.error['message']
+            raise QueryValidationError(message)
+
+        return query_criteria
