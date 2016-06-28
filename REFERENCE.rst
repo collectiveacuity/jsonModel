@@ -269,8 +269,141 @@ Too Many Items
 ^^^^^^^^^^^^^^
 Items are only added to a list from those items in kwargs if they are valid. If the number of valid items in a list in the kwargs exceeds the 'max_size' of the corresponding list in the model, then subsequent items are not added to the list once the list reaches its maximum size.
 
+Query Criteria
+--------------
+Query criteria are composed of a dictionary of one or more key-value pairs, where the key names are the dot path to the fields in the model schema to be queried and the values are dictionaries containing all the conditional operators for the query on the respective fields. Query criteria can be simple, such as the single field, operator and qualifier in the README documentation, or elaborate, such as found in the provided model sample-query.json below:
+
+**Sample Query**::
+
+    {
+      ".address.city": {
+        "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
+      },
+      ".address.country_code": {
+        "discrete_values": [36, 124, 554, 826, 840],
+        "integer_only": true
+      },
+      ".address.region": {
+        "contains_either": ["[A-Z]{2}", "[A-Z][a-z]+"],
+        "greater_than": "AB",
+        "less_than": "Yyyyyyyyyyyyyyyyyyyyyyyy"
+      },
+      ".comments": {
+        "max_size": 3,
+        "min_size": 1,
+        "unique_values": true
+      },
+      ".comments[0]": {
+        "max_length": 140,
+        "must_contain": ["[a-zA-Z]{2,}"]
+      },
+      ".datetime": {
+        "greater_than": 1.1,
+        "less_than": 2000000000.0
+      },
+      ".emoticon": {
+        "byte_data": true,
+        "excluded_values": ["c2Fk"]
+      },
+      ".rating": {
+        "excluded_values": [7, 9],
+        "integer_only": true,
+        "max_value": 10,
+        "min_value": 1
+      },
+      ".userID": {
+        "max_length": 13,
+        "max_value": "yyyyyyyyyyyyy",
+        "min_length": 13,
+        "min_value": "1111111111111",
+        "must_not_contain": ["[^\\w]", "_"]
+      }
+    }
+
+The query method follows a similar process by which input is validated. Records whose field values evaluate to true for all criteria are added to the query results. Records which do not are skipped. Although the query method will evaluate list type fields, it is not tailored for list evaluation. Unlike the process of ingestion, if any item in a list fails to evaluate to true to a criteria in the query, the entire record will be skipped.
+
+Query Errors
+^^^^^^^^^^^^
+If query criteria contain fields, operators or qualifiers which are outside the scope of the model, the query method will produce a QueryValidationError.
+
+To handle a QueryValidationError::
+
+    try:
+        query_results = validModel.query(invalid_criteria, records_list)
+    except QueryValidationError as err:
+        assert isinstance(err.error['message'], str)
 
 
+Query Rules Customization
+^^^^^^^^^^^^^^^^^^^^^^^^^
+When the model is initialized, it accepts an optional dictionary for customized query rules. The primary purpose of this customization is to limit query criteria validation to only those query operations which are supported by a specific query engine. Optional query rules must be structured according to the components field of the model-rules.json file and cannot contain any fields, operators or qualifiers outside the full range of the model query rules.
+
+**Query Rules**::
+
+    {
+      ".boolean_fields": {
+        "identical_to": ".similar_boolean",
+        "lambda_function": "",
+        "validation_url": "",
+        "value_exists": false
+      },
+     ".list_fields": {
+        "identical_to": ".similar_list",
+        "lambda_function": "",
+        "max_size": 0,
+        "min_size": 0,
+        "unique_values": false,
+        "validation_url": "",
+        "value_exists": false
+     },
+     ".map_fields": {
+        "identical_to": ".similar_map",
+        "lambda_function": "",
+        "validation_url": "",
+        "value_exists": false
+     },
+     ".null_fields": {
+        "identical_to": ".similar_null",
+        "lambda_function": "",
+        "validation_url": "",
+        "value_exists": false
+     },
+     ".number_fields": {
+        "discrete_values": [],
+        "excluded_values": [],
+        "greater_than": 0.0,
+        "identical_to": ".similar_number",
+        "integer_only": false,
+        "lambda_function": "",
+        "less_than": 0.0,
+        "max_value": 0.0,
+        "min_value": 0.0,
+        "validation_url": "",
+        "value_exists": false
+     },
+      ".string_fields": {
+        "byte_data": false,
+        "contains_either": [],
+        "discrete_values": [],
+        "excluded_values": [],
+        "greater_than": "",
+        "identical_to": ".similar_string",
+        "lambda_function": "",
+        "less_than": "",
+        "max_length": 0,
+        "max_value": "",
+        "min_length": 0,
+        "min_value": "",
+        "must_contain": [],
+        "must_not_contain": [],
+        "validation_url": "",
+        "value_exists": false
+      }
+    }
+
+*[The lambda_function, identical_to and validation_url operators are not yet supported by the model.]*
+
+A malformed query rules argument on model initialization will produce a ModelValidationError.
 
 
 

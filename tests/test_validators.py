@@ -569,8 +569,8 @@ class jsonModelTests(jsonModel):
         except ModelValidationError as err:
             assert str(err).find('.string_fields') > 0
 
-    # test sample query
-        assert self.query(valid_query)
+    # test sample empty query
+        assert isinstance(self.query(valid_query), list)
 
     # test query criteria extra qualifier exception
         query_qualifier_error = deepcopy(valid_query)

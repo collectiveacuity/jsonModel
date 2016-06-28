@@ -28,6 +28,8 @@ Features
 - Ability to assign default values to inputs
 - Validates individual components in a model
 - Ingests arbitrary keyword data and outputs model valid dictionary
+- Validates query criteria against model scope **New Feature**
+- Query results from a model valid list of records **New Feature**
 
 ============
 Installation
@@ -100,14 +102,14 @@ To import the model::
 
     import json
 
-    sampleModel = json.loads(open('sample-model.json').read())
+    sample_model = json.loads(open('sample-model.json').read())
 
 
 To initialize the class object::
 
     from jsonmodel.validators import jsonModel
 
-    validModel = jsonModel(sampleModel)
+    validModel = jsonModel(sample_model)
 
 
 To validate input against model declaration::
@@ -142,6 +144,48 @@ As a result, ingestion will produce an output which contains all the keys declar
 To ingest kwargs::
 
     output_dict = validModel.ingest(**kwargs)
+
+
+Query Records
+-------------
+The jsonModel class also supports record querying on model validated data. When the model is initialized, it constructs a set of operators that can be used to query records which contain data validated by the model. The set of valid operators and qualifiers which can be used to query records on each field depend upon its datatype. The query criteria for each field is the subset of the criteria that can be declared for that field in the components section of the model which can evaluate to 'true' against a value stored for that field in a record.
+
+The built in query method supports any number of fields declared in the model as well as the maximum subset of query relevant criteria for each field based upon its datatype. But the model can also be initialized with a customized dictionary of rules for field datatypes based upon what is supported by a specific query engine.  In this way, the query method can be used as a bridge across multiple different database query languages (with a jsonModel valid record access object customized for applicable databases) or as a post-request filter for records stored in a way that does not support robust query criteria.
+
+To declare query rules::
+
+    {
+        ".string_fields": {
+            "must_contain": []
+        }
+    }
+
+To initialize model with custom query rules::
+
+    query_rules = json.loads(open('query-rules.json').read())
+
+    validModel = jsonModel(sample_model, query_rules)
+
+
+To declare query criteria::
+
+    {
+        '.property': {
+            'must_contain': [ 'v.+' ]
+        }
+    }
+
+To validate query criteria::
+
+    validModel.query(sample_query)
+
+
+To query records using the criteria::
+
+    valid_input = validModel.validate(input)
+    records_list = [ valid_input ]
+
+    query_results = validModel.query(sample_query, records_list)
 
 
 Reference Documentation

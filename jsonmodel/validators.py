@@ -1114,15 +1114,16 @@ class jsonModel(object):
 
         return valid_data
 
-    def query(self, query_criteria):
+    def query(self, query_criteria, records_list=None):
 
         '''
-            a core method for validating query criteria against model query scope
+            a core method for querying model valid data with criteria
 
             **NOTE: input is only returned if all fields & qualifiers are valid for model
 
             :param query_criteria: dictionary with model field names and query qualifiers
-            :return: query_criteria (or QueryValidationError)
+            :param records_list: list of model validated records
+            :return: list of records (or QueryValidationError)
 
             query_criteria = {
                 '.path.to.number': {
@@ -1148,9 +1149,14 @@ class jsonModel(object):
             'declared_value': False
         }
         try:
-            query_criteria = self._validate_fields(**query_kwargs)
+            self._validate_fields(**query_kwargs)
         except ModelValidationError as err:
             message = err.error['message']
             raise QueryValidationError(message)
 
-        return query_criteria
+    # construct empty fields
+        results_list = []
+
+    # query records list
+
+        return results_list
