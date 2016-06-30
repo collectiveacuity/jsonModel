@@ -31,7 +31,7 @@
     "excluded_values": [],
     "greater_than": 0.0,
     "identical_to": ".similar_number",
-    "integer_only": false,
+    "integer_data": false,
     "lambda_function": "",
     "less_than": 0.0,
     "max_value": 0.0,

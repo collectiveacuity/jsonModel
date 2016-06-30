@@ -44,7 +44,7 @@
             "max_value": 0.0,
             "greater_than": 0.0,
             "less_than": 0.0,
-            "integer_only": false,
+            "integer_data": false,
             "discrete_values": [],
             "excluded_values": [],
             "identical_to": ".similar_number",

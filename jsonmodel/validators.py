@@ -294,10 +294,10 @@ class jsonModel(object):
                         if len(test_value) > value['max_length']:
                             message = '%s cannot be more than "max_length": %s' % (header, value['max_length'])
                             raise ModelValidationError(message)
-                    if 'integer_only' in value.keys():
-                        if value['integer_only']:
+                    if 'integer_data' in value.keys():
+                        if value['integer_data']:
                             if not isinstance(test_value, int):
-                                message = '%s must be an "integer_only".' % header
+                                message = '%s must be an "integer_data".' % header
                                 raise ModelValidationError(message)
                     if 'must_not_contain' in value.keys():
                         for regex in value['must_not_contain']:
@@ -367,10 +367,10 @@ class jsonModel(object):
                             if test_value >= value['less_than']:
                                 message = '%s must be "less_than": %s' % (header, value['less_than'])
                                 raise ModelValidationError(message)
-                        if 'integer_only' in value.keys():
-                            if value['integer_only']:
+                        if 'integer_data' in value.keys():
+                            if value['integer_data']:
                                 if not isinstance(test_value, int):
-                                    message = '%s must be an "integer_only".' % header
+                                    message = '%s must be an "integer_data".' % header
                                     raise ModelValidationError(message)
                         if 'min_length' in value.keys():
                             if len(test_value) < value['min_length']:
@@ -511,13 +511,13 @@ class jsonModel(object):
                 for record_value in record_values:
                     if record_value not in value:
                         return False
-            elif key == 'integer_only':
+            elif key == 'integer_data':
                 dummy_int = 1
                 for record_value in record_values:
-                    integer_only = True
+                    integer_data = True
                     if record_value.__class__ != dummy_int.__class__:
-                        integer_only = False
-                    if value != integer_only:
+                        integer_data = False
+                    if value != integer_data:
                         return False
             elif key == 'byte_data':
                 for record_value in record_values:
@@ -785,9 +785,9 @@ class jsonModel(object):
             'error_value': input_number,
             'error_code': 4001
         }
-        if 'integer_only' in input_criteria.keys():
-            if input_criteria['integer_only'] and not isinstance(input_number, int):
-                error_dict['failed_test'] = 'integer_only'
+        if 'integer_data' in input_criteria.keys():
+            if input_criteria['integer_data'] and not isinstance(input_number, int):
+                error_dict['failed_test'] = 'integer_data'
                 error_dict['error_code'] = 4021
                 raise InputValidationError(error_dict)
         if 'min_value' in input_criteria.keys():
@@ -996,8 +996,8 @@ class jsonModel(object):
                     valid_dict[key] = False
                 elif value_type == 'number':
                     valid_dict[key] = 0.0
-                    if 'integer_only' in self.keyMap[rules_key_path].keys():
-                        if self.keyMap[rules_key_path]['integer_only']:
+                    if 'integer_data' in self.keyMap[rules_key_path].keys():
+                        if self.keyMap[rules_key_path]['integer_data']:
                             valid_dict[key] = 0
                 elif value_type == 'string':
                     valid_dict[key] = ''
@@ -1077,8 +1077,8 @@ class jsonModel(object):
             rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
             if 'default_value' in self.keyMap[rules_path_to_root]:
                 valid_number = self.keyMap[rules_path_to_root]['default_value']
-            elif 'integer_only' in self.keyMap[rules_path_to_root].keys():
-                if self.keyMap[rules_path_to_root]['integer_only']:
+            elif 'integer_data' in self.keyMap[rules_path_to_root].keys():
+                if self.keyMap[rules_path_to_root]['integer_data']:
                     valid_number = 0
 
         return valid_number
@@ -1298,7 +1298,7 @@ class jsonModel(object):
 
         return valid_data
 
-    def query(self, query_criteria, test_record=None):
+    def query(self, query_criteria, valid_record=None):
 
         '''
             a core method for querying model valid data with criteria
@@ -1306,22 +1306,27 @@ class jsonModel(object):
             **NOTE: input is only returned if all fields & qualifiers are valid for model
 
             :param query_criteria: dictionary with model field names and query qualifiers
-            :param records_list: list of model validated records
+            :param valid_record: dictionary with model valid record
             :return: boolean (or QueryValidationError)
+
+            an example of how to construct the query_criteria argument:
 
             query_criteria = {
                 '.path.to.number': {
                     'min_value': 4.5
                 },
                 '.path.to.string': {
-                    'must_contain': [ '\regex' ]
+                    'must_contain': [ '\\regex' ]
                 }
             }
+
+            **NOTE: for a full list of operators for query_criteria based upon field
+                    datatype, see either the query-rules.json file or REFERENCE file
         '''
 
         __name__ = '%s.query' % self.__class__.__name__
         _query_arg = '%s(query_criteria={...})' % __name__
-        _record_arg = '%s(test_record={...})' % __name__
+        _record_arg = '%s(valid_record={...})' % __name__
 
     # validate input
         if not isinstance(query_criteria, dict):
@@ -1340,11 +1345,11 @@ class jsonModel(object):
             raise QueryValidationError(message)
 
     # query test record
-        if test_record:
-            if not isinstance(test_record, dict):
+        if valid_record:
+            if not isinstance(valid_record, dict):
                 raise ModelValidationError('%s must be a dictionary.' % _record_arg)
             for key, value in query_criteria.items():
-                eval_outcome = self._evaluate_field(test_record, key, value)
+                eval_outcome = self._evaluate_field(valid_record, key, value)
                 if not eval_outcome:
                     return False
 

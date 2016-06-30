@@ -34,7 +34,7 @@ class jsonModelTests(jsonModel):
         assert self.keyMap['.userID']['required_field']
         assert self.keyMap['.rating']['default_value']
         assert self.keyMap['.emoticon']['byte_data']
-        assert self.keyMap['.rating']['integer_only']
+        assert self.keyMap['.rating']['integer_data']
         assert self.keyMap['.userID']['min_length']
         assert self.keyMap['.comments[0]']['max_length']
         assert self.keyMap['.rating']['min_value']
@@ -172,13 +172,13 @@ class jsonModelTests(jsonModel):
         except InputValidationError as err:
             assert err.error['failed_test'] == 'unique_values'
 
-    # test integer_only exception
+    # test integer_data exception
         integers_only = deepcopy(valid_input)
         integers_only['rating'] = 3.5
         try:
             self.validate(integers_only)
         except InputValidationError as err:
-            assert err.error['failed_test'] == 'integer_only'
+            assert err.error['failed_test'] == 'integer_data'
 
     # test min_value exception
         min_number = deepcopy(valid_input)
@@ -611,7 +611,7 @@ class jsonModelTests(jsonModel):
         assert False in truth_table
 
         print(valid_input)
-        print(valid_query)
+        # print(valid_query)
         # print(truth_table)
 
     # test evaluate query field missing in input
@@ -682,10 +682,10 @@ class jsonModelTests(jsonModel):
         eval_kwargs['field_criteria']['less_than'] = 2000000000.0
 
     # test evaluate integer only query failure
-        eval_kwargs['field_criteria']['integer_only'] = True
+        eval_kwargs['field_criteria']['integer_data'] = True
         eval_outcome = self._evaluate_field(**eval_kwargs)
         assert not eval_outcome
-        del eval_kwargs['field_criteria']['integer_only']
+        del eval_kwargs['field_criteria']['integer_data']
 
     # test evaluate excluded values query failure
         eval_kwargs['field_name'] = '.emoticon',
@@ -764,12 +764,12 @@ class jsonModelTests(jsonModel):
         assert not self.query({'.datetime':{'min_value': 1500000000}}, valid_input)
         assert self.query({'.datetime': {'max_value': 1500000000}}, valid_input)
         assert not self.query({'.datetime': {'max_value': 1.1}}, valid_input)
-        assert self.query({'.datetime': {'integer_only': False}}, valid_input)
-        assert not self.query({'.datetime': {'integer_only': True}}, valid_input)
+        assert self.query({'.datetime': {'integer_data': False}}, valid_input)
+        assert not self.query({'.datetime': {'integer_data': True}}, valid_input)
         test_input = deepcopy(valid_input)
         test_input['datetime'] = 50
-        assert not self.query({'.datetime': {'integer_only': False}}, test_input)
-        assert self.query({'.datetime': {'integer_only': True}}, test_input)
+        assert not self.query({'.datetime': {'integer_data': False}}, test_input)
+        assert self.query({'.datetime': {'integer_data': True}}, test_input)
         assert not self.query({'.datetime': {'greater_than': 1449179763.312077}}, valid_input)
         assert not self.query({'.datetime': {'less_than': 1449179763.312077}}, valid_input)
         assert self.query({'.datetime': {'discrete_values': [1449179763.312077]}}, valid_input)

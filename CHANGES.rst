@@ -3,11 +3,12 @@ ChangeLog
 
 2.0 (2016.06.30)
 ----------------
-* **UPGRADE** Query method added to class
-* **UPGRADE** Overhaul of internal class organization to ensure json valid reports
+* **UPGRADE** Query method added to class to validate criteria and evaluate records
+* **UPGRADE** Overhaul of internal class organization to ensure json valid reporting
 * **FEATURE ADDED** 'min_value' and 'max_value' extended to string fields
 * **FEATURE ADDED** 'excluded_values' added to component conditionals
 * **FEATURE ADDED** 'greater_than' and 'less_than' added to component conditionals
+* **DEPRECATED** 'integer_only' conditional has been replaced by 'integer_data'
 * Fixed bug with init check of schema key names for item designator patterns
 * Added missing validation for correct 'contains_either' syntax in model init
 * Updates to documentation and unittests

@@ -70,7 +70,7 @@ The default validation process can be modified, and other (less common) conditio
             "max_value": 10,
             "default_value": 5,
             "excluded_values": [ 7, 9 ],
-            "integer_only": true
+            "integer_data": true
         },
         ".address.city": {
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
@@ -85,7 +85,7 @@ The default validation process can be modified, and other (less common) conditio
         },
         ".address.country_code":{
             "discrete_values": [ 36, 124, 554, 826, 840 ],
-            "integer_only": true
+            "integer_data": true
         },
         ".comments": {
             "required_field": false,
@@ -118,7 +118,7 @@ List of Field Conditionals (and default values)
 - "**must_not_contain**": [] / a list of regular expressions which should not be found in a string / error_code: 4014 [**strings only**]
 - "**must_contain**": [] / a list of regular expressions which must be found in a string / error_code: 4015 [**strings only**]
 - "**contains_either**": [] / a list of regular expressions which string must match at least one / error_code: 4016 [**strings only**]
-- "**integer_only**": false / a true boolean requires number to be an integer / error_code: 4021 [**numbers only**]
+- "**integer_data**": false / a true boolean requires number to be an integer / error_code: 4021 [**numbers only**]
 - "**min_value**": 0.0 or "" / the minimum value of a number or string / error_code: 4022 [**numbers and strings only**]
 - "**max_value**": 0.0 or "" / the maximum value of a number or string / error_code: 4023 [**numbers and strings only**]
 - "**greater_than**": 0.0 or "" / the value a number or string must be greater than / error_code: 4024 [**numbers and strings only**]
@@ -281,7 +281,7 @@ Query criteria are composed of a dictionary of one or more key-value pairs, wher
       },
       ".address.country_code": {
         "discrete_values": [36, 124, 554, 826, 840],
-        "integer_only": true
+        "integer_data": true
       },
       ".address.region": {
         "contains_either": ["[A-Z]{2}", "[A-Z][a-z]+"],
@@ -307,7 +307,7 @@ Query criteria are composed of a dictionary of one or more key-value pairs, wher
       },
       ".rating": {
         "excluded_values": [7, 9],
-        "integer_only": true,
+        "integer_data": true,
         "max_value": 10,
         "min_value": 1
       },
@@ -320,7 +320,11 @@ Query criteria are composed of a dictionary of one or more key-value pairs, wher
       }
     }
 
-The query method follows a similar process by which input is validated. Records whose field values evaluate to true for all criteria are added to the query results. Records which do not are skipped. Although the query method will evaluate list type fields, it is not tailored for list evaluation. Unlike the process of ingestion, if any item in a list fails to evaluate to true to a criteria in the query, the entire record will be skipped.
+The query method follows a similar process by which input is validated. A record whose field values evaluate to true for all criteria returns true. Otherwise, something in the record does not match one or more query criteria and the query method returns false. Because the query method returns a false as soon as it encounters a failed criteria from a dictionary of fields in the query criteria, query time will vary based upon the number of records, how many fail and how many fields are added to the query criteria.
+
+Querying Items
+^^^^^^^^^^^^^^
+Although the query method will evaluate items nested inside lists to an arbitrary depth, it does so by evaluating all items in the list and all sub-branches of any nested lists inside the list. As a result, querying items inside lists suffers non-linear explosion. And, unlike the process of item ingestion, if any item in a list (or branch of a sub-list) fails to evaluate to true to a criteria in the query, the entire record will be skipped.
 
 Query Errors
 ^^^^^^^^^^^^
@@ -329,7 +333,7 @@ If query criteria contain fields, operators or qualifiers which are outside the 
 To handle a QueryValidationError::
 
     try:
-        query_results = validModel.query(invalid_criteria, records_list)
+        query_results = validModel.query(invalid_criteria, test_record)
     except QueryValidationError as err:
         assert isinstance(err.error['message'], str)
 
@@ -373,7 +377,7 @@ When the model is initialized, it accepts an optional dictionary for customized 
         "excluded_values": [],
         "greater_than": 0.0,
         "identical_to": ".similar_number",
-        "integer_only": false,
+        "integer_data": false,
         "lambda_function": "",
         "less_than": 0.0,
         "max_value": 0.0,

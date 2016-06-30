@@ -187,6 +187,7 @@ To query a record using the criteria::
     eval_outcome = validModel.query(sample_query, valid_input)
     assert isinstance(eval_outcome, bool)
 
+
 Reference Documentation
 -----------------------
 For more details about how to use jsonModel, refer to the
