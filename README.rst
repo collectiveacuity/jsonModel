@@ -29,7 +29,7 @@ Features
 - Validates individual components in a model
 - Ingests arbitrary keyword data and outputs model valid dictionary
 - Validates query criteria against model scope **New Feature**
-- Evaluate fields of a model valid record using query criteria **New Feature**
+- Evaluates model valid records using query criteria **New Feature**
 
 ============
 Installation

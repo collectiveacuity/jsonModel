@@ -324,7 +324,7 @@ The query method follows a similar process by which input is validated. A record
 
 Querying Items
 ^^^^^^^^^^^^^^
-Although the query method will evaluate items nested inside lists to an arbitrary depth, it does so by evaluating all items in the list and all sub-branches of any nested lists inside the list. As a result, querying items inside lists suffers non-linear explosion. And, unlike the process of item ingestion, if any item in a list (or branch of a sub-list) fails to evaluate to true to a criteria in the query, the entire record will be skipped.
+Although the query method will evaluate items nested inside lists to an arbitrary depth, it does so by evaluating all items in the list and all sub-branches of any nested lists inside the list. As a result, querying items inside lists suffers non-linear explosion. And, unlike the process of item ingestion, if any item in a list (or branch of a sub-list) fails to evaluate to true to a criteria in the query, the entire record will return false. **Be Warned**
 
 Query Errors
 ^^^^^^^^^^^^
