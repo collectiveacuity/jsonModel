@@ -1,10 +1,13 @@
 ChangeLog
 =========
 
-1.7 (2016.06.24)
+2.0 (2016.06.30)
 ----------------
+* **UPGRADE** Query method added to class
+* **UPGRADE** Overhaul of internal class organization to ensure json valid reports
 * **FEATURE ADDED** 'min_value' and 'max_value' extended to string fields
-* **FEATURE ADDED** 'excluded_values' added to component criteria
+* **FEATURE ADDED** 'excluded_values' added to component conditionals
+* **FEATURE ADDED** 'greater_than' and 'less_than' added to component conditionals
 * Fixed bug with init check of schema key names for item designator patterns
 * Added missing validation for correct 'contains_either' syntax in model init
 * Updates to documentation and unittests

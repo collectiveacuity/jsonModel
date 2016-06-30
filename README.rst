@@ -180,13 +180,12 @@ To validate query criteria::
     validModel.query(sample_query)
 
 
-To query records using the criteria::
+To query a record using the criteria::
 
     valid_input = validModel.validate(input)
-    records_list = [ valid_input ]
 
-    query_results = validModel.query(sample_query, records_list)
-
+    eval_outcome = validModel.query(sample_query, valid_input)
+    assert isinstance(eval_outcome, bool)
 
 Reference Documentation
 -----------------------

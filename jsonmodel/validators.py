@@ -221,6 +221,13 @@ class jsonModel(object):
                             message = 'Field %s[0] must be either a string or number if qualifier "unique_values": true' % key
                             raise ModelValidationError(message)
 
+    # validate lack of other qualifiers if value exist is false
+            if 'value_exists' in value.keys():
+                if not value['value_exists']:
+                    if set(value.keys()) - {'value_exists'}:
+                        message = 'If field %s qualifier value_exists: false, field may not have other qualifiers.' % key
+                        raise ModelValidationError(message)
+
     # validate size qualifiers against each other
             size_qualifiers = ['min_size', 'max_size']
             for qualifier in size_qualifiers:
@@ -407,7 +414,7 @@ class jsonModel(object):
 
     # validate discrete value qualifiers against each other
             for qualifier in discrete_qualifiers:
-                if qualifier in value.keys() or qualifier in schema_field:
+                if qualifier in value.keys() or (qualifier in schema_field and declared_value):
                     multiple_values = False
                     if qualifier in value.keys():
                         if isinstance(value[qualifier], list):
@@ -435,10 +442,128 @@ class jsonModel(object):
                         if 'discrete_values' in value.keys():
                             if not qualifier == 'excluded_values':
                                 if test_value not in value['discrete_values']:
-                                    message = '%s must be one of "discrete_values": %s' % (header, value['excluded_values'])
+                                    message = '%s must be one of "discrete_values": %s' % (header, value['discrete_values'])
                                     raise ModelValidationError(message)
 
         return fields_dict
+
+    def _evaluate_field(self, record_dict, field_name, field_criteria):
+
+        '''
+            a helper method for evaluating record values based upon query criteria
+
+        :param record_dict: dictionary with model valid data to evaluate
+        :param field_name: string with path to root of query field
+        :param field_criteria: dictionary with query operators and qualifiers
+        :return: boolean (True if no field_criteria evaluate to false)
+        '''
+
+    # determine value existence criteria
+        value_exists = True
+        if 'value_exists' in field_criteria.keys():
+            if not field_criteria['value_exists']:
+                value_exists = False
+
+    # validate existence of field
+        field_exists = True
+        try:
+            record_values = self._walk(field_name, record_dict)
+        except:
+            field_exists = False
+
+    # evaluate existence query criteria
+        if value_exists != field_exists:
+            return False
+        elif not value_exists:
+            return True
+
+    # evaluate other query criteria
+        for key, value in field_criteria.items():
+            if key in ('min_size', 'min_length'):
+                for record_value in record_values:
+                    if len(record_value) < value:
+                        return False
+            elif key in ('max_size', 'max_length'):
+                for record_value in record_values:
+                    if len(record_value) > value:
+                        return False
+            elif key == 'min_value':
+                for record_value in record_values:
+                    if record_value < value:
+                        return False
+            elif key == 'max_value':
+                for record_value in record_values:
+                    if record_value > value:
+                        return False
+            elif key == 'greater_than':
+                for record_value in record_values:
+                    if record_value <= value:
+                        return False
+            elif key == 'less_than':
+                for record_value in record_values:
+                    if record_value >= value:
+                        return False
+            elif key == 'excluded_values':
+                for record_value in record_values:
+                    if record_value in value:
+                        return False
+            elif key == 'discrete_values':
+                for record_value in record_values:
+                    if record_value not in value:
+                        return False
+            elif key == 'integer_only':
+                dummy_int = 1
+                for record_value in record_values:
+                    integer_only = True
+                    if record_value.__class__ != dummy_int.__class__:
+                        integer_only = False
+                    if value != integer_only:
+                        return False
+            elif key == 'byte_data':
+                for record_value in record_values:
+                    decoded_bytes = ''
+                    byte_data = True
+                    try:
+                        decoded_bytes = b64decode(record_value)
+                    except:
+                        byte_data = False
+                    if not isinstance(decoded_bytes, bytes):
+                        byte_data = False
+                    if value != byte_data:
+                        return False
+            elif key == 'must_contain':
+                for regex in value:
+                    regex_pattern = re.compile(regex)
+                    for record_value in record_values:
+                        if not regex_pattern.findall(record_value):
+                            return False
+            elif key == 'must_not_contain':
+                for regex in value:
+                    regex_pattern = re.compile(regex)
+                    for record_value in record_values:
+                        if regex_pattern.findall(record_value):
+                            return False
+            elif key == 'contains_either':
+                record_match = True
+                for record_value in record_values:
+                    regex_match = False
+                    for regex in value:
+                        regex_pattern = re.compile(regex)
+                        if regex_pattern.findall(record_value):
+                            regex_match = True
+                    if not regex_match:
+                        record_match = False
+                if not record_match:
+                    return False
+            elif key == 'unique_values':
+                for record_value in record_values:
+                    unique_values = True
+                    if len(record_value) != len(set(record_value)):
+                        unique_values = False
+                    if value != unique_values:
+                        return False
+
+        return True
 
     def _validate_dict(self, input_dict, schema_dict, path_to_root):
 
@@ -1001,6 +1126,7 @@ class jsonModel(object):
         '''
             a helper method for finding the schema endpoint from a path to root
 
+        :param path_to_root: string with dot path to root from
         :return: list, dict, string, number, or boolean at path to root
         '''
 
@@ -1009,8 +1135,10 @@ class jsonModel(object):
         dot_pattern = re.compile('\\.|\\[')
         path_segments = dot_pattern.split(path_to_root)
 
-    # construct schema endpoint from segments
+    # construct base schema endpoint
         schema_endpoint = self.schema
+
+    # reconstruct schema endpoint from segments
         if path_segments[1]:
             for i in range(1,len(path_segments)):
                 if item_pattern.match(path_segments[i]):
@@ -1019,6 +1147,62 @@ class jsonModel(object):
                     schema_endpoint = schema_endpoint[path_segments[i]]
 
         return schema_endpoint
+
+    def _walk(self, path_to_root, record_dict):
+
+        '''
+            a helper method for finding the record endpoint from a path to root
+
+        :param path_to_root: string with dot path to root from
+        :param record_dict:
+        :return: list, dict, string, number, or boolean at path to root
+        '''
+
+    # split path to root into segments
+        item_pattern = re.compile('\d+\\]')
+        dot_pattern = re.compile('\\.|\\[')
+        path_segments = dot_pattern.split(path_to_root)
+
+    # construct empty fields
+        record_endpoints = []
+
+    # determine starting position
+        if not path_segments[0]:
+            path_segments.pop(0)
+
+    # define internal recursive function
+        def _walk_int(path_segments, record_dict):
+            record_endpoint = record_dict
+            for i in range(0, len(path_segments)):
+                if item_pattern.match(path_segments[i]):
+                    for j in range(0, len(record_endpoint)):
+                        if len(path_segments) == 2:
+                            record_endpoints.append(record_endpoint[j])
+                        else:
+                            stop_chain = False
+                            for x in range(0, i):
+                                if item_pattern.match(path_segments[x]):
+                                    stop_chain = True
+                            if not stop_chain:
+                                shortened_segments = []
+                                for z in range(i + 1, len(path_segments)):
+                                    shortened_segments.append(path_segments[z])
+                                _walk_int(shortened_segments, record_endpoint[j])
+                else:
+                    stop_chain = False
+                    for y in range(0, i):
+                        if item_pattern.match(path_segments[y]):
+                            stop_chain = True
+                    if not stop_chain:
+                        if len(path_segments) == 1:
+                            record_endpoints.append(record_endpoint[path_segments[i]])
+                        else:
+                            record_endpoint = record_endpoint[path_segments[i]]
+
+    # conduct recursive walk
+        _walk_int(path_segments, record_dict)
+
+        return record_endpoints
 
     def validate(self, input_data, path_to_root=''):
 
@@ -1114,7 +1298,7 @@ class jsonModel(object):
 
         return valid_data
 
-    def query(self, query_criteria, records_list=None):
+    def query(self, query_criteria, test_record=None):
 
         '''
             a core method for querying model valid data with criteria
@@ -1123,7 +1307,7 @@ class jsonModel(object):
 
             :param query_criteria: dictionary with model field names and query qualifiers
             :param records_list: list of model validated records
-            :return: list of records (or QueryValidationError)
+            :return: boolean (or QueryValidationError)
 
             query_criteria = {
                 '.path.to.number': {
@@ -1137,6 +1321,7 @@ class jsonModel(object):
 
         __name__ = '%s.query' % self.__class__.__name__
         _query_arg = '%s(query_criteria={...})' % __name__
+        _record_arg = '%s(test_record={...})' % __name__
 
     # validate input
         if not isinstance(query_criteria, dict):
@@ -1154,9 +1339,13 @@ class jsonModel(object):
             message = err.error['message']
             raise QueryValidationError(message)
 
-    # construct empty fields
-        results_list = []
+    # query test record
+        if test_record:
+            if not isinstance(test_record, dict):
+                raise ModelValidationError('%s must be a dictionary.' % _record_arg)
+            for key, value in query_criteria.items():
+                eval_outcome = self._evaluate_field(test_record, key, value)
+                if not eval_outcome:
+                    return False
 
-    # query records list
-
-        return results_list
+        return True

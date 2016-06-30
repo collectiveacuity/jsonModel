@@ -569,16 +569,265 @@ class jsonModelTests(jsonModel):
         except ModelValidationError as err:
             assert str(err).find('.string_fields') > 0
 
-    # test sample empty query
-        assert isinstance(self.query(valid_query), list)
+    # test internal walk method
+        metals_list = [ 'gold', 'silver', 'bronze' ]
+        metal_list = [ { 'metal': 'gold' }, { 'metal': 'silver' }, { 'metal': 'bronze' } ]
+        test_input = {
+            'metals': deepcopy(metals_list)
+        }
+        results = self._walk('.metals[0]', test_input)
+        assert len(results) == 3
+        test_input = {
+            'metals': deepcopy(metal_list)
+        }
+        results = self._walk('.metals[0].metal', test_input)
+        assert len(results) == 3
+        for group in test_input['metals']:
+            group['metal'] = deepcopy(metals_list)
+        results = self._walk('.metals[0].metal[0]', test_input)
+        assert len(results) == 9
+        for group in test_input['metals']:
+            group['metal'] = deepcopy(metal_list)
+        results = self._walk('.metals[0].metal[0].metal', test_input)
+        assert len(results) == 9
+        for metals in test_input['metals']:
+            for metal in metals['metal']:
+                metal['metal'] = deepcopy(metals_list)
+        results = self._walk('.metals[0].metal[0].metal[0]', test_input)
+        assert len(results) == 27
+        for metals in test_input['metals']:
+            for metal in metals['metal']:
+                metal['metal'] = deepcopy(metal_list)
+        # print(test_input)
+        results = self._walk('.metals[0].metal[0].metal[0].metal', test_input)
+        assert len(results) == 27
+        # print(results)
 
-    # test query criteria extra qualifier exception
+    # test evaluate valid input
+        truth_table = []
+        for key, value in valid_query.items():
+            truth_table.append(self._evaluate_field(valid_input, key, value))
+        assert True in truth_table
+        assert False in truth_table
+
+        print(valid_input)
+        print(valid_query)
+        # print(truth_table)
+
+    # test evaluate query field missing in input
+        test_query = deepcopy(valid_query)
+        test_input = deepcopy(valid_input)
+        eval_kwargs = {
+            'record_dict': test_input,
+            'field_name': '.address.country_code',
+            'field_criteria': test_query['.address.country_code']
+        }
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+
+    # test evaluate query field missing with value_exists: false
+        eval_kwargs['field_criteria']['value_exists'] = False
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert eval_outcome
+
+    # test evaluate query field exists in input
+        eval_kwargs['field_name'] = '.datetime'
+        eval_kwargs['field_criteria'] = test_query['.datetime']
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert eval_outcome
+
+    # test evaluate query field exists with value_exists: false
+        eval_kwargs['field_criteria']['value_exists'] = False
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['value_exists']
+
+    # test evaluate maximum size query failure
+        eval_kwargs['field_name'] = '.comments'
+        eval_kwargs['field_criteria'] = test_query['.comments']
+        eval_kwargs['field_criteria']['max_size'] = 2
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['max_size']
+
+    # test evaluate unique values query failure
+        eval_kwargs['record_dict']['comments'].append('gold')
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        eval_kwargs['record_dict']['comments'].pop()
+
+    # test evaluate min length query failure
+        eval_kwargs['field_name'] = '.userID'
+        eval_kwargs['field_criteria'] = test_query['.userID']
+        eval_kwargs['field_criteria']['min_length'] = 14
+        del eval_kwargs['field_criteria']['min_value']
+        eval_kwargs['field_criteria']['max_length'] = 14
+        del eval_kwargs['field_criteria']['max_value']
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+
+    # test evaluate max value query failure
+        eval_kwargs['field_criteria']['min_length'] = 12
+        eval_kwargs['field_criteria']['max_length'] = 14
+        eval_kwargs['field_criteria']['max_value'] = '2222222222222'
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+
+    # test evaluate less than query failure
+        eval_kwargs['field_name'] = '.datetime'
+        eval_kwargs['field_criteria'] = test_query['.datetime']
+        eval_kwargs['field_criteria']['less_than'] = 200000.0
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        eval_kwargs['field_criteria']['less_than'] = 2000000000.0
+
+    # test evaluate integer only query failure
+        eval_kwargs['field_criteria']['integer_only'] = True
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['integer_only']
+
+    # test evaluate excluded values query failure
+        eval_kwargs['field_name'] = '.emoticon',
+        eval_kwargs['field_criteria'] = test_query['.emoticon']
+        eval_kwargs['field_criteria']['excluded_values'].append('aGFwcHk=')
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        eval_kwargs['field_criteria']['excluded_values'].pop()
+
+    # test evaluate discrete value query failure
+        eval_kwargs['field_name'] = '.address.region',
+        eval_kwargs['field_criteria'] = test_query['.address.region']
+        eval_kwargs['field_criteria']['discrete_values'] = [ 'CA', 'MA' ]
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['discrete_values']
+
+    # test evaluate byte data query failure
+        eval_kwargs['field_criteria']['byte_data'] = True
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['byte_data']
+
+    # test evaluate contains either query failure
+        eval_kwargs['field_criteria']['contains_either'][0] = '[A-Z]{3}'
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        eval_kwargs['field_criteria']['contains_either'][0] = '[A-Z]{2}'
+
+    # test evaluate must contain query failure
+        eval_kwargs['field_name'] = '.address.country',
+        eval_kwargs['field_criteria'] = { 'must_contain': [ 'America' ] }
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['must_contain']
+
+    # test evaluate must not contain query failure
+        eval_kwargs['field_criteria'] = { 'must_not_contain': [ 'States' ] }
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+
+    # test sample empty query
+        assert self.query(valid_query)
+        assert isinstance(self.query(valid_query), bool)
+
+    # test query criteria invalid qualifier exception
         query_qualifier_error = deepcopy(valid_query)
         query_qualifier_error['.address.region']['required_field'] = False
         try:
             self.query(query_qualifier_error)
         except QueryValidationError as err:
             assert str(err).find('.address.region') > 0
+
+    # test query criteria value exists exception
+        query_value_exists = deepcopy(valid_query)
+        query_value_exists['.address.region']['value_exists'] = True
+        self.query(query_value_exists)
+        query_value_exists['.address.region']['value_exists'] = False
+        try:
+            self.query(query_value_exists)
+        except QueryValidationError as err:
+            assert str(err).find('value_exists:') > 0
+
+    # test query method with valid query on valid input
+        assert not self.query(valid_query, valid_input)
+        assert isinstance(self.query(valid_query, valid_input), bool)
+
+    # test query method with non-existent field
+        assert self.query({'.rating': {'value_exists': False}}, valid_input)
+        assert not self.query({'.rating': {'value_exists': True}}, valid_input)
+
+    # test query method with number field queries
+        assert self.query({'.datetime': {'value_exists': True}}, valid_input)
+        assert not self.query({'.datetime': {'value_exists': False}}, valid_input)
+        assert self.query({'.datetime':{'min_value': 1.1}}, valid_input)
+        assert not self.query({'.datetime':{'min_value': 1500000000}}, valid_input)
+        assert self.query({'.datetime': {'max_value': 1500000000}}, valid_input)
+        assert not self.query({'.datetime': {'max_value': 1.1}}, valid_input)
+        assert self.query({'.datetime': {'integer_only': False}}, valid_input)
+        assert not self.query({'.datetime': {'integer_only': True}}, valid_input)
+        test_input = deepcopy(valid_input)
+        test_input['datetime'] = 50
+        assert not self.query({'.datetime': {'integer_only': False}}, test_input)
+        assert self.query({'.datetime': {'integer_only': True}}, test_input)
+        assert not self.query({'.datetime': {'greater_than': 1449179763.312077}}, valid_input)
+        assert not self.query({'.datetime': {'less_than': 1449179763.312077}}, valid_input)
+        assert self.query({'.datetime': {'discrete_values': [1449179763.312077]}}, valid_input)
+        assert not self.query({'.datetime': {'excluded_values': [1449179763.312077]}}, valid_input)
+
+    # test query method with string field queries
+        assert self.query({'.userID': {'value_exists': True}}, valid_input)
+        assert not self.query({'.userID': {'value_exists': False}}, valid_input)
+        assert self.query({'.userID': {'min_length': 2}}, valid_input)
+        assert not self.query({'.userID': {'min_length': 14}}, valid_input)
+        assert not self.query({'.userID': {'max_length': 2}}, valid_input)
+        assert self.query({'.userID': {'max_length': 14}}, valid_input)
+        assert self.query({'.userID': {'min_value': '11111111111'}}, valid_input)
+        assert not self.query({'.userID': {'min_value': 'zzzzzzzzzzz'}}, valid_input)
+        assert not self.query({'.userID': {'max_value': '11111111111'}}, valid_input)
+        assert self.query({'.userID': {'max_value': 'zzzzzzzzzzz'}}, valid_input)
+        assert not self.query({'.userID': {'greater_than': '6nPbM9gTwLz3f'}}, valid_input)
+        assert self.query({'.userID': {'greater_than': '6nPbM9gTwLz'}}, valid_input)
+        assert not self.query({'.userID': {'less_than': '6nPbM9gTwLz3f'}}, valid_input)
+        assert self.query({'.userID': {'less_than': '6nPbM9gTwLz3g'}}, valid_input)
+        assert self.query({'.userID': {'discrete_values': ['6nPbM9gTwLz3f']}}, valid_input)
+        assert not self.query({'.userID': {'discrete_values': ['6nPbM9gTwLz']}}, valid_input)
+        assert not self.query({'.userID': {'excluded_values': ['6nPbM9gTwLz3f']}}, valid_input)
+        assert self.query({'.userID': {'excluded_values': ['6nPbM9gTwLz']}}, valid_input)
+        assert self.query({'.userID': {'must_contain': ['6nPbM9gTwLz']}}, valid_input)
+        assert not self.query({'.userID': {'must_contain': ['/']}}, valid_input)
+        assert not self.query({'.userID': {'must_not_contain': ['6nPbM9gTwLz']}}, valid_input)
+        assert self.query({'.userID': {'must_not_contain': ['/']}}, valid_input)
+        assert self.query({'.userID': {'contains_either': ['6nPbM9gTwLz', '/']}}, valid_input)
+        assert not self.query({'.userID': {'contains_either': [':', '/']}}, valid_input)
+        assert self.query({'.emoticon': {'byte_data': True}}, valid_input)
+        assert not self.query({'.userID': {'byte_data': True}}, valid_input)
+        assert self.query({'.userID': {'byte_data': False}}, valid_input)
+        assert not self.query({'.emoticon': {'byte_data': False}}, valid_input)
+
+    # test query method with list field queries
+        assert self.query({'.comments': {'value_exists': True}}, valid_input)
+        assert not self.query({'.comments': {'value_exists': False}}, valid_input)
+        assert self.query({'.comments': {'min_size': 2}}, valid_input)
+        assert not self.query({'.comments': {'min_size': 4}}, valid_input)
+        assert not self.query({'.comments': {'max_size': 2}}, valid_input)
+        assert self.query({'.comments': {'max_size': 4}}, valid_input)
+        assert self.query({'.comments': {'unique_values': True}}, valid_input)
+        assert not self.query({'.comments': {'unique_values': False}}, valid_input)
+        test_input = deepcopy(valid_input)
+        test_input['comments'].append('gold')
+        assert not self.query({'.comments': {'unique_values': True}}, test_input)
+        assert self.query({'.comments': {'unique_values': False}}, test_input)
+
+    # test items in list field queries
+        assert self.query({'.comments[0]': {'value_exists': True}}, valid_input)
+        assert not self.query({'.comments[0]': {'value_exists': False}}, valid_input)
+        assert self.query({'.comments[0]': {'min_length': 3}}, valid_input)
+        assert not self.query({'.comments[0]': {'min_length': 5}}, valid_input)
+        assert self.query({'.comments[0]': {'must_contain': ['.{2}']}}, valid_input)
+        assert not self.query({'.comments[0]': {'must_contain': ['g.{2}']}}, valid_input)
+        assert self.query({'.comments[0]': {'contains_either': ['l', 'o']}}, valid_input)
+        assert not self.query({'.comments[0]': {'contains_either': ['r', 'e']}}, valid_input)
 
         return self
 
