@@ -49,7 +49,9 @@ class mapModel(object):
             if input_dict[key]:
                 criteria_dict['required_field'] = True
             if isinstance(value, dict):
-                criteria_dict['extra_fields'] = False
+                criteria_dict['extra_fields'] = True
+                if value:
+                    criteria_dict['extra_fields'] = False
             if criteria_dict['value_datatype'] in ('boolean', 'string', 'number'):
                 if value:
                     criteria_dict['declared_value'] = value

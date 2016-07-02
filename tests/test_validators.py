@@ -545,6 +545,10 @@ class jsonModelTests(jsonModel):
     # test query rules input
         assert jsonModel(test_model, self.queryRules)
 
+    # test query rules json file
+        query_rules = json.loads(open('../models/query-rules.json').read())
+        assert jsonModel(test_model, query_rules)
+
     # test query rules extra field exception
         query_rules_field = deepcopy(self.queryRules)
         query_rules_field['.none_fields'] = {}

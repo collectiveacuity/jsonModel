@@ -27,8 +27,8 @@
     "value_exists": false
  },
  ".number_fields": {
-    "discrete_values": [],
-    "excluded_values": [],
+    "discrete_values": [ 0.0 ],
+    "excluded_values": [ 0.0 ],
     "greater_than": 0.0,
     "identical_to": ".similar_number",
     "integer_data": false,
@@ -41,9 +41,9 @@
  },
   ".string_fields": {
     "byte_data": false,
-    "contains_either": [],
-    "discrete_values": [],
-    "excluded_values": [],
+    "contains_either": [ "" ],
+    "discrete_values": [ "" ],
+    "excluded_values": [ "" ],
     "greater_than": "",
     "identical_to": ".similar_string",
     "lambda_function": "",
@@ -52,8 +52,8 @@
     "max_value": "",
     "min_length": 0,
     "min_value": "",
-    "must_contain": [],
-    "must_not_contain": [],
+    "must_contain": [ "" ],
+    "must_not_contain": [ "" ],
     "validation_url": "",
     "value_exists": false
   }

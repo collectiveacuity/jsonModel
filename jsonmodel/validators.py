@@ -134,10 +134,10 @@ class jsonModel(object):
             input_set = set(query_rules.keys())
             req_set = set(self.queryRules.keys())
             if input_set - req_set:
-                message = 'Query rules input may only have %s key names.' % req_set
+                message = 'Query rules input may only have %s field key names.' % req_set
                 raise ModelValidationError(message)
             elif req_set - input_set:
-                message = 'Query rules input must have all %s key names.' % req_set
+                message = 'Query rules input must have all %s field key names.' % req_set
                 raise ModelValidationError(message)
             for key in req_set:
                 input_qualifier_set = set(query_rules[key].keys())
