@@ -1,6 +1,11 @@
 ChangeLog
 =========
 
+2.2 (2016.07.10)
+----------------
+* Bug fix for ingestion of dictionaries inside lists
+* Updates to unittests
+
 2.1 (2016.07.09)
 ----------------
 * Bug fix for ingestion of keywords with non-matching datatypes

@@ -71,6 +71,10 @@ class mapModel(object):
                 'required_field': False,
                 'value_datatype': self._datatype_names[class_index]
             }
+            if isinstance(input_list[0], dict):
+                criteria_dict['extra_fields'] = True
+                if input_list[0]:
+                    criteria_dict['extra_fields'] = False
             if isinstance(input_list[0], bool) or isinstance(input_list[0], str) or isinstance(input_list[0], int) or isinstance(input_list[0], float):
                 criteria_dict['declared_value'] = input_list[0]
             key_criteria.append(criteria_dict)

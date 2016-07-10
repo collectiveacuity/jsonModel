@@ -1017,9 +1017,9 @@ class jsonModel(object):
 
     # add extra fields if set to True
         if self.keyMap[rules_path_to_root]['extra_fields']:
-            for k, v in input_dict.items():
-                if k not in valid_dict:
-                    valid_dict[k] = v
+            for key, value in input_dict.items():
+                if key not in valid_dict.keys():
+                    valid_dict[key] = value
 
         return valid_dict
 
@@ -1060,7 +1060,7 @@ class jsonModel(object):
                             valid_list.append(self._validate_string(input_list[i], item_path))
                         elif item_type == 'map':
                             valid_list.append(self._ingest_dict(input_list[i], schema_list[0], item_path))
-                        elif item_type == 'number':
+                        elif item_type == 'list':
                             valid_list.append(self._ingest_list(input_list[i], schema_list[0], item_path))
                     except:
                         pass

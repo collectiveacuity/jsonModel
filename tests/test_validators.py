@@ -346,6 +346,12 @@ class jsonModelTests(jsonModel):
         ingest_input = deepcopy(valid_input)
         self.ingest(**ingest_input)
 
+    # test malformed dictionary datatype input ingestion
+        malformed_datatype = deepcopy(valid_input)
+        malformed_datatype['address'] = 'my home'
+        valid_output = self.ingest(**malformed_datatype)
+        assert not valid_output['address']['region']
+
     # test missing default input injection
         missing_default = deepcopy(valid_input)
         assert not 'rating' in missing_default.keys()
@@ -425,7 +431,7 @@ class jsonModelTests(jsonModel):
         assert 'bronze' not in valid_output['comments']
 
         # print(self.validate(valid_input))
-        # print(self.ingest(**valid_input))
+        print(self.ingest(**valid_input))
         # print(self.ingest(**{}))
 
         test_model = {
@@ -437,6 +443,14 @@ class jsonModelTests(jsonModel):
             'max_size': self.maxSize,
             'url': self.url
         }
+
+    # test list ingestion of dictionaries
+        new_model = deepcopy(test_model)
+        new_model['schema']['test_list'] = [ { 'test': 'me' } ]
+        list_model = jsonModel(new_model)
+        test_input = { 'test_list': [ { 'test': 'me' }, { 'test': 'you' } ] }
+        valid_output = list_model.ingest(**test_input)
+        assert valid_output['test_list']
 
     # test json valid structure of model components
         assert json.dumps(test_model)
@@ -614,7 +628,7 @@ class jsonModelTests(jsonModel):
         assert True in truth_table
         assert False in truth_table
 
-        print(valid_input)
+        # print(valid_input)
         # print(valid_query)
         # print(truth_table)
 
@@ -847,4 +861,4 @@ if __name__ == '__main__':
     test_schema = { 'schema': { 'key': { 'key': 'value'}}}
     test_input = { 'key': 'value' }
     testM = jsonModel(test_schema)
-    print(testM.ingest(**test_input))
+    # print(testM.ingest(**test_input))
