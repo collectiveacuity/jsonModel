@@ -971,9 +971,18 @@ class jsonModel(object):
                 key_path += '.'
             key_path += key
             rules_key_path = re.sub('\[\d+\]', '[0]', key_path)
+            value_match = False
             if key in input_dict.keys():
                 value_index = self._datatype_classes.index(value.__class__)
                 value_type = self._datatype_names[value_index]
+                try:
+                    v_index = self._datatype_classes.index(input_dict[key].__class__)
+                    v_type = self._datatype_names[v_index]
+                    if v_type == value_type:
+                        value_match = True
+                except:
+                    value_match = False
+            if value_match:
                 if value_type == 'null':
                     valid_dict[key] = input_dict[key]
                 elif value_type == 'boolean':

@@ -1,6 +1,11 @@
 ChangeLog
 =========
 
+2.1 (2016.07.09)
+----------------
+* Bug fix for ingestion of keywords with non-matching datatypes
+* Updates to unittests
+
 2.0 (2016.06.30)
 ----------------
 * **UPGRADE** Query method added to class to validate criteria and evaluate records

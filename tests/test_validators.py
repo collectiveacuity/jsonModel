@@ -844,3 +844,7 @@ if __name__ == '__main__':
     jsonModelTests(testModel).unitTests(testInput, testQuery)
     t1 = timer()
     print(str(t1 - t0))
+    test_schema = { 'schema': { 'key': { 'key': 'value'}}}
+    test_input = { 'key': 'value' }
+    testM = jsonModel(test_schema)
+    print(testM.ingest(**test_input))
