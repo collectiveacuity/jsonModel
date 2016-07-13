@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+2.3 (2016.07.??)
+----------------
+* Bug fix for ingestion of items outside scope of json datatypes
+
 2.2 (2016.07.10)
 ----------------
 * Bug fix for ingestion of dictionaries inside lists

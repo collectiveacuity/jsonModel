@@ -1048,9 +1048,15 @@ class jsonModel(object):
             rules_type = self._datatype_names[rules_index]
             for i in range(len(input_list)):
                 item_path = '%s[%s]' % (path_to_root, i)
-                item_index = self._datatype_classes.index(input_list[i].__class__)
-                item_type = self._datatype_names[item_index]
-                if item_type == rules_type:
+                value_match = False
+                try:
+                    item_index = self._datatype_classes.index(input_list[i].__class__)
+                    item_type = self._datatype_names[item_index]
+                    if item_type == rules_type:
+                        value_match = True
+                except:
+                    value_match = False
+                if value_match:
                     try:
                         if item_type == 'boolean':
                             valid_list.append(self._validate_boolean(input_list[i], item_path))
