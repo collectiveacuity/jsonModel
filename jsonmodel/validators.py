@@ -1239,7 +1239,7 @@ class jsonModel(object):
             if not isinstance(path_to_root, str):
                 raise ModelValidationError('%s must be a string.' % _path_arg)
             elif not path_to_root in self.keyMap.keys():
-                raise ModelValidationError('%s does not exist in components %s.' % (_path_arg, self.keyMap.keys()))
+                raise ModelValidationError('%s does not exist in components %s.' % (_path_arg.replace('...', path_to_root), self.keyMap.keys()))
         else:
             path_to_root = '.'
 
