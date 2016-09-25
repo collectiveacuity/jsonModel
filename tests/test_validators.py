@@ -55,11 +55,15 @@ class jsonModelTests(jsonModel):
         # TODO: "lambda_function": "",
         # TODO: "validation_url": "",
 
-    # test empty path to root
+    # test use of integers in key names
+        test_schema = { 'schema': { '0': { 0: 'value' } } }
+        testM = jsonModel(test_schema)
+
+    # test validation with empty path to root
         v_input = deepcopy(valid_input)
         assert self.validate(v_input)
 
-    # test dot-path to root
+    # test validation with dot-path to root
         v_input = deepcopy(valid_input)
         assert self.validate(v_input, '.')
 
@@ -78,6 +82,10 @@ class jsonModelTests(jsonModel):
         v_input = deepcopy(valid_input)
         assert self.validate(v_input['address'], '.address') == \
                v_input['address']
+
+    # test user of integer in input
+        test_input = { 0: 'value' }
+        testM.validate(test_input, '.0')
 
     # test non-existent path to root exception
         v_input = deepcopy(valid_input)
@@ -858,7 +866,8 @@ if __name__ == '__main__':
     jsonModelTests(testModel).unitTests(testInput, testQuery)
     t1 = timer()
     print(str(t1 - t0))
-    test_schema = { 'schema': { 'key': { 'key': 'value'}}}
-    test_input = { 'key': 'value' }
+    test_schema = { 'schema': { '0': { 0: 'value'}}}
+    test_input = { 0: 'value' }
     testM = jsonModel(test_schema)
+    testM.validate(test_input, '.0')
     # print(testM.ingest(**test_input))

@@ -39,7 +39,7 @@ class mapModel(object):
 
     def dict(self, input_dict, path_to_root, key_name, key_criteria):
         for key, value in input_dict.items():
-            key_path = path_to_root + '.' + key
+            key_path = path_to_root + '.' + str(key)
             key_name.append(key_path)
             class_index = self._datatype_classes.index(value.__class__)
             criteria_dict = {
