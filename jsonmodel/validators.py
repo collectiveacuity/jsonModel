@@ -579,9 +579,9 @@ class jsonModel(object):
         input_key_list = []
         for key in input_dict.keys():
             if path_to_root == '.':
-                input_key_name = path_to_root + key
+                input_key_name = path_to_root + str(key)
             else:
-                input_key_name = path_to_root + '.' + key
+                input_key_name = path_to_root + '.' + str(key)
             input_keys.append(input_key_name)
             input_key_list.append(key)
 
@@ -596,9 +596,9 @@ class jsonModel(object):
         req_key_list = []
         for key in schema_dict.keys():
             if path_to_root == '.':
-                schema_key_name = path_to_root + key
+                schema_key_name = path_to_root + str(key)
             else:
-                schema_key_name = path_to_root + '.' + key
+                schema_key_name = path_to_root + '.' + str(key)
             max_keys.append(schema_key_name)
             max_key_list.append(key)
             rules_schema_key_name = re.sub('\[\d+\]', '[0]', schema_key_name)
@@ -641,9 +641,9 @@ class jsonModel(object):
     # validate datatype of value
         for key, value in input_dict.items():
             if path_to_root == '.':
-                input_key_name = path_to_root + key
+                input_key_name = path_to_root + str(key)
             else:
-                input_key_name = path_to_root + '.' + key
+                input_key_name = path_to_root + '.' + str(key)
             rules_input_key_name = re.sub('\[\d+\]', '[0]', input_key_name)
             if input_key_name in max_keys:
                 value_index = self._datatype_classes.index(value.__class__)
