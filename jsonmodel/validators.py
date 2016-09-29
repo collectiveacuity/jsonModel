@@ -565,7 +565,7 @@ class jsonModel(object):
 
         return True
 
-    def _validate_dict(self, input_dict, schema_dict, path_to_root):
+    def _validate_dict(self, input_dict, schema_dict, path_to_root, object_title=''):
 
         '''
             a helper method for recursively validating keys in dictionaries
@@ -581,6 +581,7 @@ class jsonModel(object):
         input_key_list = []
         for key in input_dict.keys():
             error_dict = {
+                'object_title': object_title,
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'key_datatype',
@@ -629,6 +630,7 @@ class jsonModel(object):
         missing_keys = set(req_keys) - set(input_keys)
         if missing_keys:
             error_dict = {
+                'object_title': object_title,
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'required_field',
@@ -647,6 +649,7 @@ class jsonModel(object):
                 pathless_key = re.sub(rules_top_level_key, '', key, count=1)
                 extra_key_list.append(pathless_key)
             error_dict = {
+                'object_title': object_title,
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'extra_fields',
@@ -665,31 +668,36 @@ class jsonModel(object):
                 input_key_name = path_to_root + '.' + key
             rules_input_key_name = re.sub('\[\d+\]', '[0]', input_key_name)
             if input_key_name in max_keys:
-                value_index = self._datatype_classes.index(value.__class__)
-                value_type = self._datatype_names[value_index]
                 input_criteria = self.keyMap[rules_input_key_name]
                 error_dict = {
+                    'object_title': object_title,
                     'model_schema': self.schema,
                     'input_criteria': input_criteria,
                     'failed_test': 'value_datatype',
                     'input_path': input_key_name,
-                    'error_value': value_type,
+                    'error_value': value,
                     'error_code': 4001
                 }
+                try:
+                    value_index = self._datatype_classes.index(value.__class__)
+                except:
+                    error_dict['error_value'] = value.__class__.__name__
+                    raise InputValidationError(error_dict)
+                value_type = self._datatype_names[value_index]
                 if value_type != input_criteria['value_datatype']:
                     raise InputValidationError(error_dict)
 
     # call appropriate validation sub-routine for datatype of value
                 if value_type == 'boolean':
-                    input_dict[key] = self._validate_boolean(value, input_key_name)
+                    input_dict[key] = self._validate_boolean(value, input_key_name, object_title)
                 elif value_type == 'number':
-                    input_dict[key] = self._validate_number(value, input_key_name)
+                    input_dict[key] = self._validate_number(value, input_key_name, object_title)
                 elif value_type == 'string':
-                    input_dict[key] = self._validate_string(value, input_key_name)
+                    input_dict[key] = self._validate_string(value, input_key_name, object_title)
                 elif value_type == 'map':
-                    input_dict[key] = self._validate_dict(value, schema_dict[key], input_key_name)
+                    input_dict[key] = self._validate_dict(value, schema_dict[key], input_key_name, object_title)
                 elif value_type == 'list':
-                    input_dict[key] = self._validate_list(value, schema_dict[key], input_key_name)
+                    input_dict[key] = self._validate_list(value, schema_dict[key], input_key_name, object_title)
 
     # set default values for empty optional fields
         for key in max_key_list:
@@ -701,7 +709,7 @@ class jsonModel(object):
 
         return input_dict
 
-    def _validate_list(self, input_list, schema_list, path_to_root):
+    def _validate_list(self, input_list, schema_list, path_to_root, object_title=''):
 
         '''
             a helper method for recursively validating items in a list
@@ -717,6 +725,7 @@ class jsonModel(object):
 
     # construct list error report template
         list_error = {
+            'object_title': object_title,
             'model_schema': self.schema,
             'input_criteria': list_rules,
             'failed_test': 'value_datatype',
@@ -741,6 +750,7 @@ class jsonModel(object):
 
     # construct item error report template
         item_error = {
+            'object_title': object_title,
             'model_schema': self.schema,
             'input_criteria': item_rules,
             'failed_test': 'value_datatype',
@@ -754,23 +764,27 @@ class jsonModel(object):
             input_path = path_to_root + '[%s]' % i
             item = input_list[i]
             item_error['input_path'] = input_path
-            item_index = self._datatype_classes.index(item.__class__)
+            try:
+                item_index = self._datatype_classes.index(item.__class__)
+            except:
+                item_error['error_value'] = item.__class__.__name__
+                raise InputValidationError(item_error)
             item_type = self._datatype_names[item_index]
-            item_error['error_value'] = item_type
+            item_error['error_value'] = item
             if item_type != item_rules['value_datatype']:
                 raise InputValidationError(item_error)
 
     # call appropriate validation sub-routine for datatype of item
             if item_type == 'boolean':
-                input_list[i] = self._validate_boolean(item, input_path)
+                input_list[i] = self._validate_boolean(item, input_path, object_title)
             elif item_type == 'number':
-                input_list[i] = self._validate_number(item, input_path)
+                input_list[i] = self._validate_number(item, input_path, object_title)
             elif item_type == 'string':
-                input_list[i] = self._validate_string(item, input_path)
+                input_list[i] = self._validate_string(item, input_path, object_title)
             elif item_type == 'map':
-                input_list[i] = self._validate_dict(item, schema_list[0], input_path)
+                input_list[i] = self._validate_dict(item, schema_list[0], input_path, object_title)
             elif item_type == 'list':
-                input_list[i] = self._validate_list(item, schema_list[0], input_path)
+                input_list[i] = self._validate_list(item, schema_list[0], input_path, object_title)
 
     # validate unique values in list
         if 'unique_values' in list_rules.keys():
@@ -786,7 +800,7 @@ class jsonModel(object):
 
         return input_list
 
-    def _validate_number(self, input_number, path_to_root):
+    def _validate_number(self, input_number, path_to_root, object_title=''):
 
         '''
             a helper method for validating properties of a number
@@ -797,6 +811,7 @@ class jsonModel(object):
         rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
         input_criteria = self.keyMap[rules_path_to_root]
         error_dict = {
+            'object_title': object_title,
             'model_schema': self.schema,
             'input_criteria': input_criteria,
             'failed_test': 'value_datatype',
@@ -846,7 +861,7 @@ class jsonModel(object):
 
         return input_number
 
-    def _validate_string(self, input_string, path_to_root):
+    def _validate_string(self, input_string, path_to_root, object_title=''):
 
         '''
             a helper method for validating properties of a string
@@ -857,6 +872,7 @@ class jsonModel(object):
         rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
         input_criteria = self.keyMap[rules_path_to_root]
         error_dict = {
+            'object_title': object_title,
             'model_schema': self.schema,
             'input_criteria': input_criteria,
             'failed_test': 'value_datatype',
@@ -945,7 +961,7 @@ class jsonModel(object):
 
         return input_string
 
-    def _validate_boolean(self, input_boolean, path_to_root):
+    def _validate_boolean(self, input_boolean, path_to_root, object_title=''):
 
         '''
             a helper method for validating properties of a boolean
@@ -956,6 +972,7 @@ class jsonModel(object):
         rules_path_to_root = re.sub('\[\d+\]', '[0]', path_to_root)
         input_criteria = self.keyMap[rules_path_to_root]
         error_dict = {
+            'object_title': object_title,
             'model_schema': self.schema,
             'input_criteria': input_criteria,
             'failed_test': 'value_datatype',
@@ -1238,7 +1255,7 @@ class jsonModel(object):
 
         return record_endpoints
 
-    def validate(self, input_data, path_to_root=''):
+    def validate(self, input_data, path_to_root='', object_title=''):
 
         '''
             a core method for validating input against the model
@@ -1247,11 +1264,13 @@ class jsonModel(object):
 
         :param input_data: list, dict, string, number, or boolean to validate
         :param path_to_root: [optional] string with dot-path of model component
+        :param object_title: [optional] string with name of input to validate
         :return: input_data (or InputValidationError)
         '''
 
         __name__ = '%s.validate' % self.__class__.__name__
         _path_arg = '%s(path_to_root="...")' % __name__
+        _title_arg = '%s(object_title="...")' % __name__
 
     # validate input
         if path_to_root:
@@ -1261,36 +1280,46 @@ class jsonModel(object):
                 raise ModelValidationError('%s does not exist in components %s.' % (_path_arg.replace('...', path_to_root), self.keyMap.keys()))
         else:
             path_to_root = '.'
+        if object_title:
+            if not isinstance(object_title, str):
+                raise ModelValidationError('%s must be a string' % _title_arg)
+
+    # construct generic error dictionary
+        error_dict = {
+            'object_title': object_title,
+            'model_schema': self.schema,
+            'input_criteria': self.keyMap[path_to_root],
+            'failed_test': 'value_datatype',
+            'input_path': path_to_root,
+            'error_value': input_data,
+            'error_code': 4001
+        }
 
     # determine value type of input data
-        input_index = self._datatype_classes.index(input_data.__class__)
+        try:
+            input_index = self._datatype_classes.index(input_data.__class__)
+        except:
+            error_dict['error_value'] = input_data.__class__.__name__
+            raise InputValidationError(error_dict)
         input_type = self._datatype_names[input_index]
 
     # validate input data type
         if input_type != self.keyMap[path_to_root]['value_datatype']:
-            error_dict = {
-                'model_schema': self.schema,
-                'input_criteria': self.keyMap[path_to_root],
-                'failed_test': 'value_datatype',
-                'input_path': path_to_root,
-                'error_value': input_type,
-                'error_code': 4001
-            }
             raise InputValidationError(error_dict)
 
     # run helper method appropriate to data type
         if input_type == 'boolean':
-            input_data = self._validate_boolean(input_data, path_to_root)
+            input_data = self._validate_boolean(input_data, path_to_root, object_title)
         elif input_type == 'number':
-            input_data = self._validate_number(input_data, path_to_root)
+            input_data = self._validate_number(input_data, path_to_root, object_title)
         elif input_type == 'string':
-            input_data = self._validate_string(input_data, path_to_root)
+            input_data = self._validate_string(input_data, path_to_root, object_title)
         elif input_type == 'list':
             schema_list = self._reconstruct(path_to_root)
-            input_data = self._validate_list(input_data, schema_list, path_to_root)
+            input_data = self._validate_list(input_data, schema_list, path_to_root, object_title)
         elif input_type == 'map':
             schema_dict = self._reconstruct(path_to_root)
-            input_data = self._validate_dict(input_data, schema_dict, path_to_root)
+            input_data = self._validate_dict(input_data, schema_dict, path_to_root, object_title)
 
         return input_data
 

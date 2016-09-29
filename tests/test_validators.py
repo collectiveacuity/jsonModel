@@ -86,14 +86,6 @@ class jsonModelTests(jsonModel):
         assert self.validate(v_input['address'], '.address') == \
                v_input['address']
 
-    # test integer in input key name exception
-        integer_keyname_error = deepcopy(valid_input)
-        integer_keyname_error[2] = 'integer key name'
-        try:
-            self.validate(integer_keyname_error)
-        except InputValidationError as err:
-            assert err.error['error_value'] == 2
-
     # test non-existent path to root exception
         v_input = deepcopy(valid_input)
         try:
@@ -116,9 +108,28 @@ class jsonModelTests(jsonModel):
             assert err.error['model_schema']
             assert err.error['failed_test'] == 'value_datatype'
 
+    # test object title in error message
+        try:
+            self.validate(invalid_list, object_title='List input')
+        except InputValidationError as err:
+            assert err.error['object_title']
+            assert str(err).find('input is invalid.')
+            assert str(err).find('Value []')
+
+    # test non-json valid object exception
+        invalid_object = jsonModel({'schema':{'test':'object'}})
+        try:
+            self.validate(invalid_object, object_title='jsonModel input')
+        except InputValidationError as err:
+            assert str(err).find('Value jsonModel')
+
     # test json structure of error message
         try:
             self.validate(invalid_list)
+        except InputValidationError as err:
+            assert json.dumps(err.error)
+        try:
+            self.validate(invalid_object)
         except InputValidationError as err:
             assert json.dumps(err.error)
 
@@ -129,6 +140,21 @@ class jsonModelTests(jsonModel):
             assert err.error['failed_test'] == 'value_datatype'
             assert json.dumps(err.error)
 
+    # test non-json valid input datatype
+        try:
+            self.validate(invalid_object, '.comments[0]')
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'value_datatype'
+            assert json.dumps(err.error)
+
+    # test key_datatype exception
+        integer_keyname_error = deepcopy(valid_input)
+        integer_keyname_error[2] = 'integer key name'
+        try:
+            self.validate(integer_keyname_error)
+        except InputValidationError as err:
+            assert err.error['error_value'] == 2
+
     # test extra_fields exception
         extra_key_input = deepcopy(valid_input)
         extra_key_input['extraKey'] = 'string'
@@ -136,14 +162,16 @@ class jsonModelTests(jsonModel):
             self.validate(extra_key_input)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'extra_fields'
+            assert not err.error['object_title']
 
     # test required_field exception
         missing_key_input = deepcopy(valid_input)
         del missing_key_input['active']
         try:
-            self.validate(missing_key_input)
+            self.validate(missing_key_input, object_title='Required field exception')
         except InputValidationError as err:
             assert err.error['failed_test'] == 'required_field'
+            assert err.error['object_title']
 
     # test required_field false in dictionaries
         optional_key = deepcopy(valid_input)
@@ -162,14 +190,16 @@ class jsonModelTests(jsonModel):
             self.validate(short_list)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'min_size'
+            assert not err.error['object_title']
 
     # test max_size exception
         long_list = deepcopy(valid_input)
         long_list['comments'].append('pewter')
         try:
-            self.validate(long_list)
+            self.validate(long_list, object_title='Max size exception')
         except InputValidationError as err:
             assert err.error['failed_test'] == 'max_size'
+            assert err.error['object_title']
 
     # test value_datatype exception
         mixed_list = deepcopy(valid_input)
@@ -191,9 +221,10 @@ class jsonModelTests(jsonModel):
         integers_only = deepcopy(valid_input)
         integers_only['rating'] = 3.5
         try:
-            self.validate(integers_only)
+            self.validate(integers_only, object_title='Integer data exception')
         except InputValidationError as err:
             assert err.error['failed_test'] == 'integer_data'
+            assert err.error['object_title']
 
     # test min_value exception
         min_number = deepcopy(valid_input)
@@ -202,6 +233,7 @@ class jsonModelTests(jsonModel):
             self.validate(min_number)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'min_value'
+            assert not err.error['object_title']
 
     # test max_value exception
         max_number = deepcopy(valid_input)
@@ -247,9 +279,10 @@ class jsonModelTests(jsonModel):
         greater_string = deepcopy(valid_input)
         greater_string['address']['region'] = 'AA'
         try:
-            self.validate(greater_string)
+            self.validate(greater_string, object_title='Greater than exception')
         except InputValidationError as err:
             assert err.error['failed_test'] == 'greater_than'
+            assert err.error['object_title']
 
     # test less_than exception for strings
         less_string = deepcopy(valid_input)
@@ -258,6 +291,7 @@ class jsonModelTests(jsonModel):
             self.validate(less_string)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'less_than'
+            assert not err.error['object_title']
 
     # test excluded_values for strings exception
         excluded_string = deepcopy(valid_input)
@@ -490,6 +524,19 @@ class jsonModelTests(jsonModel):
             jsonModel(empty_schema)
         except ModelValidationError as err:
             assert err
+
+    # test invalid json data exception
+        object_model = deepcopy(test_model)
+        object_model['schema']['not_json'] = list_model
+        try:
+            jsonModel(object_model)
+        except ModelValidationError as err:
+            assert str(err).find('.not_json') > 0
+        object_model['schema']['not_json'] = [ list_model ]
+        try:
+            jsonModel(object_model)
+        except ModelValidationError as err:
+            assert str(err).find('.not_json[0]') > 0
 
     # test wrong datatype qualifier keys in components exception
         integer_criteria_error = deepcopy(test_model)

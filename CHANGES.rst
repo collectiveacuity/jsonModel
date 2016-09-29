@@ -1,8 +1,11 @@
 ChangeLog
 =========
 
-2.3 (2016.07.??)
+2.3 (2016.09.29)
 ----------------
+* **FEATURE ADDED** object_title added to validate method argument for error handling
+* Bug fix for non-json valid object added to model and validate input data
+* Bug fix for dictionaries with non-string values for key names
 * Bug fix for ingestion of items outside scope of json datatypes
 
 2.2 (2016.07.10)

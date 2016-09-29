@@ -29,14 +29,17 @@ class InputValidationError(Exception):
 
     def __init__(self, error_dict=None):
         self.error = {
+            'object_title': '',
             'model_schema': {},
             'input_criteria': {},
             'failed_test': '',
-            'input_path': {},
+            'input_path': '',
             'error_value': None,
             'error_code': 0
         }
         if isinstance(error_dict, dict):
+            if 'object_title' in error_dict:
+                self.error['object_title'] = error_dict['object_title']
             if 'model_schema' in error_dict:
                 self.error['model_schema'] = error_dict['model_schema']
             if 'input_criteria' in error_dict:
@@ -49,5 +52,13 @@ class InputValidationError(Exception):
                 self.error['error_value'] = error_dict['error_value']
             if 'error_code' in error_dict:
                 self.error['error_code'] = error_dict['error_code']
-        self.message = '\nError Report: %s' % self.error
+        if self.error['object_title']:
+            failed_test = self.error['failed_test']
+            first_line = '\n%s is invalid.' % (self.error['object_title'].rstrip())
+            second_line = "\nValue %s for field %s failed test '%s'" % (self.error['error_value'], self.error['input_path'], failed_test)
+            if failed_test in self.error['input_criteria']:
+                second_line += ': %s' % self.error['input_criteria'][failed_test]
+            self.message = '%s%s' % (first_line, second_line)
+        else:
+            self.message = '\nError Report: %s' % self.error
         super(InputValidationError, self).__init__(self.message)

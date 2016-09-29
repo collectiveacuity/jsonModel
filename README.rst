@@ -28,8 +28,8 @@ Features
 - Ability to assign default values to inputs
 - Validates individual components in a model
 - Ingests arbitrary keyword data and outputs model valid dictionary
-- Validates query criteria against model scope **New Feature**
-- Evaluates model valid records using query criteria **New Feature**
+- Validates query criteria against model scope
+- Evaluates model valid records using query criteria
 
 ============
 Installation

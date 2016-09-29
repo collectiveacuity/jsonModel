@@ -38,6 +38,8 @@ class mapModel(object):
             self.keyName, self.keyCriteria = self.dict(input, '', key_name, key_criteria)
         elif isinstance(input, list):
             self.keyName, self.keyCriteria = self.list(input, '', [], [])
+        else:
+            raise ModelValidationError('Input for mapModel must be a dictionary or list.')
 
     def dict(self, input_dict, path_to_root, key_name, key_criteria):
         for key, value in input_dict.items():
@@ -46,7 +48,10 @@ class mapModel(object):
                 raise ModelValidationError('Key name for field %s must not be a string datatype.' % key_path)
             key_path = path_to_root + '.' + key
             key_name.append(key_path)
-            class_index = self._datatype_classes.index(value.__class__)
+            try:
+                class_index = self._datatype_classes.index(value.__class__)
+            except:
+                raise ModelValidationError('Value for field %s must be a json-valid datatype.' % key_path)
             criteria_dict = {
                 'required_field': False,
                 'value_datatype': self._datatype_names[class_index]
@@ -71,7 +76,10 @@ class mapModel(object):
         if input_list:
             key_path = path_to_root + '[0]'
             key_name.append(key_path)
-            class_index = self._datatype_classes.index(input_list[0].__class__)
+            try:
+                class_index = self._datatype_classes.index(input_list[0].__class__)
+            except:
+                raise ModelValidationError('Value for field %s must be a json-valid datatype.' % key_path)
             criteria_dict = {
                 'required_field': False,
                 'value_datatype': self._datatype_names[class_index]
