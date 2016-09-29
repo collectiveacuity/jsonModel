@@ -1,6 +1,7 @@
 __author__ = 'rcj1492'
 __created__ = '2015.12'
-__version__ = '2.3'
+__version__ = '2.4'
 __license__ = 'MIT'
 __module__ = 'jsonmodel'
 __email__ = 'support@collectiveacuity.com'
+__url__ = 'https://github.com/collectiveacuity/jsonModel'

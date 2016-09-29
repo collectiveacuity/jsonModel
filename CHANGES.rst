@@ -1,7 +1,7 @@
 ChangeLog
 =========
 
-2.3 (2016.09.29)
+2.4 (2016.09.29)
 ----------------
 * **FEATURE ADDED** object_title added to validate method argument for error handling
 * Bug fix for non-json valid object added to model and validate input data

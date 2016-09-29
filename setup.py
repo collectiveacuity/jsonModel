@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 '''
 References:
 https://python-packaging-user-guide.readthedocs.org/en/latest/
-https://docs.python.org/3.5/distutils/index.html
+https://docs.python.org/3.5/distributing/index.html#distributing-index
 https://github.com/jgehrcke/python-cmdline-bootstrap
 http://www.pyinstaller.org/
 
@@ -51,13 +51,16 @@ license_terms = re.search("^__license__\s*=\s*'(.*)'", config_file, re.M).group(
 module = re.search("^__module__\s*=\s*'(.*)'", config_file, re.M).group(1)
 author = re.search("^__author__\s*=\s*'(.*)'", config_file, re.M).group(1)
 email = re.search("^__email__\s*=\s*'(.*)'", config_file, re.M).group(1)
+url = re.search("^__url__\s*=\s*'(.*)'", config_file, re.M).group(1)
 # author_list = re.search("^__authors__\s*=\s*'(.*)'", config_file, re.M).group(1)
 
 setup(
     name=module,
     version=version,
     author=author,
+    author_email=author,
     maintainer_email=email,
+    url=url,
     include_package_data=True,  # Checks MANIFEST.in for explicit rules
     packages=find_packages(exclude=['cred','keys','docs','tests','models','notes']),  # Needed for bdist
     license=license_terms,
