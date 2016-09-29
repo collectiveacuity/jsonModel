@@ -573,15 +573,34 @@ class jsonModel(object):
         :return input_dict
         '''
 
-    # construct lists of keys in input dictionary
+    # reconstruct key path to current dictionary in model
         rules_top_level_key = re.sub('\[\d+\]', '[0]', path_to_root)
+
+    # construct lists of keys in input dictionary
         input_keys = []
         input_key_list = []
         for key in input_dict.keys():
+            error_dict = {
+                'model_schema': self.schema,
+                'input_criteria': self.keyMap[rules_top_level_key],
+                'failed_test': 'key_datatype',
+                'input_path': path_to_root,
+                'error_value': key,
+                'error_code': 4004
+            }
+            error_dict['input_criteria']['key_datatype'] = 'string'
             if path_to_root == '.':
-                input_key_name = path_to_root + str(key)
+                if not isinstance(key, str):
+                    input_key_name = path_to_root + str(key)
+                    error_dict['input_path'] = input_key_name
+                    raise InputValidationError(error_dict)
+                input_key_name = path_to_root + key
             else:
-                input_key_name = path_to_root + '.' + str(key)
+                if not isinstance(key, str):
+                    input_key_name = path_to_root + '.' + str(key)
+                    error_dict['input_path'] = input_key_name
+                    raise InputValidationError(error_dict)
+                input_key_name = path_to_root + '.' + key
             input_keys.append(input_key_name)
             input_key_list.append(key)
 
@@ -596,9 +615,9 @@ class jsonModel(object):
         req_key_list = []
         for key in schema_dict.keys():
             if path_to_root == '.':
-                schema_key_name = path_to_root + str(key)
+                schema_key_name = path_to_root + key
             else:
-                schema_key_name = path_to_root + '.' + str(key)
+                schema_key_name = path_to_root + '.' + key
             max_keys.append(schema_key_name)
             max_key_list.append(key)
             rules_schema_key_name = re.sub('\[\d+\]', '[0]', schema_key_name)
@@ -614,7 +633,7 @@ class jsonModel(object):
                 'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'required_field',
                 'input_path': path_to_root,
-                'error_value': req_key_list,
+                'error_value': list(missing_keys),
                 'error_code': 4002
             }
             error_dict['input_criteria']['required_keys'] = req_keys
@@ -641,9 +660,9 @@ class jsonModel(object):
     # validate datatype of value
         for key, value in input_dict.items():
             if path_to_root == '.':
-                input_key_name = path_to_root + str(key)
+                input_key_name = path_to_root + key
             else:
-                input_key_name = path_to_root + '.' + str(key)
+                input_key_name = path_to_root + '.' + key
             rules_input_key_name = re.sub('\[\d+\]', '[0]', input_key_name)
             if input_key_name in max_keys:
                 value_index = self._datatype_classes.index(value.__class__)

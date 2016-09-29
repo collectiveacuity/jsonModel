@@ -1,6 +1,8 @@
 __author__ = 'rcj1492'
 __created__ = '2016.01'
 
+from jsonmodel.exceptions import ModelValidationError
+
 class mapModel(object):
 
     '''
@@ -39,7 +41,10 @@ class mapModel(object):
 
     def dict(self, input_dict, path_to_root, key_name, key_criteria):
         for key, value in input_dict.items():
-            key_path = path_to_root + '.' + str(key)
+            if not isinstance(key, str):
+                key_path = path_to_root + '.' + str(key)
+                raise ModelValidationError('Key name for field %s must not be a string datatype.' % key_path)
+            key_path = path_to_root + '.' + key
             key_name.append(key_path)
             class_index = self._datatype_classes.index(value.__class__)
             criteria_dict = {

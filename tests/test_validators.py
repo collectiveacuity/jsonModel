@@ -55,9 +55,12 @@ class jsonModelTests(jsonModel):
         # TODO: "lambda_function": "",
         # TODO: "validation_url": "",
 
-    # test use of integers in key names
-        test_schema = { 'schema': { '0': { 0: 'value' } } }
-        testM = jsonModel(test_schema)
+    # test integers in key name exception
+        try:
+            test_schema = { 'schema': { 0: 'value' } }
+            jsonModel(test_schema)
+        except ModelValidationError as err:
+            assert str(err).find('Model declaration is invalid')
 
     # test validation with empty path to root
         v_input = deepcopy(valid_input)
@@ -83,9 +86,13 @@ class jsonModelTests(jsonModel):
         assert self.validate(v_input['address'], '.address') == \
                v_input['address']
 
-    # test user of integer in input
-        test_input = { 0: 'value' }
-        testM.validate(test_input, '.0')
+    # test integer in input key name exception
+        integer_keyname_error = deepcopy(valid_input)
+        integer_keyname_error[2] = 'integer key name'
+        try:
+            self.validate(integer_keyname_error)
+        except InputValidationError as err:
+            assert err.error['error_value'] == 2
 
     # test non-existent path to root exception
         v_input = deepcopy(valid_input)
@@ -866,8 +873,3 @@ if __name__ == '__main__':
     jsonModelTests(testModel).unitTests(testInput, testQuery)
     t1 = timer()
     print(str(t1 - t0))
-    test_schema = { 'schema': { '0': { 0: 'value'}}}
-    test_input = { 0: 'value' }
-    testM = jsonModel(test_schema)
-    testM.validate(test_input, '.0')
-    # print(testM.ingest(**test_input))
