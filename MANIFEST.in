@@ -5,6 +5,7 @@ recursive-exclude models *
 recursive-exclude notes *
 recursive-exclude docs *
 recursive-include jsonmodel *.json
+prune */__pycache__
 include *.rst
 include *.txt
 include *.md

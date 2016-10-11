@@ -13,7 +13,8 @@ pip install wheel
 pip install twine
 
 Build Distributions:
-python setup.py sdist --format=gztar,zip bdist_wheel
+python setup.py sdist --format=gztar,zip
+pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-2.3.tar.gz
 
 Upload Distributions to PyPi:
 twine register dist/*
@@ -40,6 +41,7 @@ System Installation:
 # http://www.pyinstaller.org/
 
 Old Methods:
+python setup.py sdist --format=gztar,zip bdist_wheel # Old wheel production
 python setup.py sdist bdist_wheel upload  # for PyPi
 pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz
 '''
@@ -62,7 +64,7 @@ setup(
     maintainer_email=email,
     url=url,
     include_package_data=True,  # Checks MANIFEST.in for explicit rules
-    packages=find_packages(exclude=['cred','keys','docs','tests','models','notes']),  # Needed for bdist
+    packages=find_packages(),  # exclude=['cred','keys','docs','tests','models','notes'] Needed for bdist
     license=license_terms,
     description="A Collection of Methods for Validating JSON Structured Data",
     long_description=open('README.rst').read(),
