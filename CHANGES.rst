@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+2.5 (2016.10.25)
+----------------
+* Fixed missing declared value criteria for empty strings, number and boolean declarations
+* Updates to MANIFEST and setup process to exclude IDE file types
+* Updates to unittests
+
 2.4 (2016.09.29)
 ----------------
 * **FEATURE ADDED** object_title added to validate method argument for error handling

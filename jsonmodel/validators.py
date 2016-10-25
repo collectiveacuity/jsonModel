@@ -331,7 +331,12 @@ class jsonModel(object):
             schema_field = self.keyCriteria[self.keyName.index(key)]
             discrete_qualifiers = ['declared_value', 'default_value', 'excluded_values', 'discrete_values', 'example_values']
             for qualifier in discrete_qualifiers:
-                if qualifier in value.keys() or (qualifier in schema_field and declared_value):
+                test_qualifier = False
+                if qualifier in schema_field:
+                    test_qualifier = True
+                    if qualifier == 'declared_value' and not schema_field[qualifier]:
+                        test_qualifier = False
+                if qualifier in value.keys() or (test_qualifier and declared_value):
                     multiple_values = False
                     if qualifier in value.keys():
                         if isinstance(value[qualifier], list):
@@ -414,7 +419,12 @@ class jsonModel(object):
 
     # validate discrete value qualifiers against each other
             for qualifier in discrete_qualifiers:
-                if qualifier in value.keys() or (qualifier in schema_field and declared_value):
+                test_qualifier = False
+                if qualifier in schema_field:
+                    test_qualifier = True
+                    if qualifier == 'declared_value' and not schema_field[qualifier]:
+                        test_qualifier = False
+                if qualifier in value.keys() or (test_qualifier and declared_value):
                     multiple_values = False
                     if qualifier in value.keys():
                         if isinstance(value[qualifier], list):

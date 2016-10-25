@@ -12,6 +12,7 @@ class testMapModel(mapModel):
     def unitTests(self):
 
         assert self.keyCriteria[self.keyName.index('.')]['value_datatype'] == 'map'
+        print(self.keyCriteria[0])
 
         return self
 

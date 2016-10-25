@@ -31,7 +31,9 @@ class jsonModelTests(jsonModel):
         assert isinstance(self.maxSize, int)
 
     # test declarative fields in model keyMap
+        assert self.keyMap['.']['value_datatype']
         assert self.keyMap['.userID']['required_field']
+        assert self.keyMap['.address.region']['declared_value']
         assert self.keyMap['.rating']['default_value']
         assert self.keyMap['.emoticon']['byte_data']
         assert self.keyMap['.rating']['integer_data']
@@ -54,6 +56,10 @@ class jsonModelTests(jsonModel):
         # TODO: "identical_to": ".similar_string",
         # TODO: "lambda_function": "",
         # TODO: "validation_url": "",
+
+    # test declared values for empty values
+        assert isinstance(self.keyMap['.address.country_code']['declared_value'], int)
+        assert isinstance(self.keyMap['.address.postal_code']['declared_value'], str)
 
     # test integers in key name exception
         try:

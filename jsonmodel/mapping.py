@@ -63,8 +63,7 @@ class mapModel(object):
                 if value:
                     criteria_dict['extra_fields'] = False
             if criteria_dict['value_datatype'] in ('boolean', 'string', 'number'):
-                if value:
-                    criteria_dict['declared_value'] = value
+                criteria_dict['declared_value'] = value
             key_criteria.append(criteria_dict)
             if isinstance(value, dict):
                 self.dict(input_dict=input_dict[key], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
