@@ -34,6 +34,7 @@
             "validation_url": "",
             "example_values": [ "" ],
             "field_title": "",
+            "field_position": 0,
             "field_description": "",
             "field_metadata": {}
         },
@@ -52,6 +53,7 @@
             "validation_url": "",
             "example_values": [ 0.0 ],
             "field_title": "",
+            "field_position": 0,
             "field_description": "",
             "field_metadata": {}
         },
@@ -62,6 +64,7 @@
             "lambda_function": "",
             "validation_url": "",
             "field_title": "",
+            "field_position": 0,
             "field_description": "",
             "field_metadata": {}
         },
@@ -72,6 +75,7 @@
             "lambda_function": "",
             "validation_url": "",
             "field_title": "",
+            "field_position": 0,
             "field_description": "",
             "field_metadata": {}
         },
@@ -84,6 +88,7 @@
             "lambda_function": "",
             "validation_url": "",
             "field_title": "",
+            "field_position": 0,
             "field_description": "",
             "field_metadata": {}
         },
@@ -93,6 +98,7 @@
             "lambda_function": "",
             "validation_url": "",
             "field_title": "",
+            "field_position": 0,
             "field_description": "",
             "field_metadata": {}
         }

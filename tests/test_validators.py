@@ -50,6 +50,7 @@ class jsonModelTests(jsonModel):
         assert self.keyMap['.address.country_code']['discrete_values']
         assert self.keyMap['.emoticon']['example_values']
         assert self.keyMap['.address.region']['field_title']
+        assert self.keyMap['.datetime']['field_position']
         assert self.keyMap['.userID']['field_description']
         assert self.keyMap['.emoticon']['field_metadata']
 
@@ -583,6 +584,14 @@ class jsonModelTests(jsonModel):
             jsonModel(field_description_error)
         except ModelValidationError as err:
             assert str(err).find('.userID') > 0
+
+    # test integer only datatype qualifier values in components exception
+        contains_either_error = deepcopy(test_model)
+        contains_either_error['components']['.datetime']['field_position'] = 1.1
+        try:
+            jsonModel(contains_either_error)
+        except ModelValidationError as err:
+            assert str(err).find('.datetime') > 0
 
     # test conflicting byte data and range criteria exception
         byte_range_error = deepcopy(test_model)

@@ -117,7 +117,7 @@ class jsonModel(object):
     # construct queryRules property from class model rules
         self.queryRules = {}
         for key, value in self.__rules__['components'].items():
-            remove_from_query = [ 'required_field', 'default_value', 'example_values', 'field_title', 'field_description', 'field_metadata', 'extra_fields' ]
+            remove_from_query = [ 'required_field', 'default_value', 'example_values', 'field_title', 'field_position', 'field_description', 'field_metadata', 'extra_fields' ]
             field_qualifiers = {
                 'value_exists': False
             }
@@ -189,6 +189,11 @@ class jsonModel(object):
                 if v_type != qualifier_type:
                     message = 'Value for field %s qualifier %s must be a %s datatype.' % (key, k, qualifier_type)
                     raise ModelValidationError(message)
+                if qualifier_type == 'number':
+                    if isinstance(type_dict[k], int):
+                        if not isinstance(v, int):
+                            message = 'Value for field %s qualifier %s must be an integer.' % (key, k)
+                            raise ModelValidationError(message)
 
     # validate internal logic of each qualifier value declaration
                 if k in ('must_not_contain', 'must_contain', 'contains_either'):

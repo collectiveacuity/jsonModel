@@ -33,7 +33,8 @@
     },
     ".datetime": {
       "greater_than": 1.1,
-      "less_than": 2000000000.0
+      "less_than": 2000000000.0,
+      "field_position": 1
     },
     ".emoticon": {
       "required_field": true,

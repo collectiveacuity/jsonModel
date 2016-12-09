@@ -1,6 +1,11 @@
 ChangeLog
 =========
 
+2.6 (2016.12.08)
+----------------
+* **FEATURE ADDED** field_position added to component criteria for ordered position handling
+* Bug fix for non-integer values of max size, min size, max length and min length criteria
+
 2.5 (2016.10.25)
 ----------------
 * Fixed missing declared value criteria for empty strings, number and boolean declarations
