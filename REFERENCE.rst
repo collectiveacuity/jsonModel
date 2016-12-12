@@ -15,6 +15,7 @@ The default behavior of a schema declaration includes validation of structure, d
         "active": true,
         "emoticon": "aGFwcHk=",
         "rating": 8,
+        "reference": null,
         "address": {
             "city": "New Orleans",
             "region": "LA",
@@ -55,7 +56,8 @@ The default validation process can be modified, and other (less common) conditio
         },
         ".datetime": {
             "greater_than": 1.1,
-            "less_than": 2000000000.0
+            "less_than": 2000000000.0,
+            "field_position": 1
         },
         ".emoticon": {
             "required_field": false,
@@ -63,6 +65,9 @@ The default validation process can be modified, and other (less common) conditio
             "example_values": [ "aGFwcHk=" ],
             "excluded_values": [ "c2Fk" ],
             "field_metadata": { "endpoint": "http://collectiveacuity.com/icons/" }
+        },
+        ".reference": {
+            "required_field": false
         },
         ".rating": {
             "required_field": false,
@@ -134,6 +139,7 @@ List of Field Conditionals (and default values)
 - "**example_values**": [] / a list of values which satisfy all the validation requirements [**numbers and strings only**]
 - "**field_title**": "" / the title of the component for documentation and error reporting
 - "**field_description**": "" / a description of the component for documentation and error reporting
+- "**field_position**": 0 / the position of the component in an ordered array of fields
 - "**field_metadata**": {} / a dictionary for metadata about the component that passes through validation check
 
 Error Handling
@@ -155,6 +161,7 @@ Errors created from improper model specification will raise a ModelValidationErr
             'comments': [ '@GerardMaras Rock the shrimp bouillabaisse!' ],
             'active': True,
             'rating': 8,
+            'reference': None,
             'userID': 'gY3Cv81QwL0Fs',
             'emoticon': 'aGFwcHk=',
         },
@@ -227,6 +234,7 @@ Like the core validation method, ingestion will also walk through each item in a
         'datetime': 1449179763.312077,
         'active': False,
         'rating': 5,
+        'reference': None,
         'emoticon': 'aGFwcHIk='
         'comments': ['gold', 'silver', 'bronze'],
         'address': {
@@ -251,6 +259,7 @@ Like the core validation method, ingestion will also walk through each item in a
         'datetime': 0.0,
         'active': False,
         'rating': 5,
+        'reference': None,
         'emoticon': ''
         'comments': [],
         'address': {

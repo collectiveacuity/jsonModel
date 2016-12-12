@@ -36,6 +36,7 @@ class jsonModelTests(jsonModel):
         assert self.keyMap['.address.region']['declared_value']
         assert self.keyMap['.rating']['default_value']
         assert self.keyMap['.emoticon']['byte_data']
+        assert self.keyMap['.reference']['value_datatype']
         assert self.keyMap['.rating']['integer_data']
         assert self.keyMap['.userID']['min_length']
         assert self.keyMap['.comments[0]']['max_length']
@@ -79,19 +80,15 @@ class jsonModelTests(jsonModel):
 
     # test individual component validation
         v_input = deepcopy(valid_input)
-        assert self.validate(v_input['datetime'], '.datetime') == \
-               v_input['datetime']
+        assert self.validate(v_input['datetime'], '.datetime') == v_input['datetime']
         v_input = deepcopy(valid_input)
-        assert self.validate(v_input['userID'], '.userID') == \
-               v_input['userID']
+        assert self.validate(v_input['userID'], '.userID') == v_input['userID']
         v_input = deepcopy(valid_input)
         assert not self.validate(v_input['active'], '.active')
         v_input = deepcopy(valid_input)
-        assert self.validate(v_input['comments'], '.comments') == \
-               v_input['comments']
+        assert self.validate(v_input['comments'], '.comments') == v_input['comments']
         v_input = deepcopy(valid_input)
-        assert self.validate(v_input['address'], '.address') == \
-               v_input['address']
+        assert self.validate(v_input['address'], '.address') == v_input['address']
 
     # test non-existent path to root exception
         v_input = deepcopy(valid_input)
@@ -184,6 +181,22 @@ class jsonModelTests(jsonModel):
         optional_key = deepcopy(valid_input)
         del optional_key['comments']
         assert not 'comments' in self.validate(optional_key).keys()
+
+    # test null value declaration
+        null_value = deepcopy(valid_input)
+        null_value['reference'] = 1
+        self.validate(null_value)
+
+    # test null value declaration of invalid json data exception
+        null_error = deepcopy(valid_input)
+        null_error['reference'] = invalid_object
+        count = 1
+        try:
+            self.validate(null_error)
+            count = 0
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'value_datatype'
+        assert count
 
     # test default_value insertion
         default_rating = deepcopy(valid_input)
@@ -532,13 +545,25 @@ class jsonModelTests(jsonModel):
         except ModelValidationError as err:
             assert err
 
-    # test invalid json data exception
+    # test invalid object data exception
+        object_model = deepcopy
+        count = 1
+        try:
+            jsonModel(object_model)
+            count = 0
+        except ModelValidationError as err:
+            assert str(err).find('dictionary') > 0
+        assert count
+
+    # test invalid json data exception in dictionaries
         object_model = deepcopy(test_model)
         object_model['schema']['not_json'] = list_model
         try:
             jsonModel(object_model)
         except ModelValidationError as err:
             assert str(err).find('.not_json') > 0
+
+    # test invalid json data exception in lists
         object_model['schema']['not_json'] = [ list_model ]
         try:
             jsonModel(object_model)
@@ -546,12 +571,26 @@ class jsonModelTests(jsonModel):
             assert str(err).find('.not_json[0]') > 0
 
     # test wrong datatype qualifier keys in components exception
+        null_criteria_error = deepcopy(test_model)
+        null_criteria_error['components']['.reference']['integer_data'] = True
+        count = 1
+        try:
+            jsonModel(null_criteria_error)
+            count = 0
+        except ModelValidationError as err:
+            assert str(err).find('.reference') > 0
+        assert count
+
+    # test wrong datatype qualifier keys in components exception
         integer_criteria_error = deepcopy(test_model)
         integer_criteria_error['components']['.rating']['must_not_contain'] = [ '\\w' ]
+        count = 1
         try:
             jsonModel(integer_criteria_error)
+            count = 0
         except ModelValidationError as err:
             assert str(err).find('.rating') > 0
+        assert count
 
     # test wrong datatype qualifier values in components exception
         contains_either_error = deepcopy(test_model)

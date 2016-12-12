@@ -1,6 +1,11 @@
 ChangeLog
 =========
 
+2.7 (2016.12.12)
+----------------
+* Fixed bug in error checking model validation of null fields with component criteria
+* Added pass to type checking of input value declarations for null fields
+
 2.6 (2016.12.08)
 ----------------
 * **FEATURE ADDED** field_position added to component criteria for ordered position handling

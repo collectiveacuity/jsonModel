@@ -175,8 +175,8 @@ class jsonModel(object):
                 type_dict = fields_rules['.list_fields']
             elif value_type == 'map':
                 type_dict = fields_rules['.map_fields']
-            # elif value_type == 'null':
-            #     type_dict = field_rules['.null_fields']
+            elif value_type == 'null':
+                type_dict = fields_rules['.null_fields']
             if set(value.keys()) - set(type_dict.keys()):
                 raise ModelValidationError('Field %s may only have datatype %s qualifiers %s.' % (key, value_type, set(type_dict.keys())))
 
@@ -464,8 +464,7 @@ class jsonModel(object):
 
     def _evaluate_field(self, record_dict, field_name, field_criteria):
 
-        '''
-            a helper method for evaluating record values based upon query criteria
+        ''' a helper method for evaluating record values based upon query criteria
 
         :param record_dict: dictionary with model valid data to evaluate
         :param field_name: string with path to root of query field
@@ -582,8 +581,7 @@ class jsonModel(object):
 
     def _validate_dict(self, input_dict, schema_dict, path_to_root, object_title=''):
 
-        '''
-            a helper method for recursively validating keys in dictionaries
+        ''' a helper method for recursively validating keys in dictionaries
 
         :return input_dict
         '''
@@ -699,20 +697,23 @@ class jsonModel(object):
                     error_dict['error_value'] = value.__class__.__name__
                     raise InputValidationError(error_dict)
                 value_type = self._datatype_names[value_index]
-                if value_type != input_criteria['value_datatype']:
-                    raise InputValidationError(error_dict)
+                if input_criteria['value_datatype'] == 'null':
+                    pass
+                else:
+                    if value_type != input_criteria['value_datatype']:
+                        raise InputValidationError(error_dict)
 
     # call appropriate validation sub-routine for datatype of value
-                if value_type == 'boolean':
-                    input_dict[key] = self._validate_boolean(value, input_key_name, object_title)
-                elif value_type == 'number':
-                    input_dict[key] = self._validate_number(value, input_key_name, object_title)
-                elif value_type == 'string':
-                    input_dict[key] = self._validate_string(value, input_key_name, object_title)
-                elif value_type == 'map':
-                    input_dict[key] = self._validate_dict(value, schema_dict[key], input_key_name, object_title)
-                elif value_type == 'list':
-                    input_dict[key] = self._validate_list(value, schema_dict[key], input_key_name, object_title)
+                    if value_type == 'boolean':
+                        input_dict[key] = self._validate_boolean(value, input_key_name, object_title)
+                    elif value_type == 'number':
+                        input_dict[key] = self._validate_number(value, input_key_name, object_title)
+                    elif value_type == 'string':
+                        input_dict[key] = self._validate_string(value, input_key_name, object_title)
+                    elif value_type == 'map':
+                        input_dict[key] = self._validate_dict(value, schema_dict[key], input_key_name, object_title)
+                    elif value_type == 'list':
+                        input_dict[key] = self._validate_list(value, schema_dict[key], input_key_name, object_title)
 
     # set default values for empty optional fields
         for key in max_key_list:
@@ -786,20 +787,23 @@ class jsonModel(object):
                 raise InputValidationError(item_error)
             item_type = self._datatype_names[item_index]
             item_error['error_value'] = item
-            if item_type != item_rules['value_datatype']:
-                raise InputValidationError(item_error)
+            if item_rules['value_datatype'] == 'null':
+                pass
+            else:
+                if item_type != item_rules['value_datatype']:
+                    raise InputValidationError(item_error)
 
     # call appropriate validation sub-routine for datatype of item
-            if item_type == 'boolean':
-                input_list[i] = self._validate_boolean(item, input_path, object_title)
-            elif item_type == 'number':
-                input_list[i] = self._validate_number(item, input_path, object_title)
-            elif item_type == 'string':
-                input_list[i] = self._validate_string(item, input_path, object_title)
-            elif item_type == 'map':
-                input_list[i] = self._validate_dict(item, schema_list[0], input_path, object_title)
-            elif item_type == 'list':
-                input_list[i] = self._validate_list(item, schema_list[0], input_path, object_title)
+                if item_type == 'boolean':
+                    input_list[i] = self._validate_boolean(item, input_path, object_title)
+                elif item_type == 'number':
+                    input_list[i] = self._validate_number(item, input_path, object_title)
+                elif item_type == 'string':
+                    input_list[i] = self._validate_string(item, input_path, object_title)
+                elif item_type == 'map':
+                    input_list[i] = self._validate_dict(item, schema_list[0], input_path, object_title)
+                elif item_type == 'list':
+                    input_list[i] = self._validate_list(item, schema_list[0], input_path, object_title)
 
     # validate unique values in list
         if 'unique_values' in list_rules.keys():

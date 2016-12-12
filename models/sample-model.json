@@ -9,6 +9,7 @@
     "datetime": 1456190345.543713,
     "active": true,
     "emoticon": "aGFwcHk=",
+    "reference": null,
     "rating": 8,
     "address": {
       "city": "New Orleans",
@@ -42,6 +43,9 @@
       "example_values": [ "aGFwcHk=" ],
       "excluded_values": [ "c2Fk" ],
       "field_metadata": { "endpoint": "http://collectiveacuity.com/icons/" }
+    },
+    ".reference": {
+      "required_field": false
     },
     ".rating": {
       "required_field": false,
