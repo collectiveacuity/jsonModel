@@ -19,7 +19,7 @@ class jsonModel(object):
 
         :param data_model: dictionary with json model architecture
         :param query_rules: [optional] dictionary with valid field type qualifiers
-        :return: jsonmodel object
+        :return: object with jsonModel methods
         '''
 
     # validate schema input
