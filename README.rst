@@ -1,7 +1,5 @@
 .. image:: https://img.shields.io/pypi/v/jsonmodel.svg
     :target: https://pypi.python.org/pypi/jsonmodel
-.. image:: https://img.shields.io/pypi/dm/jsonmodel.svg
-    :target: https://pypi.python.org/pypi/jsonmodel
 .. image:: https://img.shields.io/pypi/l/jsonmodel.svg
     :target: https://pypi.python.org/pypi/jsonmodel
 
