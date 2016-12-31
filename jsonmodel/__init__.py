@@ -1,3 +1,4 @@
+''' A Collection of Methods for Validating JSON Structured Data '''
 __author__ = 'rcj1492'
 __created__ = '2015.12'
 __version__ = '2.7'

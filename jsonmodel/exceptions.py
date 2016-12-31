@@ -26,7 +26,7 @@ class QueryValidationError(Exception):
         super(QueryValidationError, self).__init__(text)
 
 class InputValidationError(Exception):
-
+    ''' a class for reporting jsonmodel input validation errors '''
     def __init__(self, error_dict=None):
         self.error = {
             'object_title': '',
