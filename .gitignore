@@ -1,3 +1,5 @@
+#################   .gitignore    #################
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
 # Byte-compiled / optimized / DLL files
@@ -66,4 +68,29 @@ docs/_build/
 
 # PyBuilder
 target/
+#################   data files    #################
+appdata/
 
+#################  distro files   #################
+docs/site/
+.webassets-cache/
+platforms/
+plugins/
+hooks/
+
+#################  dependencies   #################
+node_modules/
+
+#################    IDE files    #################
+.DS_STORE
+.netbeans
+nbproject
+.idea
+.node_history
+__pycache__
+
+#################   backup sync   #################
+desktop.ini
+*.gdoc
+.dropbox
+Thumbs.db
