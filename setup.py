@@ -1,10 +1,32 @@
-import re
 from setuptools import setup, find_packages
+from jsonmodel.utils import inject_init
 
-'''
+init_path = 'jsonmodel/__init__.py'
+readme_path = 'README.rst'
+setup_kwargs = {
+    'include_package_data': True,  # Checks MANIFEST.in for explicit rules
+    'packages': find_packages(),
+    'install_requires': [],
+    'classifiers': [
+        # https://pypi.python.org/pypi?%3Aaction=list_classifiers
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.5'
+    ]
+}
+setup_kwargs = inject_init(init_path, readme_path, setup_kwargs)
+setup(**setup_kwargs)
+
+''' DOCUMENTATION
 References:
+https://docs.python.org/3.6/distutils/setupscript.html
+
 https://python-packaging-user-guide.readthedocs.org/en/latest/
-https://docs.python.org/3.5/distributing/index.html#distributing-index
+https://docs.python.org/3.5/distutils/index.html
 https://github.com/jgehrcke/python-cmdline-bootstrap
 http://www.pyinstaller.org/
 
@@ -14,16 +36,20 @@ pip install twine
 
 Build Distributions:
 python setup.py sdist --format=gztar,zip
-pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-2.7.tar.gz
+pip wheel --no-index --no-deps --wheel-dir dist dist/pocketlab-0.1.tar.gz
 
-Upload Distributions to PyPi:
-twine register dist/*
+Upload (or Register) Distributions to PyPi:
 twine upload dist/[module-version]*
+
+Upload Documentation to Github:
+mkdocs gh-deploy
+.gitconfig [credential] helper = wincred
 
 Installation:
 pip install [module]
 python setup.py develop  # for local on-the-fly file updates
 python setup.py install  # when possessing distribution files
+pip install dist/pocketlab-0.1-py3-none-any.whl # when possessing wheel file
 
 Uninstall:
 pip uninstall [module]
@@ -33,49 +59,27 @@ python setup.py develop --uninstall # for removing symbolic link
 CLI Installation:
 command = 'name of command'
 module = 'name of module'
-    entry_points = {
-        "console_scripts": ['%s = %s.cli:cli' % (command, module)]
-    },
+entry_points = {
+    "console_scripts": ['%s = %s.cli:cli' % (command, module)]
+},
 
 System Installation:
 # http://www.pyinstaller.org/
 
-Old Methods:
-python setup.py sdist --format=gztar,zip bdist_wheel # Old wheel production
-python setup.py sdist bdist_wheel upload  # for PyPi
-pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz
+Mercurial Dev Setup:
+.hgignore (add dist/, *.egg-info/, '.git/')
+hgrc [paths] default = ssh://hg@bitbucket.org/collectiveacuity/pocketlab
+
+Git Public Setup:
+.gitignore (add dist/, *.egg-info/, dev/, tests_dev/, docs/, docs_dev/, .hg/, .hgignore)
+git init
+git remote add origin https://github.com/collectiveacuity/pocketLab.git
+
+Git Public Updates:
+git add -A
+git commit -m 'updates'
+git push origin master
+
+Git Remove History: [Run as admin and pause syncing]
+git filter-branch --force --index-filter 'git rm -rf --cached --ignore-unmatch dev/*' --prune-empty --tag-name-filter cat -- --all
 '''
-
-config_file = open('jsonmodel/__init__.py').read()
-version = re.search("^__version__\s*=\s*'(.*)'", config_file, re.M).group(1)
-license_terms = re.search("^__license__\s*=\s*'(.*)'", config_file, re.M).group(1)
-# command = re.search("^__command__\s*=\s*'(.*)'", config_file, re.M).group(1)
-module = re.search("^__module__\s*=\s*'(.*)'", config_file, re.M).group(1)
-author = re.search("^__author__\s*=\s*'(.*)'", config_file, re.M).group(1)
-email = re.search("^__email__\s*=\s*'(.*)'", config_file, re.M).group(1)
-url = re.search("^__url__\s*=\s*'(.*)'", config_file, re.M).group(1)
-# author_list = re.search("^__authors__\s*=\s*'(.*)'", config_file, re.M).group(1)
-
-setup(
-    name=module,
-    version=version,
-    author=author,
-    author_email=author,
-    maintainer_email=email,
-    url=url,
-    include_package_data=True,  # Checks MANIFEST.in for explicit rules
-    packages=find_packages(),  # exclude=['cred','keys','docs','tests','models','notes'] Needed for bdist
-    license=license_terms,
-    description="A Collection of Methods for Validating JSON Structured Data",
-    long_description=open('README.rst').read(),
-    install_requires=[],
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Web Environment',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Natural Language :: English',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3.5'
-    ]
-)

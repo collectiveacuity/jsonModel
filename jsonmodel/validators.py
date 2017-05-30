@@ -1,5 +1,6 @@
 __author__ = 'rcj1492'
 __created__ = '2015.11'
+__license__ = 'MIT'
 
 import re
 from base64 import b64decode
