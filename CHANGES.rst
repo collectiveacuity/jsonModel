@@ -1,6 +1,19 @@
 ChangeLog
 =========
 
+TODO
+----
+* Possible Bug: Investigate field injection in property validation process
+* Documentation: Write auto-generate script for mkdocs documentation
+* Toggle to add all the criteria defaults for a key type in the keyMap
+* Sort dictionary keys alphabetically prior to evaluation
+* Allow validation of null datatype declarations
+* Allow declaration of multiple datatypes for key values
+* Validate size of data object inputs
+* Allow declaration of a lambda function for further validation
+* Allow validation of path to file or folder
+
+
 2.7 (2016.12.12)
 ----------------
 * Fixed bug in error checking model validation of null fields with component criteria
@@ -92,12 +105,3 @@ ChangeLog
 ----------------
 * Upload of package
 
-TODO
-----
-* Toggle to add all the criteria defaults for a key type in the keyMap
-* Sort dictionary keys alphabetically prior to evaluation
-* Allow validation of null datatype declarations
-* Allow declaration of multiple datatypes for key values
-* Validate size of data object inputs
-* Allow declaration of a lambda function for further validation
-* Allow validation of path to file or folder

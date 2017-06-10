@@ -20,7 +20,7 @@ by [Collective Acuity](http://collectiveacuity.com)
 </table>
 
 ## Introduction
-Json Model is designed to facilitate the process of implementing data validation against a declared json data model. jsonModel offers a more intuitive declaration process than other schema enforcement modules currently available by relying upon the architecture of json itself to validate datatypes, requirements and defaults.
+Json Model is designed to facilitate the process of implementing data validation against a declared json data model. The jsonModel class offers a more intuitive declaration process than other schema enforcement modules currently available by relying upon the architecture of json itself to validate datatypes, requirements and defaults.
 
 ## Installation
 From PyPi::
