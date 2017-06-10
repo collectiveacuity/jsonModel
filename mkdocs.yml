@@ -1,0 +1,7 @@
+site_name: Json Model
+pages:
+  - Home: index.md
+  - jsonModel Class: jsonmodel.md
+  - Reference: reference.md
+  - Roadmap: roadmap.md
+markdown_extensions: [ footnotes, smarty, abbr ]

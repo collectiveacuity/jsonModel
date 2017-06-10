@@ -49,6 +49,7 @@ node_modules/
 .hg/
 dev/
 tests_dev/
+docs_dev/
 
 
 #################    IDE files    #################

@@ -1,25 +1,28 @@
-.. image:: https://img.shields.io/pypi/v/jsonmodel.svg
-    :target: https://pypi.python.org/pypi/jsonmodel
-.. image:: https://img.shields.io/pypi/l/jsonmodel.svg
-    :target: https://pypi.python.org/pypi/jsonmodel
+# Json Model
+_A Collection of Methods for Validating JSON Structured Data_  
+by [Collective Acuity](http://collectiveacuity.com)
 
-=========
-jsonModel
-=========
-*A Collection of Methods for Validating JSON Structured Data*
+<table>
+  <tbody>
+    <tr>
+      <td><b>Downloads</b></td>
+      <td><a href="http://pypi.python.org/pypi/jsonmodel">http://pypi.python.org/pypi/jsonModel</a></td>
+    </tr>
+    <tr>
+      <td><b>Source</b></td>
+      <td><a href="https://github.com/collectiveacuity/jsonmodel">https://github.com/collectiveacuity/jsonModel</a></td>
+    </tr>
+    <tr>
+      <td><b>Documentation</b></td>
+      <td><a href="https://collectiveacuity.github.io/jsonmodel">https://collectiveacuity.github.io/jsonModel/</a></td>
+    </tr>
+  </tbody>
+</table>
 
-:Downloads: http://pypi.python.org/pypi/jsonModel
-:Source: https://github.com/collectiveacuity/jsonModel
-:Documentation: https://collectiveacuity.github.io/jsonModel/
-
-============
-Introduction
-============
+## Introduction
 Json Model is designed to facilitate the process of implementing data validation against a declared json data model. jsonModel offers a more intuitive declaration process than other schema enforcement modules currently available by relying upon the architecture of json itself to validate datatypes, requirements and defaults.
 
-============
-Installation
-============
+## Installation
 From PyPi::
 
     $ pip install jsonmodel
@@ -31,8 +34,7 @@ From GitHub::
     $ python setup.py install
 
 
-Getting Started
----------------
+## Getting Started
 This module uses self-valid schema declarations as a method to describe data requirements. As a result, for many data models, full validation can be achieved from an example declaration using the schema key::
 
 
@@ -131,6 +133,4 @@ To customize error message:
 
 Further Reading
 ---------------
-For more details about how to use jsonModel, refer to the
-`Reference Documentation on GitHub
-<https://collectiveacuity.github.io/jsonModel>`_
+For more details about how to use the jsonModel class, refer to the [jsonModel Class](jsonmodel.md), [Reference](reference.md) and [Roadmap](roadmap.md) pages.
