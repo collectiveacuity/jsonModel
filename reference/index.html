@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Reference - Json Model</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+	
+	<script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="..">Json Model</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                    <li >
+                        <a href="../jsonmodel/">jsonModel Class</a>
+                    </li>
+                    <li class="active">
+                        <a href="./">Reference</a>
+                    </li>
+                    <li >
+                        <a href="../roadmap/">Roadmap</a>
+                    </li>
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                    <li >
+                        <a rel="next" href="../jsonmodel/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../roadmap/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#reference-materials">Reference Materials</a></li>
+            <li><a href="#schema-default-behavior">Schema Default Behavior</a></li>
+            <li><a href="#components-map">Components Map</a></li>
+            <li><a href="#list-of-field-conditionals-and-default-values">List of Field Conditionals (and default values)</a></li>
+            <li><a href="#error-handling">Error Handling</a></li>
+            <li><a href="#ingesting-kwargs">Ingesting Kwargs</a></li>
+            <li><a href="#query-criteria">Query Criteria</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="reference-materials">Reference Materials</h1>
+<p><em>Documentation for model declaration and error handling for jsonModel validation</em></p>
+<h2 id="schema-default-behavior">Schema Default Behavior</h2>
+<p>The default behavior of a schema declaration includes validation of structure, datatype and requirements. Any of these defaults can be turned off in the specification of a property in the components map. However, for many purposes, the defaults will suffice to declare model property validation, eliminating the need for further specification in a components map.</p>
+<p><strong>Schema Example</strong>::</p>
+<pre><code>"schema": {
+    "userID": "gY3Cv81QwL0Fs",
+    "datetime": 1456000345.543713,
+    "active": true,
+    "emoticon": "aGFwcHk=",
+    "rating": 8,
+    "reference": null,
+    "address": {
+        "city": "New Orleans",
+        "region": "LA",
+        "postal_code": "",
+        "country": "United States",
+        "country_code": 0
+    },
+    "comments": [ "@GerardMaras Rock the shrimp bouillabaisse!" ]
+}
+</code></pre>
+<h3 id="default-settings">Default Settings</h3>
+<ul>
+<li><strong>Structure</strong>: The validation process will assume that a dictionary (including the top-level dictionary) defines its maximum scope of key names and that lists can contain any number of items. Lists cannot contain mixed datatypes and the first item in a list defines the allowable properties of each item in the list. For this reason, all lists declared in the model must also contain an item. So, the example model expects to find only the userID, datetime, active, emoticon, rating, address and comments fields and it will accept any number of strings in the comments list.</li>
+<li><strong>Datatype</strong>: The validation process will assume that the datatype of each value in the input matches the datatype in the model. So, the example model expects to see a string for userID, a number for datetime, a boolean for active, etc&hellip; Special datatypes like bytes, integers and sets which json does not directly support must be handled by qualifiers in the components map.</li>
+<li><strong>Requirements</strong>: The validation process will assume a key with a non-empty value is a required input. Since lists must declare an item, all lists are assumed to be required fields in the model. So, all fields in the example are required except postal_code and country_code. The empty value for each datatype can be expressed with {}, 0, 0.0, false or &ldquo;&rdquo; and indicates that it is optional.</li>
+</ul>
+<h3 id="meta-model-restrictions">Meta-Model Restrictions</h3>
+<p>A model validation error will occur if a key name in the schema contains an item designator pattern such as [2] or [35]. The module uses these patterns to validate inputs which contain lists of arbitrary size. As a result, there are limitations to the meta-model recursion of the module. It is not possible to use lists in model declarations which you wish to use as schemas in other model declarations.</p>
+<h2 id="components-map">Components Map</h2>
+<p>The default validation process can be modified, and other (less common) conditionals can be added through the components map of the model. Whereas the schema map provides a transparent data architecture that is self-valid, the components map can be used to specify the conditions of acceptable data for any number of fields in the schema. The component map is an optional flat dictionary where each key in the component map designates a particular path in the schema using the dot-path (&lsquo;.&rsquo; and [0]) nomenclature of nesting and array identification.</p>
+<p><strong>Components Example</strong>::</p>
+<pre><code>"components": {
+    ".": {
+        "extra_fields": false
+    },
+    ".userID": {
+        "min_length": 13,
+        "max_length": 13,
+        "min_value": "1111111111111",
+        "max_value": "yyyyyyyyyyyyy",
+        "must_not_contain": [ "[^\\w]", "_" ],
+        "field_description": "13 digit unique base 64 url safe key"
+    },
+    ".datetime": {
+        "greater_than": 1.1,
+        "less_than": 2000000000.0,
+        "field_position": 1
+    },
+    ".emoticon": {
+        "required_field": false,
+        "byte_data": true,
+        "example_values": [ "aGFwcHk=" ],
+        "excluded_values": [ "c2Fk" ],
+        "field_metadata": { "endpoint": "http://collectiveacuity.com/icons/" }
+    },
+    ".reference": {
+        "required_field": false
+    },
+    ".rating": {
+        "required_field": false,
+        "min_value": 1,
+        "max_value": 10,
+        "default_value": 5,
+        "excluded_values": [ 7, 9 ],
+        "integer_data": true
+    },
+    ".address.city": {
+        "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
+        "required_field": false,
+        "default_value": "New York"
+    },
+    ".address.region":{
+        "greater_than": "AB",
+        "less_than": "Yyyyyyyyyyyyyyyyyyyyyyyy",
+        "contains_either": [ "[A-Z]{2}", "[A-Z][a-z]+" ],
+        "field_title": "State or Province"
+    },
+    ".address.country_code":{
+        "discrete_values": [ 36, 124, 554, 826, 840 ],
+        "integer_data": true
+    },
+    ".comments": {
+        "required_field": false,
+        "min_size": 1,
+        "max_size": 3,
+        "unique_values": true
+    }
+    ".comments[0]": {
+        "max_length": 140,
+        "must_contain": [ "[a-zA-Z]{2,}" ],
+        "example_values": [ "couldn't find the place", "hidden gem!!!!" ]
+    }
+}
+</code></pre>
+<h3 id="path-definitions">Path Definitions</h3>
+<p>To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, the key named &ldquo;.userID&rdquo; maps to the &ldquo;userID&rdquo; key to be found in the top level map of the schema, &ldquo;.address.city&rdquo; refers to the &ldquo;city&rdquo; key inside the &ldquo;address&rdquo; map inside the schema map and &ldquo;.comments[0]&rdquo; refers to the first item inside the comments list.  Since the comments list is itself made optional by the declaration &ldquo;required_field&rdquo;: false in the &ldquo;.comments&rdquo; key, this component is only validated if there is an item to validate. Otherwise, it is ignored. &ldquo;.&rdquo; is the key name for the top-level map itself and the &ldquo;extra_fields&rdquo; conditional changes the default to allow the top-level map to accept undeclared keys.</p>
+<h2 id="list-of-field-conditionals-and-default-values">List of Field Conditionals (and default values)</h2>
+<ul>
+<li>&ldquo;<strong>value_datatype</strong>&rdquo;: &ldquo;&rdquo; / <strong>IMMUTABLE</strong> / the datatype of a value or item defined in the schema / error_code: 4001</li>
+<li>&ldquo;<strong>required_field</strong>&rdquo;: false / a true boolean requires this key-value in the input / error_code: 4002</li>
+<li>&ldquo;<strong>extra_fields</strong>&rdquo;: false / a true boolean allows map to contain undeclared keys / error_code: 4003 / [<strong>maps only</strong>]</li>
+<li>&ldquo;<strong>key_datatype</strong>&rdquo;: &ldquo;string&rdquo; / <strong>IMMUTABLE</strong> / the datatype of a key name must be a string / error_code: 4004</li>
+<li>&ldquo;<strong>maximum_scope</strong>&rdquo;: [] / <strong>IMMUTABLE</strong> / the maximum extent of keys allowed in a dictionary generated by extra_fields default / [<strong>maps only</strong>]</li>
+<li>&ldquo;<strong>declared_value</strong>&rdquo;: null / <strong>IMMUTABLE</strong> / the value or item defined in the schema [<strong>strings, numbers and booleans only</strong>]</li>
+<li>&ldquo;<strong>default_value</strong>&rdquo;: null / a value for an optional property when field is missing in input [<strong>strings, numbers and booleans only</strong>]</li>
+<li>&ldquo;<strong>byte_data</strong>&rdquo;: false / a true boolean expects to see base64 byte data in the string field / error_code: 4011 [<strong>strings only</strong>]</li>
+<li>&ldquo;<strong>min_length</strong>&rdquo;: 0 / the minimum number of characters in a string / error_code: 4012 [<strong>strings only</strong>]</li>
+<li>&ldquo;<strong>max_length</strong>&rdquo;: 0 / the maximum number of characters in a string / error_code: 4013 [<strong>strings only</strong>]</li>
+<li>&ldquo;<strong>must_not_contain</strong>&rdquo;: [] / a list of regular expressions which should not be found in a string / error_code: 4014 [<strong>strings only</strong>]</li>
+<li>&ldquo;<strong>must_contain</strong>&rdquo;: [] / a list of regular expressions which must be found in a string / error_code: 4015 [<strong>strings only</strong>]</li>
+<li>&ldquo;<strong>contains_either</strong>&rdquo;: [] / a list of regular expressions which string must match at least one / error_code: 4016 [<strong>strings only</strong>]</li>
+<li>&ldquo;<strong>integer_data</strong>&rdquo;: false / a true boolean requires number to be an integer / error_code: 4021 [<strong>numbers only</strong>]</li>
+<li>&ldquo;<strong>min_value</strong>&rdquo;: 0.0 or &ldquo;&rdquo; / the minimum value of a number or string / error_code: 4022 [<strong>numbers and strings only</strong>]</li>
+<li>&ldquo;<strong>max_value</strong>&rdquo;: 0.0 or &ldquo;&rdquo; / the maximum value of a number or string / error_code: 4023 [<strong>numbers and strings only</strong>]</li>
+<li>&ldquo;<strong>greater_than</strong>&rdquo;: 0.0 or &ldquo;&rdquo; / the value a number or string must be greater than / error_code: 4024 [<strong>numbers and strings only</strong>]</li>
+<li>&ldquo;<strong>less_than</strong>&rdquo;: 0.0 or &ldquo;&rdquo; / the value a number or string must be less than / error_code: 4025 [<strong>numbers and strings only</strong>]</li>
+<li>&ldquo;<strong>min_size</strong>&rdquo;: 0 / the minimum number of items in a list / error_code: 4031 / [<strong>lists only</strong>]</li>
+<li>&ldquo;<strong>max_size</strong>&rdquo;: 0 / the maximum number of items in a list / error_code: 4032 / [<strong>lists only</strong>]</li>
+<li>&ldquo;<strong>unique_values</strong>&rdquo;: false / a true boolean treats a list as a set of unique primitives with no duplication / error_code: 4033 [<strong>lists of strings and numbers only</strong>]</li>
+<li>&ldquo;<strong>discrete_values</strong>&rdquo;: [] / a list of values allowed / error_code: 4041 [<strong>numbers and strings only</strong>]</li>
+<li>&ldquo;<strong>identical_to</strong>&rdquo;: &ldquo;&rdquo; / <strong>TODO</strong> / the key name in the components map whose value the value of this component must match</li>
+<li>&ldquo;<strong>lambda_function</strong>&rdquo;: &ldquo;&rdquo; / <strong>TODO</strong> / a single argument function which should be run to validate the value of this component, lambda_function must return true (valid) or false (invalid)</li>
+<li>&ldquo;<strong>validation_url</strong>&rdquo;: &ldquo;&rdquo; / <strong>TODO</strong> / an uri which can be called to validate the value of this component with its input in the body of the request, uri response must return true (valid) or false (invalid)</li>
+<li>&ldquo;<strong>example_values</strong>&rdquo;: [] / a list of values which satisfy all the validation requirements [<strong>numbers and strings only</strong>]</li>
+<li>&ldquo;<strong>field_title</strong>&rdquo;: &ldquo;&rdquo; / the title of the component for documentation and error reporting</li>
+<li>&ldquo;<strong>field_description</strong>&rdquo;: &ldquo;&rdquo; / a description of the component for documentation and error reporting</li>
+<li>&ldquo;<strong>field_position</strong>&rdquo;: 0 / the position of the component in an ordered array of fields</li>
+<li>&ldquo;<strong>field_metadata</strong>&rdquo;: {} / a dictionary for metadata about the component that passes through validation check</li>
+</ul>
+<h2 id="error-handling">Error Handling</h2>
+<p>Errors created from improper model specification will raise a ModelValidationError with a message that is designed to help determine the source of the model declaration error. To ensure that model initialization occurs properly, no error encoding is included to handle these exceptions. However, it is expected that validation of inputs will produce errors. Otherwise, what&rsquo;s the point?! So, in addition to a text report, a dictionary has been included with the InputValidationError exception to facilitate error handling.</p>
+<p><strong>Error Method Example</strong>::</p>
+<pre><code>self.error = {
+    'model_schema': {
+        'datetime': 1456190345.543713,
+        'address': {
+            'country_code': 0,
+            'city': 'New Orleans',
+            'postal_code': '',
+            'region': 'LA',
+            'country': 'United States'
+        },
+        'comments': [ '@GerardMaras Rock the shrimp bouillabaisse!' ],
+        'active': True,
+        'rating': 8,
+        'reference': None,
+        'userID': 'gY3Cv81QwL0Fs',
+        'emoticon': 'aGFwcHk=',
+    },
+    'input_path': '.',
+    'input_criteria': {
+        'required_field': True,
+        'value_datatype': 'map',
+        'maximum_scope': [ 'datetime', 'address', 'active', 'userID', 'comments', 'rating', 'emoticon' ],
+        'extra_fields': False
+    },
+    'failed_test': 'extra_fields',
+    'error_value': 'extraKey',
+    'error_code': 4003
+}
+</code></pre>
+<h3 id="order-of-exceptions">Order of Exceptions</h3>
+<p>The validation process will raise an error as soon as it encounters one, so there is no guarantee that the error that is reported is the only error in the input. Since there is no set order to the keys in a dictionary, there is also no guaranteed a priori order to the evaluation process. However below is an overview of the order of the steps of the validation process:</p>
+<p>Structure:</p>
+<hr />
+<ol>
+<li>Input is a dictionary</li>
+<li>Required keys in the input</li>
+<li>Extra keys in the input</li>
+<li>Value of each key in the input (recursive) <em>(see below)</em></li>
+<li>Inject default values for missing optional keys</li>
+</ol>
+<p>Values (or Items):</p>
+<hr />
+<ol>
+<li>Datatype of value</li>
+<li>Other value qualifiers based upon datatype</li>
+<li>Identity, Lambda and URL qualifiers # <strong>TODO</strong></li>
+</ol>
+<p>To help the process of error handling and client-server negotiation, both the schema for the model as well as the the map of conditional qualifiers for the field that raised the error are included in the error dictionary.</p>
+<h2 id="ingesting-kwargs">Ingesting Kwargs</h2>
+<p>The process of ingestion recursively walks the valid model searching for key-value pairs which match the keyword arguments of the input. For each match it finds, it constructs a key-value pair in the dictionary using the following rules (in order):</p>
+<ol>
+<li>Value in kwargs if field passes all its component validation tests</li>
+<li>Default value declared for the key in the model</li>
+<li>Empty value appropriate to datatype of key in the model</li>
+</ol>
+<p>Like the core validation method, ingestion will also walk through each item in a list field of the kwargs if the item type itself is also a list or dictionary. However, because invalid data will be replaced by empty values appropriate to the datatype declared in the model, unlike the core validation model, output data from ingest may not be model valid data. If it is desirable to ensure that the data is valid, a &lsquo;default_value&rsquo; should be declared for each key in the components section of the data model and the &lsquo;min_size&rsquo; of each list declaration should only be set to 0.</p>
+<p><strong>Sample Kwargs</strong>::</p>
+<pre><code>{
+    "userID": "6nPbM9gTwLz3f",
+    "datetime": 1449179763.312077,
+    "active": false,
+    "emoticon": "aGFwcHIk=",
+    "comments": [ "gold", "silver", "bronze", "pewter" ],
+    "address": {
+        "region": "NY",
+        "country": "United States"
+  }
+}
+</code></pre>
+<p><strong>Ingest Sample</strong>::</p>
+<pre><code>output = jsonModel.ingest(**sample_kwargs)
+</code></pre>
+<p><strong>Sample Output</strong>::</p>
+<pre><code>{
+    'userID': '6nPbM9gTwLz3f',
+    'datetime': 1449179763.312077,
+    'active': False,
+    'rating': 5,
+    'reference': None,
+    'emoticon': 'aGFwcHIk='
+    'comments': ['gold', 'silver', 'bronze'],
+    'address': {
+        'postal_code': '',
+        'city': 'New York',
+        'country_code': 0,
+        'region': 'NY',
+        'country': 'United States'
+    }
+}
+</code></pre>
+<p><strong>Ingest Empty</strong>::</p>
+<pre><code>output = jsonModel.ingest(**{})
+</code></pre>
+<p><strong>Empty Output</strong>::</p>
+<pre><code>{
+    'userID': '',
+    'datetime': 0.0,
+    'active': False,
+    'rating': 5,
+    'reference': None,
+    'emoticon': ''
+    'comments': [],
+    'address': {
+        'postal_code': '',
+        'city': 'New York',
+        'country_code': 0,
+        'region': '',
+        'country': ''
+    }
+}
+</code></pre>
+<h3 id="extra-keywords">Extra Keywords</h3>
+<p>If &lsquo;extra_fields&rsquo; is declared True in the components for a dictionary in the model, then any extraneous keys in the corresponding dictionary in the kwargs will be added to the output.</p>
+<h3 id="too-many-items">Too Many Items</h3>
+<p>Items are only added to a list from those items in kwargs if they are valid. If the number of valid items in a list in the kwargs exceeds the &lsquo;max_size&rsquo; of the corresponding list in the model, then subsequent items are not added to the list once the list reaches its maximum size.</p>
+<h2 id="query-criteria">Query Criteria</h2>
+<p>Query criteria are composed of a dictionary of one or more key-value pairs, where the key names are the dot path to the fields in the model schema to be queried and the values are dictionaries containing all the conditional operators for the query on the respective fields. Query criteria can be simple, such as the single field, operator and qualifier in the README documentation, or elaborate, such as found in the provided model sample-query.json below:</p>
+<p><strong>Sample Query</strong>::</p>
+<pre><code>{
+  ".address.city": {
+    "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
+  },
+  ".address.country_code": {
+    "discrete_values": [36, 124, 554, 826, 840],
+    "integer_data": true
+  },
+  ".address.region": {
+    "contains_either": ["[A-Z]{2}", "[A-Z][a-z]+"],
+    "greater_than": "AB",
+    "less_than": "Yyyyyyyyyyyyyyyyyyyyyyyy"
+  },
+  ".comments": {
+    "max_size": 3,
+    "min_size": 1,
+    "unique_values": true
+  },
+  ".comments[0]": {
+    "max_length": 140,
+    "must_contain": ["[a-zA-Z]{2,}"]
+  },
+  ".datetime": {
+    "greater_than": 1.1,
+    "less_than": 2000000000.0
+  },
+  ".emoticon": {
+    "byte_data": true,
+    "excluded_values": ["c2Fk"]
+  },
+  ".rating": {
+    "excluded_values": [7, 9],
+    "integer_data": true,
+    "max_value": 10,
+    "min_value": 1
+  },
+  ".userID": {
+    "max_length": 13,
+    "max_value": "yyyyyyyyyyyyy",
+    "min_length": 13,
+    "min_value": "1111111111111",
+    "must_not_contain": ["[^\\w]", "_"]
+  }
+}
+</code></pre>
+<p>The query method follows a similar process by which input is validated. A record whose field values evaluate to true for all criteria returns true. Otherwise, something in the record does not match one or more query criteria and the query method returns false. Because the query method returns a false as soon as it encounters a failed criteria from a dictionary of fields in the query criteria, query time will vary based upon the number of records, how many fail and how many fields are added to the query criteria.</p>
+<h3 id="querying-items">Querying Items</h3>
+<p>Although the query method will evaluate items nested inside lists to an arbitrary depth, it does so by evaluating all items in the list and all sub-branches of any nested lists inside the list. As a result, querying items inside lists suffers non-linear explosion. And, unlike the process of item ingestion, if any item in a list (or branch of a sub-list) fails to evaluate to true to a criteria in the query, the entire record will return false. <strong>Be Warned</strong></p>
+<h3 id="query-errors">Query Errors</h3>
+<p>If query criteria contain fields, operators or qualifiers which are outside the scope of the model, the query method will produce a QueryValidationError.</p>
+<p>To handle a QueryValidationError::</p>
+<pre><code>try:
+    query_results = validModel.query(invalid_criteria, test_record)
+except QueryValidationError as err:
+    assert isinstance(err.error['message'], str)
+</code></pre>
+<h3 id="query-rules-customization">Query Rules Customization</h3>
+<p>When the model is initialized, it accepts an optional dictionary for customized query rules. The primary purpose of this customization is to limit query criteria validation to only those query operations which are supported by a specific query engine. Optional query rules must be structured according to the components field of the model-rules.json file and cannot contain any fields, operators or qualifiers outside the full range of the model query rules.</p>
+<p><strong>Query Rules</strong>::</p>
+<pre><code>{
+  ".boolean_fields": {
+    "identical_to": ".similar_boolean",
+    "lambda_function": "",
+    "validation_url": "",
+    "value_exists": false
+  },
+ ".list_fields": {
+    "identical_to": ".similar_list",
+    "lambda_function": "",
+    "max_size": 0,
+    "min_size": 0,
+    "unique_values": false,
+    "validation_url": "",
+    "value_exists": false
+ },
+ ".map_fields": {
+    "identical_to": ".similar_map",
+    "lambda_function": "",
+    "validation_url": "",
+    "value_exists": false
+ },
+ ".null_fields": {
+    "identical_to": ".similar_null",
+    "lambda_function": "",
+    "validation_url": "",
+    "value_exists": false
+ },
+ ".number_fields": {
+    "discrete_values": [],
+    "excluded_values": [],
+    "greater_than": 0.0,
+    "identical_to": ".similar_number",
+    "integer_data": false,
+    "lambda_function": "",
+    "less_than": 0.0,
+    "max_value": 0.0,
+    "min_value": 0.0,
+    "validation_url": "",
+    "value_exists": false
+ },
+  ".string_fields": {
+    "byte_data": false,
+    "contains_either": [],
+    "discrete_values": [],
+    "excluded_values": [],
+    "greater_than": "",
+    "identical_to": ".similar_string",
+    "lambda_function": "",
+    "less_than": "",
+    "max_length": 0,
+    "max_value": "",
+    "min_length": 0,
+    "min_value": "",
+    "must_contain": [],
+    "must_not_contain": [],
+    "validation_url": "",
+    "value_exists": false
+  }
+}
+</code></pre>
+<p><em>[The lambda_function, identical_to and validation_url operators are not yet supported by the model.]</em></p>
+<p>A malformed query rules argument on model initialization will produce a ModelValidationError.</p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script><div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
