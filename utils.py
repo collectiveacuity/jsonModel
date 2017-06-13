@@ -1,13 +1,13 @@
 __author__ = 'rcj1492'
-__created__ = '2017.05'
+__created__ = '2017.06'
 __license__ = 'MIT'
 
+
 def inject_init(init_path, readme_path, setup_kwargs):
-    
     '''
         a method to add arguments to setup.py from module init file
 
-    :param init_path: string with path to module __init__ file 
+    :param init_path: string with path to module __init__ file
     :param readme_path: string with path to module README.rst file
     :param setup_kwargs: dictionary with existing setup keyword arguments
     :return: dictionary with injected keyword arguments
@@ -17,13 +17,13 @@ def inject_init(init_path, readme_path, setup_kwargs):
     from os import path
     from copy import deepcopy
 
-# retrieve init text
+    # retrieve init text
     init_text = ''
     if not path.exists(init_path):
         raise ValueError('%s is not a valid path' % init_path)
     init_text = open(init_path).read()
 
-# retrieve init settings
+    # retrieve init settings
     init_kwargs = {
         'version': '',
         'author': '',
@@ -37,7 +37,7 @@ def inject_init(init_path, readme_path, setup_kwargs):
         if key_search:
             init_kwargs[key] = key_search[0]
 
-# retrieve modifiable settings
+            # retrieve modifiable settings
     mod_kwargs = {
         'module': '',
         'email': '',
@@ -60,7 +60,7 @@ def inject_init(init_path, readme_path, setup_kwargs):
         del init_kwargs['author']
         init_kwargs['author_list'] = mod_kwargs['authors'].split(' ')
 
-# add readme
+    # add readme
     if not path.exists(readme_path):
         raise ValueError('%s is not a valid path' % readme_path)
     try:
@@ -69,7 +69,7 @@ def inject_init(init_path, readme_path, setup_kwargs):
     except:
         raise ValueError('%s is not a valid text file.' % readme_path)
 
-# merge kwargs
+    # merge kwargs
     setup_kwargs.update(**init_kwargs)
     updated_kwargs = deepcopy(setup_kwargs)
     for key, value in updated_kwargs.items():

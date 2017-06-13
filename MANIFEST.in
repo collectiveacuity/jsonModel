@@ -1,10 +1,4 @@
-recursive-exclude cred *
-recursive-exclude keys *
-recursive-exclude tests *
-recursive-exclude models *
-recursive-exclude notes *
-recursive-exclude docs *
-recursive-include jsonmodel *.json
+recursive-include jsonmodel/models *.json
 prune */__pycache__
 include *.rst
 include *.txt

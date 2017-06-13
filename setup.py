@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from jsonmodel.utils import inject_init
+from .utils import inject_init
 
 init_path = 'jsonmodel/__init__.py'
 readme_path = 'README.rst'

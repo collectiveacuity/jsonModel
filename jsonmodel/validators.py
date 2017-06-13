@@ -8,10 +8,11 @@ from jsonmodel.exceptions import InputValidationError, ModelValidationError
 from jsonmodel.exceptions import QueryValidationError
 from jsonmodel.loader import jsonLoader
 from jsonmodel.mapping import mapModel
+from jsonmodel import __module__
 
 class jsonModel(object):
 
-    __rules__ = jsonLoader('jsonmodel', 'model-rules.json')
+    __rules__ = jsonLoader(__module__, 'models/model-rules.json')
 
     def __init__(self, data_model, query_rules=None):
 
