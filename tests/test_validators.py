@@ -5,7 +5,7 @@ try:
     import pytest
 except:
     import sys
-    print('test_validators requires the pytest module. try "pip install pytest".')
+    print('test_validators requires the pytest module. try: pip3 install pytest')
     sys.exit()
 
 import json

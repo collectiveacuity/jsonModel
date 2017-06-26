@@ -1,7 +1,6 @@
 # Roadmap
 
-Features
---------
+## Features
 - Validates native json datatypes
 - Validates byte data as base64 encoded strings
 - Alternative to json schema module
@@ -14,6 +13,10 @@ Features
 - Validates query criteria against model scope
 - Evaluates model valid records using query criteria
 
-Nothin' Yet
------------
-Roadmap to infinity...
+## Nothin' Yet (aka TODO)
+- Validates that a path exists on localhost
+- Verifies that a url is responsive
+- Custom validations with lambda functions
+- Custom validations with web url
+- Compares one field against another field
+
