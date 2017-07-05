@@ -58,7 +58,10 @@ class InputValidationError(Exception):
             first_line = '\n%s is invalid.' % (self.error['object_title'].rstrip())
             second_line = "\nValue %s for field %s failed test '%s'" % (self.error['error_value'], self.error['input_path'], failed_test)
             if failed_test in self.error['input_criteria']:
-                second_line += ': %s' % self.error['input_criteria'][failed_test]
+                if failed_test == 'required_field':
+                    second_line += ': True'
+                else:
+                    second_line += ': %s' % self.error['input_criteria'][failed_test]
             self.message = '%s%s' % (first_line, second_line)
         else:
             self.message = '\nError Report: %s' % self.error
