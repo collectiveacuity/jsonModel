@@ -36,10 +36,10 @@ pip install twine
 
 Build Distributions:
 python setup.py sdist --format=gztar,zip
-pip wheel --no-index --no-deps --wheel-dir dist dist/pocketlab-0.1.tar.gz
+pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-2.7.tar.gz
 
 Upload (or Register) Distributions to PyPi:
-twine upload dist/[module-version]*
+twine upload dist/jsonmodel-2.7*
 
 Upload Documentation to Github:
 mkdocs gh-deploy
@@ -49,7 +49,7 @@ Installation:
 pip install [module]
 python setup.py develop  # for local on-the-fly file updates
 python setup.py install  # when possessing distribution files
-pip install dist/pocketlab-0.1-py3-none-any.whl # when possessing wheel file
+pip install dist/jsonmodel-2.7-py3-none-any.whl # when possessing wheel file
 
 Uninstall:
 pip uninstall [module]

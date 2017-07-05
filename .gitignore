@@ -50,7 +50,7 @@ node_modules/
 dev/
 tests_dev/
 docs_dev/
-
+notes/
 
 #################    IDE files    #################
 .DS_STORE
