@@ -19,7 +19,7 @@ class jsonModelTests(jsonModel):
     def __init__(self, data_model):
         jsonModel.__init__(self, data_model)
 
-    def unitTests(self, valid_input, valid_query):
+    def unitTests(self, valid_input, valid_query, valid_rules):
 
         # print(self.keyMap)
 
@@ -676,8 +676,7 @@ class jsonModelTests(jsonModel):
         assert jsonModel(test_model, self.queryRules)
 
     # test query rules json file
-        query_rules = json.loads(open('../models/query-rules.json').read())
-        assert jsonModel(test_model, query_rules)
+        assert jsonModel(test_model, valid_rules)
 
     # test query rules extra field exception
         query_rules_field = deepcopy(self.queryRules)
@@ -968,9 +967,10 @@ class jsonModelTests(jsonModel):
 if __name__ == '__main__':
     from timeit import timeit as timer
     t0 = timer()
-    testQuery = json.loads(open('../models/sample-query.json').read())
-    testModel = json.loads(open('../models/sample-model.json').read())
-    testInput = json.loads(open('../models/sample-input.json').read())
-    jsonModelTests(testModel).unitTests(testInput, testQuery)
+    testQuery = json.loads(open('../samples/sample-query.json').read())
+    testModel = json.loads(open('../samples/sample-model.json').read())
+    testInput = json.loads(open('../samples/sample-input.json').read())
+    testRules = json.loads(open('../samples/query-rules.json').read())
+    jsonModelTests(testModel).unitTests(testInput, testQuery, testRules)
     t1 = timer()
     print(str(t1 - t0))

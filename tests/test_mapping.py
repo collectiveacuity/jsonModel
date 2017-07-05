@@ -18,5 +18,5 @@ class testMapModel(mapModel):
 
 if __name__ == '__main__':
     import json
-    testModel = json.loads(open('../models/sample-model.json').read())
+    testModel = json.loads(open('../samples/sample-model.json').read())
     testMapModel(testModel).unitTests()

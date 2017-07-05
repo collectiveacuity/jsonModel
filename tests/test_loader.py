@@ -15,12 +15,12 @@ class jsonLoaderTests(object):
 
     # test invalid module exception
         with pytest.raises(Exception):
-            jsonLoader('not_a_module', 'model-rules.json')
+            jsonLoader('not_a_module', 'models/model-rules.json')
 
     # test valid relative paths
-        assert jsonLoader(__module__, 'model-rules.json')
-        assert jsonLoader(__module__, './model-rules.json')
-        assert jsonLoader(__module__, '../models/sample-model.json')
+        assert jsonLoader(__module__, 'models/model-rules.json')
+        assert jsonLoader(__module__, './models/model-rules.json')
+        assert jsonLoader(__module__, '../samples/sample-model.json')
 
     # test invalid relative path exception
         with pytest.raises(Exception):
