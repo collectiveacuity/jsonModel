@@ -14,6 +14,10 @@ TODO
 * Allow validation of path to file or folder
 
 
+2.8 (TBD)
+---------
+* Bug fix for finding values in walk of nested keys
+
 2.7 (2016.12.12)
 ----------------
 * Fixed bug in error checking model validation of null fields with component criteria

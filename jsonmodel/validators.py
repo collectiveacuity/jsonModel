@@ -1240,7 +1240,7 @@ class jsonModel(object):
     # determine starting position
         if not path_segments[0]:
             path_segments.pop(0)
-
+        
     # define internal recursive function
         def _walk_int(path_segments, record_dict):
             record_endpoint = record_dict
@@ -1265,7 +1265,7 @@ class jsonModel(object):
                         if item_pattern.match(path_segments[y]):
                             stop_chain = True
                     if not stop_chain:
-                        if len(path_segments) == 1:
+                        if len(path_segments) == i + 1:
                             record_endpoints.append(record_endpoint[path_segments[i]])
                         else:
                             record_endpoint = record_endpoint[path_segments[i]]

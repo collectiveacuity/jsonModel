@@ -735,6 +735,11 @@ class jsonModelTests(jsonModel):
         results = self._walk('.metals[0].metal[0].metal[0].metal', test_input)
         assert len(results) == 27
         # print(results)
+    
+    # test internal walk with dictionaries
+        test_input = { 'here': { 'there': { 'where': [ 'stare' ] } } }
+        results = self._walk('.here.there.where', test_input)
+        assert results[0][0] == 'stare'
 
     # test evaluate valid input
         truth_table = []
