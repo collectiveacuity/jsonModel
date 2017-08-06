@@ -1,4 +1,8 @@
 {
+  ".active": {
+    "value_exists": true,
+    "equal_to": false
+  },
   ".address.city": {
     "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
   },

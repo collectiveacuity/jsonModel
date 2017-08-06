@@ -41,6 +41,9 @@ The default validation process can be modified, and other (less common) conditio
         ".": {
             "extra_fields": false
         },
+        ".active": {
+            "equal_to": false
+        },
         ".userID": {
             "min_length": 13,
             "max_length": 13,
@@ -127,6 +130,7 @@ To validate additional conditional qualifier placed on a field in the schema, th
 <tr><td>max_value        </td><td>Number or String          </td><td>4023        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the maximum value of a number or string                                                                                                                                 </td></tr>
 <tr><td>greater_than     </td><td>Number or String          </td><td>4024        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the value a number or string must be greater than                                                                                                                       </td></tr>
 <tr><td>less_than        </td><td>Number or String          </td><td>4025        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the value a number or string must be less than                                                                                                                          </td></tr>
+<tr><td>equal_to         </td><td>Boolean, Number or String </td><td>4026        </td><td>Y       </td><td>Y       </td><td>Y        </td><td>     </td><td>      </td><td>available</td><td>the value a number, string or boolean must equal                                                                                                                        </td></tr>
 <tr><td>min_size         </td><td>Integer                   </td><td>4031        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>the minimum number of items in a list                                                                                                                                   </td></tr>
 <tr><td>max_size         </td><td>Integer                   </td><td>4032        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>the maximum number of items in a list                                                                                                                                   </td></tr>
 <tr><td>unique_values    </td><td>Boolean                   </td><td>4033        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>a true boolean treats a list as a set of unique primitives with no duplication                                                                                          </td></tr>
@@ -281,6 +285,10 @@ Query criteria are composed of a dictionary of one or more key-value pairs, wher
 **Sample Query**::
 
     {
+      ".active": {
+        "value_exists": true,
+        "equal_to": false
+      },
       ".address.city": {
         "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
       },
@@ -351,7 +359,8 @@ When the model is initialized, it accepts an optional dictionary for customized 
         "identical_to": ".similar_boolean",
         "lambda_function": "",
         "validation_url": "",
-        "value_exists": false
+        "value_exists": false,
+        "equal_to": false
       },
      ".list_fields": {
         "identical_to": ".similar_list",
@@ -385,7 +394,8 @@ When the model is initialized, it accepts an optional dictionary for customized 
         "max_value": 0.0,
         "min_value": 0.0,
         "validation_url": "",
-        "value_exists": false
+        "value_exists": false,
+        "equal_to": 0.0
      },
       ".string_fields": {
         "byte_data": false,
@@ -403,7 +413,8 @@ When the model is initialized, it accepts an optional dictionary for customized 
         "must_contain": [],
         "must_not_contain": [],
         "validation_url": "",
-        "value_exists": false
+        "value_exists": false,
+        "equal_to": ""
       }
     }
 

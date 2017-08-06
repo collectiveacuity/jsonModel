@@ -278,6 +278,14 @@ class jsonModelTests(jsonModel):
             self.validate(less_number)
         except InputValidationError as err:
             assert err.error['failed_test'] == 'less_than'
+    
+    # test equal_to exception for booleans
+        equal_boolean = deepcopy(valid_input)
+        equal_boolean['active'] = True
+        try:
+            self.validate(equal_boolean)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'equal_to'
 
     # test min_value for strings exception
         low_string = deepcopy(valid_input)
@@ -353,7 +361,7 @@ class jsonModelTests(jsonModel):
         except InputValidationError as err:
             assert err.error['failed_test'] == 'byte_data'
 
-    # test max_length
+    # test max_length exception
         max_string = deepcopy(valid_input)
         max_string['userID'] = 'LongAlphaNumericID'
         try:

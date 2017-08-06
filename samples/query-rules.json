@@ -3,7 +3,8 @@
     "identical_to": ".similar_boolean",
     "lambda_function": "",
     "validation_url": "",
-    "value_exists": false
+    "value_exists": false,
+    "equal_to": false
   },
  ".list_fields": {
     "identical_to": ".similar_list",
@@ -37,7 +38,8 @@
     "max_value": 0.0,
     "min_value": 0.0,
     "validation_url": "",
-    "value_exists": false
+    "value_exists": false,
+    "equal_to": 0.0
  },
   ".string_fields": {
     "byte_data": false,
@@ -55,6 +57,7 @@
     "must_contain": [ "" ],
     "must_not_contain": [ "" ],
     "validation_url": "",
-    "value_exists": false
+    "value_exists": false,
+    "equal_to": ""
   }
 }

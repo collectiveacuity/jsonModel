@@ -267,7 +267,7 @@ class jsonModel(object):
                             raise ModelValidationError(message)
 
     # validate range qualifiers against each other & length qualifiers
-            range_qualifiers = ['min_value', 'max_value', 'greater_than', 'less_than']
+            range_qualifiers = ['min_value', 'max_value', 'greater_than', 'less_than', 'equal_to']
             for qualifier in range_qualifiers:
                 if qualifier in value.keys():
                     test_value = value[qualifier]
@@ -330,8 +330,9 @@ class jsonModel(object):
                             raise ModelValidationError(message)
                     if 'byte_data' in value.keys():
                         if value['byte_data']:
-                            message = '%s cannot be used with base64 encoded "byte_data".' % header
-                            raise ModelValidationError(message)
+                            if qualifier != 'equal_to':
+                                message = '%s cannot be used with base64 encoded "byte_data".' % header
+                                raise ModelValidationError(message)
 
     # validate discrete value qualifiers against other criteria
             schema_field = self.keyCriteria[self.keyName.index(key)]
@@ -370,6 +371,11 @@ class jsonModel(object):
                             if test_value > value['max_value']:
                                 message = '%s must not be greater than "max_value": %s' % (header, value['max_value'])
                                 raise ModelValidationError(message)
+                        if 'equal_to' in value.keys():
+                            if test_value != value['equal_to']:
+                                if qualifier != 'declared_value' and isinstance(test_value, bool):
+                                    message = '%s must be "equal_to": %s' % (header, value['equal_to'])
+                                    raise ModelValidationError(message)
                         if 'greater_than' in value.keys():
                             if test_value <= value['greater_than']:
                                 message = '%s must be "greater_than": %s' % (header, value['greater_than'])
@@ -509,6 +515,10 @@ class jsonModel(object):
             elif key == 'max_value':
                 for record_value in record_values:
                     if record_value > value:
+                        return False
+            elif key == 'equal_to':
+                for record_value in record_values:
+                    if record_value != value:
                         return False
             elif key == 'greater_than':
                 for record_value in record_values:
@@ -864,6 +874,11 @@ class jsonModel(object):
                 error_dict['failed_test'] = 'less_than'
                 error_dict['error_code'] = 4025
                 raise InputValidationError(error_dict)
+        if 'equal_to' in input_criteria.keys():
+            if input_number != input_criteria['equal_to']:
+                error_dict['failed_test'] = 'equal_to'
+                error_dict['error_code'] = 4026
+                raise InputValidationError(error_dict)
         if 'discrete_values' in input_criteria.keys():
             if input_number not in input_criteria['discrete_values']:
                 error_dict['failed_test'] = 'discrete_values'
@@ -929,6 +944,11 @@ class jsonModel(object):
             if input_string >= input_criteria['less_than']:
                 error_dict['failed_test'] = 'less_than'
                 error_dict['error_code'] = 4025
+                raise InputValidationError(error_dict)
+        if 'equal_to' in input_criteria.keys():
+            if input_string != input_criteria['equal_to']:
+                error_dict['failed_test'] = 'equal_to'
+                error_dict['error_code'] = 4026
                 raise InputValidationError(error_dict)
         if 'min_length' in input_criteria.keys():
             if len(input_string) < input_criteria['min_length']:
@@ -1000,6 +1020,11 @@ class jsonModel(object):
             'error_value': input_boolean,
             'error_code': 4001
         }
+        if 'equal_to' in input_criteria.keys():
+            if input_boolean != input_criteria['equal_to']:
+                error_dict['failed_test'] = 'equal_to'
+                error_dict['error_code'] = 4026
+                raise InputValidationError(error_dict)
 
     # TODO: validate boolean against identical to reference
 

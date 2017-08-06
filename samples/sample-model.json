@@ -24,6 +24,9 @@
     ".": {
       "extra_fields": false
     },
+    ".active": {
+      "equal_to": false
+    },
     ".userID": {
       "min_length": 13,
       "max_length": 13,
