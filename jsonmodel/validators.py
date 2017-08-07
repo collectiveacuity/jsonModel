@@ -501,84 +501,125 @@ class jsonModel(object):
     # evaluate other query criteria
         for key, value in field_criteria.items():
             if key in ('min_size', 'min_length'):
+                found = False
                 for record_value in record_values:
-                    if len(record_value) < value:
-                        return False
+                    if len(record_value) >= value:
+                        found = True
+                        break
+                if not found:
+                    return False
             elif key in ('max_size', 'max_length'):
+                found = False
                 for record_value in record_values:
-                    if len(record_value) > value:
-                        return False
+                    if len(record_value) <= value:
+                        found = True
+                        break
+                if not found:
+                    return False
             elif key == 'min_value':
-                for record_value in record_values:
-                    if record_value < value:
-                        return False
-            elif key == 'max_value':
-                for record_value in record_values:
-                    if record_value > value:
-                        return False
-            elif key == 'equal_to':
-                for record_value in record_values:
-                    if record_value != value:
-                        return False
-            elif key == 'greater_than':
-                for record_value in record_values:
-                    if record_value <= value:
-                        return False
-            elif key == 'less_than':
+                found = False
                 for record_value in record_values:
                     if record_value >= value:
-                        return False
+                        found = True
+                        break
+                if not found:
+                    return False
+            elif key == 'max_value':
+                found = False
+                for record_value in record_values:
+                    if record_value <= value:
+                        found = True
+                        break
+                if not found:
+                    return False
+            elif key == 'equal_to':
+                found = False
+                for record_value in record_values:
+                    if record_value == value:
+                        found = True
+                        break
+                if not found:
+                    return False
+            elif key == 'greater_than':
+                found = False
+                for record_value in record_values:
+                    if record_value > value:
+                        found = True
+                        break
+                if not found:
+                    return False
+            elif key == 'less_than':
+                found = False
+                for record_value in record_values:
+                    if record_value < value:
+                        found = True
+                        break
+                if not found:
+                    return False
             elif key == 'excluded_values':
                 for record_value in record_values:
                     if record_value in value:
                         return False
             elif key == 'discrete_values':
+                found = False
                 for record_value in record_values:
-                    if record_value not in value:
-                        return False
+                    if record_value in value:
+                        found = True
+                        break
+                if not found:
+                    return False
             elif key == 'integer_data':
+                found = False
                 dummy_int = 1
                 for record_value in record_values:
-                    integer_data = True
-                    if record_value.__class__ != dummy_int.__class__:
-                        integer_data = False
-                    if value != integer_data:
-                        return False
+                    if record_value.__class__ == dummy_int.__class__:
+                        found = True
+                        break
+                if value != found:
+                    return False
             elif key == 'byte_data':
+                found = False
                 for record_value in record_values:
-                    decoded_bytes = ''
-                    byte_data = True
                     try:
                         decoded_bytes = b64decode(record_value)
                     except:
-                        byte_data = False
-                    if not isinstance(decoded_bytes, bytes):
-                        byte_data = False
-                    if value != byte_data:
-                        return False
+                        decoded_bytes = ''
+                    if isinstance(decoded_bytes, bytes):
+                        found = True
+                        break
+                if value != found:
+                    return False
             elif key == 'must_contain':
                 for regex in value:
                     regex_pattern = re.compile(regex)
+                    found = False
                     for record_value in record_values:
-                        if not regex_pattern.findall(record_value):
-                            return False
+                        if regex_pattern.findall(record_value):
+                            found = True
+                            break
+                    if not found:
+                        return False
             elif key == 'must_not_contain':
+                for regex in value:
+                    regex_pattern = re.compile(regex)
+                    found = False
+                    for record_value in record_values:
+                        if regex_pattern.findall(record_value):
+                            found = True
+                            break
+                    if found:
+                        return False
+            elif key == 'contains_either':
+                found = False
                 for regex in value:
                     regex_pattern = re.compile(regex)
                     for record_value in record_values:
                         if regex_pattern.findall(record_value):
-                            return False
-            elif key == 'contains_either':
-                record_match = True
-                for record_value in record_values:
-                    regex_match = False
-                    for regex in value:
-                        regex_pattern = re.compile(regex)
-                        if regex_pattern.findall(record_value):
-                            regex_match = True
-                    if not regex_match:
-                        record_match = False
-                if not record_match:
+                            found = True
+                            break
+                    if found:
+                        break
+                if not found:
                     return False
             elif key == 'unique_values':
                 for record_value in record_values:

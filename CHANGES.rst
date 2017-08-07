@@ -17,6 +17,7 @@ TODO
 2.8 (TBD)
 ---------
 * **FEATURE ADDED** 'equal_to' conditional to validation and query criteria
+* Changed query logic for list items to match any rather than all records
 * Bug fix for finding values in walk of nested keys
 
 2.7 (2016.12.12)

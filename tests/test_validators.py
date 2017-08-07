@@ -969,11 +969,11 @@ class jsonModelTests(jsonModel):
         assert self.query({'.comments[0]': {'value_exists': True}}, valid_input)
         assert not self.query({'.comments[0]': {'value_exists': False}}, valid_input)
         assert self.query({'.comments[0]': {'min_length': 3}}, valid_input)
-        assert not self.query({'.comments[0]': {'min_length': 5}}, valid_input)
-        assert self.query({'.comments[0]': {'must_contain': ['.{2}']}}, valid_input)
-        assert not self.query({'.comments[0]': {'must_contain': ['g.{2}']}}, valid_input)
-        assert self.query({'.comments[0]': {'contains_either': ['l', 'o']}}, valid_input)
-        assert not self.query({'.comments[0]': {'contains_either': ['r', 'e']}}, valid_input)
+        assert not self.query({'.comments[0]': {'min_length': 7}}, valid_input)
+        assert self.query({'.comments[0]': {'must_contain': ['.{4}']}}, valid_input)
+        assert not self.query({'.comments[0]': {'must_contain': ['tin']}}, valid_input)
+        assert self.query({'.comments[0]': {'contains_either': ['gold', 'tin']}}, valid_input)
+        assert not self.query({'.comments[0]': {'contains_either': ['tin', 'zinc']}}, valid_input)
 
         return self
 
