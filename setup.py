@@ -38,10 +38,10 @@ pip install twine
 
 Build Distributions:
 python setup.py sdist --format=gztar,zip
-pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-2.7.tar.gz
+pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-2.8.tar.gz
 
 Upload (or Register) Distributions to PyPi:
-twine upload dist/jsonmodel-2.7*
+twine upload dist/jsonmodel-2.8*
 
 Upload Documentation to Github:
 mkdocs gh-deploy
