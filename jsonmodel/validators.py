@@ -34,6 +34,8 @@ class jsonModel(object):
             raise ModelValidationError('Data model "schema" field must not be empty.')
 
     # construct base methods
+        from copy import deepcopy
+        data_model = deepcopy(data_model)
         self.schema = data_model['schema']
         self.keyName = mapModel(self.schema).keyName
         self.keyCriteria = mapModel(self.schema).keyCriteria

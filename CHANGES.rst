@@ -3,6 +3,8 @@ ChangeLog
 
 TODO
 ----
+* Change custom error argument to accept .format syntax
+* Allow javascript dot_path syntax in schema model
 * Possible Bug: Investigate field injection in property validation process
 * Documentation: Write auto-generate script for mkdocs documentation
 * Toggle to add all the criteria defaults for a key type in the keyMap
@@ -12,13 +14,16 @@ TODO
 * Validate size of data object inputs
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
+* Assume integer datatype in schema declaration means integer data only
+* Construct property that returns raw schema input
 
 
-2.8 (TBD)
+2.8 (2017.12.12)
 ---------
 * **FEATURE ADDED** 'equal_to' conditional to validation and query criteria
 * Changed query logic for list items to match any rather than all records
 * Bug fix for finding values in walk of nested keys
+* Bug fix for post-hoc redefinitions of schema dict causing key errors
 
 2.7 (2016.12.12)
 ----------------
