@@ -18,8 +18,8 @@
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
-	
-	<script src="../js/jquery-1.10.2.min.js"></script>
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
         <script src="../js/bootstrap-3.0.3.min.js"></script>
         <script src="../js/highlight.pack.js"></script> 
     </head>
@@ -86,7 +86,7 @@
         <li class="main active"><a href="#reference-materials">Reference Materials</a></li>
             <li><a href="#schema-default-behavior">Schema Default Behavior</a></li>
             <li><a href="#components-map">Components Map</a></li>
-            <li><a href="#list-of-field-conditionals-and-default-values">List of Field Conditionals (and default values)</a></li>
+            <li><a href="#list-of-field-conditionals">List of Field Conditionals</a></li>
             <li><a href="#error-handling">Error Handling</a></li>
             <li><a href="#ingesting-kwargs">Ingesting Kwargs</a></li>
             <li><a href="#query-criteria">Query Criteria</a></li>
@@ -97,7 +97,7 @@
 <h1 id="reference-materials">Reference Materials</h1>
 <p><em>Documentation for model declaration and error handling for jsonModel validation</em></p>
 <h2 id="schema-default-behavior">Schema Default Behavior</h2>
-<p>The default behavior of a schema declaration includes validation of structure, datatype and requirements. Any of these defaults can be turned off in the specification of a property in the components map. However, for many purposes, the defaults will suffice to declare model property validation, eliminating the need for further specification in a components map.</p>
+<p>The default behavior of a schema declaration includes validation of structure, datatype and requirements. Any of these defaults can be turned off in the specification of a field in the components map. However, for many purposes, the defaults will suffice to declare model field validation, eliminating the need for further specification in a components map.</p>
 <p><strong>Schema Example</strong>::</p>
 <pre><code>"schema": {
     "userID": "gY3Cv81QwL0Fs",
@@ -125,11 +125,14 @@
 <h3 id="meta-model-restrictions">Meta-Model Restrictions</h3>
 <p>A model validation error will occur if a key name in the schema contains an item designator pattern such as [2] or [35]. The module uses these patterns to validate inputs which contain lists of arbitrary size. As a result, there are limitations to the meta-model recursion of the module. It is not possible to use lists in model declarations which you wish to use as schemas in other model declarations.</p>
 <h2 id="components-map">Components Map</h2>
-<p>The default validation process can be modified, and other (less common) conditionals can be added through the components map of the model. Whereas the schema map provides a transparent data architecture that is self-valid, the components map can be used to specify the conditions of acceptable data for any number of fields in the schema. The component map is an optional flat dictionary where each key in the component map designates a particular path in the schema using the dot-path (&lsquo;.&rsquo; and [0]) nomenclature of nesting and array identification.</p>
+<p>The default validation process can be modified, and other (less common) conditional qualifier can be added through the components map of the model. Whereas the schema map provides a transparent data architecture that is self-valid, the components map can be used to specify the conditions of acceptable data for any number of fields in the schema. The component map is an optional flat dictionary where each key in the component map designates a particular path in the schema using the dot-path (&lsquo;.&rsquo; and [0]) nomenclature of nesting and array identification.</p>
 <p><strong>Components Example</strong>::</p>
 <pre><code>"components": {
     ".": {
         "extra_fields": false
+    },
+    ".active": {
+        "equal_to": false
     },
     ".userID": {
         "min_length": 13,
@@ -191,40 +194,47 @@
 }
 </code></pre>
 <h3 id="path-definitions">Path Definitions</h3>
-<p>To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, the key named &ldquo;.userID&rdquo; maps to the &ldquo;userID&rdquo; key to be found in the top level map of the schema, &ldquo;.address.city&rdquo; refers to the &ldquo;city&rdquo; key inside the &ldquo;address&rdquo; map inside the schema map and &ldquo;.comments[0]&rdquo; refers to the first item inside the comments list.  Since the comments list is itself made optional by the declaration &ldquo;required_field&rdquo;: false in the &ldquo;.comments&rdquo; key, this component is only validated if there is an item to validate. Otherwise, it is ignored. &ldquo;.&rdquo; is the key name for the top-level map itself and the &ldquo;extra_fields&rdquo; conditional changes the default to allow the top-level map to accept undeclared keys.</p>
-<h2 id="list-of-field-conditionals-and-default-values">List of Field Conditionals (and default values)</h2>
-<ul>
-<li>&ldquo;<strong>value_datatype</strong>&rdquo;: &ldquo;&rdquo; / <strong>IMMUTABLE</strong> / the datatype of a value or item defined in the schema / error_code: 4001</li>
-<li>&ldquo;<strong>required_field</strong>&rdquo;: false / a true boolean requires this key-value in the input / error_code: 4002</li>
-<li>&ldquo;<strong>extra_fields</strong>&rdquo;: false / a true boolean allows map to contain undeclared keys / error_code: 4003 / [<strong>maps only</strong>]</li>
-<li>&ldquo;<strong>key_datatype</strong>&rdquo;: &ldquo;string&rdquo; / <strong>IMMUTABLE</strong> / the datatype of a key name must be a string / error_code: 4004</li>
-<li>&ldquo;<strong>maximum_scope</strong>&rdquo;: [] / <strong>IMMUTABLE</strong> / the maximum extent of keys allowed in a dictionary generated by extra_fields default / [<strong>maps only</strong>]</li>
-<li>&ldquo;<strong>declared_value</strong>&rdquo;: null / <strong>IMMUTABLE</strong> / the value or item defined in the schema [<strong>strings, numbers and booleans only</strong>]</li>
-<li>&ldquo;<strong>default_value</strong>&rdquo;: null / a value for an optional property when field is missing in input [<strong>strings, numbers and booleans only</strong>]</li>
-<li>&ldquo;<strong>byte_data</strong>&rdquo;: false / a true boolean expects to see base64 byte data in the string field / error_code: 4011 [<strong>strings only</strong>]</li>
-<li>&ldquo;<strong>min_length</strong>&rdquo;: 0 / the minimum number of characters in a string / error_code: 4012 [<strong>strings only</strong>]</li>
-<li>&ldquo;<strong>max_length</strong>&rdquo;: 0 / the maximum number of characters in a string / error_code: 4013 [<strong>strings only</strong>]</li>
-<li>&ldquo;<strong>must_not_contain</strong>&rdquo;: [] / a list of regular expressions which should not be found in a string / error_code: 4014 [<strong>strings only</strong>]</li>
-<li>&ldquo;<strong>must_contain</strong>&rdquo;: [] / a list of regular expressions which must be found in a string / error_code: 4015 [<strong>strings only</strong>]</li>
-<li>&ldquo;<strong>contains_either</strong>&rdquo;: [] / a list of regular expressions which string must match at least one / error_code: 4016 [<strong>strings only</strong>]</li>
-<li>&ldquo;<strong>integer_data</strong>&rdquo;: false / a true boolean requires number to be an integer / error_code: 4021 [<strong>numbers only</strong>]</li>
-<li>&ldquo;<strong>min_value</strong>&rdquo;: 0.0 or &ldquo;&rdquo; / the minimum value of a number or string / error_code: 4022 [<strong>numbers and strings only</strong>]</li>
-<li>&ldquo;<strong>max_value</strong>&rdquo;: 0.0 or &ldquo;&rdquo; / the maximum value of a number or string / error_code: 4023 [<strong>numbers and strings only</strong>]</li>
-<li>&ldquo;<strong>greater_than</strong>&rdquo;: 0.0 or &ldquo;&rdquo; / the value a number or string must be greater than / error_code: 4024 [<strong>numbers and strings only</strong>]</li>
-<li>&ldquo;<strong>less_than</strong>&rdquo;: 0.0 or &ldquo;&rdquo; / the value a number or string must be less than / error_code: 4025 [<strong>numbers and strings only</strong>]</li>
-<li>&ldquo;<strong>min_size</strong>&rdquo;: 0 / the minimum number of items in a list / error_code: 4031 / [<strong>lists only</strong>]</li>
-<li>&ldquo;<strong>max_size</strong>&rdquo;: 0 / the maximum number of items in a list / error_code: 4032 / [<strong>lists only</strong>]</li>
-<li>&ldquo;<strong>unique_values</strong>&rdquo;: false / a true boolean treats a list as a set of unique primitives with no duplication / error_code: 4033 [<strong>lists of strings and numbers only</strong>]</li>
-<li>&ldquo;<strong>discrete_values</strong>&rdquo;: [] / a list of values allowed / error_code: 4041 [<strong>numbers and strings only</strong>]</li>
-<li>&ldquo;<strong>identical_to</strong>&rdquo;: &ldquo;&rdquo; / <strong>TODO</strong> / the key name in the components map whose value the value of this component must match</li>
-<li>&ldquo;<strong>lambda_function</strong>&rdquo;: &ldquo;&rdquo; / <strong>TODO</strong> / a single argument function which should be run to validate the value of this component, lambda_function must return true (valid) or false (invalid)</li>
-<li>&ldquo;<strong>validation_url</strong>&rdquo;: &ldquo;&rdquo; / <strong>TODO</strong> / an uri which can be called to validate the value of this component with its input in the body of the request, uri response must return true (valid) or false (invalid)</li>
-<li>&ldquo;<strong>example_values</strong>&rdquo;: [] / a list of values which satisfy all the validation requirements [<strong>numbers and strings only</strong>]</li>
-<li>&ldquo;<strong>field_title</strong>&rdquo;: &ldquo;&rdquo; / the title of the component for documentation and error reporting</li>
-<li>&ldquo;<strong>field_description</strong>&rdquo;: &ldquo;&rdquo; / a description of the component for documentation and error reporting</li>
-<li>&ldquo;<strong>field_position</strong>&rdquo;: 0 / the position of the component in an ordered array of fields</li>
-<li>&ldquo;<strong>field_metadata</strong>&rdquo;: {} / a dictionary for metadata about the component that passes through validation check</li>
-</ul>
+<p>To validate additional conditional qualifier placed on a field in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, the key named &ldquo;.userID&rdquo; maps to the &ldquo;userID&rdquo; key to be found in the top level map of the schema, &ldquo;.address.city&rdquo; refers to the &ldquo;city&rdquo; key inside the &ldquo;address&rdquo; map inside the schema map and &ldquo;.comments[0]&rdquo; refers to the first item inside the comments list.  Since the comments list is itself made optional by the declaration &ldquo;required_field&rdquo;: false in the &ldquo;.comments&rdquo; key, this component is only validated if there is an item to validate. Otherwise, it is ignored. &ldquo;.&rdquo; is the key name for the top-level map itself and the &ldquo;extra_fields&rdquo; criterion changes the default to allow the top-level map to accept undeclared keys.</p>
+<h2 id="list-of-field-conditionals">List of Field Conditionals</h2>
+<p><table>
+<thead>
+<tr><th>Criteria Key     </th><th>Criteria Value            </th><th>Error Code  </th><th>String  </th><th>Number  </th><th>Boolean  </th><th>Map  </th><th>List  </th><th>Status   </th><th>Description                                                                                                                                                             </th></tr>
+</thead>
+<tbody>
+<tr><td>value_datatype   </td><td>String                    </td><td>n/a         </td><td>        </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the datatype of a value or item defined in the schema                                                                                                                   </td></tr>
+<tr><td>required_field   </td><td>Boolean                   </td><td>4002        </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>available</td><td>a true boolean requires this key-value in the input                                                                                                                     </td></tr>
+<tr><td>extra_fields     </td><td>Boolean                   </td><td>4003        </td><td>        </td><td>        </td><td>         </td><td>Y    </td><td>      </td><td>available</td><td>a true boolean allows map to contain undeclared keys                                                                                                                    </td></tr>
+<tr><td>key_datatype     </td><td>String                    </td><td>n/a         </td><td>        </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the datatype of a key name must be a string                                                                                                                             </td></tr>
+<tr><td>maximum_scope    </td><td>List                      </td><td>n/a         </td><td>        </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the maximum extent of keys allowed in a dictionary generated by extra_fields default                                                                                    </td></tr>
+<tr><td>declared_value   </td><td>Any                       </td><td>n/a         </td><td>        </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the value or item defined in the schema [strings                                                                                                                        </td></tr>
+<tr><td>default_value    </td><td>Any                       </td><td>n/a         </td><td>Y       </td><td>Y       </td><td>Y        </td><td>     </td><td>      </td><td>available</td><td>a value for an optional field when field is missing in input                                                                                                            </td></tr>
+<tr><td>byte_data        </td><td>Boolean                   </td><td>4011        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a true boolean expects to see base64 byte data in the string field                                                                                                      </td></tr>
+<tr><td>min_length       </td><td>Integer                   </td><td>4012        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the minimum number of characters in a string                                                                                                                            </td></tr>
+<tr><td>max_length       </td><td>Integer                   </td><td>4013        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the maximum number of characters in a string                                                                                                                            </td></tr>
+<tr><td>must_not_contain </td><td>List of Strings           </td><td>4014        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a list of regular expressions which should not be found in a string                                                                                                     </td></tr>
+<tr><td>must_contain     </td><td>List of Strings           </td><td>4015        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a list of regular expressions which must be found in a string                                                                                                           </td></tr>
+<tr><td>contains_either  </td><td>List of Strings           </td><td>4016        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a list of regular expressions which string must match at least one                                                                                                      </td></tr>
+<tr><td>integer_data     </td><td>Boolean                   </td><td>4021        </td><td>        </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a true boolean requires number to be an integer                                                                                                                         </td></tr>
+<tr><td>min_value        </td><td>Number or String          </td><td>4022        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the minimum value of a number or string                                                                                                                                 </td></tr>
+<tr><td>max_value        </td><td>Number or String          </td><td>4023        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the maximum value of a number or string                                                                                                                                 </td></tr>
+<tr><td>greater_than     </td><td>Number or String          </td><td>4024        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the value a number or string must be greater than                                                                                                                       </td></tr>
+<tr><td>less_than        </td><td>Number or String          </td><td>4025        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the value a number or string must be less than                                                                                                                          </td></tr>
+<tr><td>equal_to         </td><td>Boolean, Number or String </td><td>4026        </td><td>Y       </td><td>Y       </td><td>Y        </td><td>     </td><td>      </td><td>available</td><td>the value a number, string or boolean must equal                                                                                                                        </td></tr>
+<tr><td>min_size         </td><td>Integer                   </td><td>4031        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>the minimum number of items in a list                                                                                                                                   </td></tr>
+<tr><td>max_size         </td><td>Integer                   </td><td>4032        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>the maximum number of items in a list                                                                                                                                   </td></tr>
+<tr><td>unique_values    </td><td>Boolean                   </td><td>4033        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>a true boolean treats a list as a set of unique primitives with no duplication                                                                                          </td></tr>
+<tr><td>discrete_values  </td><td>List of Strings or Numbers</td><td>4041        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a list of values allowed                                                                                                                                                </td></tr>
+<tr><td>identical_to     </td><td>String                    </td><td>            </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>         </td><td>the key name in the components map whose value the value of this component must match                                                                                   </td></tr>
+<tr><td>lambda_function  </td><td>String                    </td><td>            </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>         </td><td>a single argument function which should be run to validate the value of this component / lambda_function must return true (valid) or false (invalid)                    </td></tr>
+<tr><td>validation_url   </td><td>String                    </td><td>            </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>         </td><td>an uri which can be called to validate the value of this component with its input in the body of the request /  uri response must return true (valid) or false (invalid)</td></tr>
+<tr><td>valid_path       </td><td>Boolean                   </td><td>            </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>         </td><td>a true value will check localhost to determine if file path is valid                                                                                                    </td></tr>
+<tr><td>example_values   </td><td>List of Strings or Numbers</td><td>            </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a list of values which satisfy all the validation requirements                                                                                                          </td></tr>
+<tr><td>field_title      </td><td>String                    </td><td>n/a         </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>available</td><td>the title of the component for documentation and error reporting                                                                                                        </td></tr>
+<tr><td>field_description</td><td>String                    </td><td>n/a         </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>available</td><td>a description of the component for documentation and error reporting                                                                                                    </td></tr>
+<tr><td>field_position   </td><td>Integer                   </td><td>n/a         </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>available</td><td>the position of the component in an ordered array of fields                                                                                                             </td></tr>
+<tr><td>field_metadata   </td><td>Map                       </td><td>n/a         </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>available</td><td>a dictionary for metadata about the component that passes through validation check                                                                                      </td></tr>
+</tbody>
+</table></p>
 <h2 id="error-handling">Error Handling</h2>
 <p>Errors created from improper model specification will raise a ModelValidationError with a message that is designed to help determine the source of the model declaration error. To ensure that model initialization occurs properly, no error encoding is included to handle these exceptions. However, it is expected that validation of inputs will produce errors. Otherwise, what&rsquo;s the point?! So, in addition to a text report, a dictionary has been included with the InputValidationError exception to facilitate error handling.</p>
 <p><strong>Error Method Example</strong>::</p>
@@ -347,6 +357,10 @@
 <p>Query criteria are composed of a dictionary of one or more key-value pairs, where the key names are the dot path to the fields in the model schema to be queried and the values are dictionaries containing all the conditional operators for the query on the respective fields. Query criteria can be simple, such as the single field, operator and qualifier in the README documentation, or elaborate, such as found in the provided model sample-query.json below:</p>
 <p><strong>Sample Query</strong>::</p>
 <pre><code>{
+  ".active": {
+    "value_exists": true,
+    "equal_to": false
+  },
   ".address.city": {
     "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
   },
@@ -410,7 +424,8 @@ except QueryValidationError as err:
     "identical_to": ".similar_boolean",
     "lambda_function": "",
     "validation_url": "",
-    "value_exists": false
+    "value_exists": false,
+    "equal_to": false
   },
  ".list_fields": {
     "identical_to": ".similar_list",
@@ -444,7 +459,8 @@ except QueryValidationError as err:
     "max_value": 0.0,
     "min_value": 0.0,
     "validation_url": "",
-    "value_exists": false
+    "value_exists": false,
+    "equal_to": 0.0
  },
   ".string_fields": {
     "byte_data": false,
@@ -462,7 +478,8 @@ except QueryValidationError as err:
     "must_contain": [],
     "must_not_contain": [],
     "validation_url": "",
-    "value_exists": false
+    "value_exists": false,
+    "equal_to": ""
   }
 }
 </code></pre>
@@ -475,8 +492,11 @@ except QueryValidationError as err:
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>var base_url = '..';</script>
-        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
-        <script src="../js/base.js"></script><div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+        <script src="../js/base.js"></script>
+        <script src="../search/require.js"></script>
+        <script src="../search/search.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -499,7 +519,47 @@ except QueryValidationError as err:
             </div>
         </div>
     </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
 </div>
+
 
     </body>
 </html>
