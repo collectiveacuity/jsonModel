@@ -84,4 +84,7 @@ git push origin master
 
 Git Remove History: [Run as admin and pause syncing]
 git filter-branch --force --index-filter 'git rm -rf --cached --ignore-unmatch dev/*' --prune-empty --tag-name-filter cat -- --all
+
+GitHub.io Documentation:
+mkdocs gh-deploy -r origin
 '''

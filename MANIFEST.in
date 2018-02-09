@@ -3,3 +3,4 @@ prune */__pycache__
 include *.rst
 include *.txt
 include *.md
+include utils.py
