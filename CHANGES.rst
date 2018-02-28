@@ -17,9 +17,12 @@ TODO
 * Assume integer datatype in schema declaration means integer data only
 * Construct property that returns raw schema input
 
+2.9 (2018.03.??)
+----------------
+* **FEATURE ADDED** 'default_value' conditional to list fields
 
 2.8 (2017.12.12)
----------
+----------------
 * **FEATURE ADDED** 'equal_to' conditional to validation and query criteria
 * Changed query logic for list items to match any rather than all records
 * Bug fix for finding values in walk of nested keys

@@ -203,6 +203,11 @@ class jsonModelTests(jsonModel):
         new_default_rating = self.validate(default_rating)
         assert new_default_rating['rating'] == 5
 
+    # test default_value ingestion
+        default_rating_ingest = deepcopy(valid_input)
+        new_default_rating = self.ingest(**default_rating_ingest)
+        assert new_default_rating['rating'] == 5
+
     # test min_size exception
         short_list = deepcopy(valid_input)
         short_list['comments'] = []
@@ -528,7 +533,7 @@ class jsonModelTests(jsonModel):
         test_input = { 'test_list': [ { 'test': 'me' }, { 'test': 'you' } ] }
         valid_output = list_model.ingest(**test_input)
         assert valid_output['test_list']
-
+        
     # test json valid structure of model components
         assert json.dumps(test_model)
 
@@ -545,6 +550,16 @@ class jsonModelTests(jsonModel):
         null_schema['test'] = None
         assert jsonModel(null_schema)
 
+    # test default_value ingestion of list datatypes
+        default_list_model = deepcopy(test_model)
+        default_list_model['components']['.comments']['default_value'] = [ 'default comment' ]
+        default_list_input = deepcopy(valid_input)
+        del default_list_input['comments']
+        default_list_output = jsonModel(default_list_model).validate(default_list_input)
+        assert default_list_output['comments'][0] == 'default comment'
+        default_list_output = jsonModel(default_list_model).ingest(**default_list_input)
+        assert default_list_output['comments'][0] == 'default comment'
+        
     # test empty schema exception
         empty_schema = deepcopy(test_model)
         empty_schema['schema'] = {}
@@ -672,6 +687,14 @@ class jsonModelTests(jsonModel):
         except ModelValidationError as err:
             assert str(err).find('.address.city') > 0
 
+    # test conflicting default value and datatype in list exception
+        default_value_error = deepcopy(test_model)
+        default_value_error['components']['.comments']['default_value'] = [ 1 ]
+        try:
+            jsonModel(default_value_error)
+        except ModelValidationError as err:
+            assert str(err).find('.comments qualifier default_value[0]') > 0
+            
     # test item designator pattern used in schema keys
         item_designator_error = deepcopy(test_model)
         item_designator_error['schema']['[1]'] = ''

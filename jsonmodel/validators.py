@@ -37,8 +37,9 @@ class jsonModel(object):
         from copy import deepcopy
         data_model = deepcopy(data_model)
         self.schema = data_model['schema']
-        self.keyName = mapModel(self.schema).keyName
-        self.keyCriteria = mapModel(self.schema).keyCriteria
+        model_map = mapModel(self.schema)
+        self.keyName = model_map.keyName
+        self.keyCriteria = model_map.keyCriteria
 
     # construct protected type classes
         self._datatype_names = mapModel._datatype_names
@@ -117,6 +118,9 @@ class jsonModel(object):
                 for k, v in self.components[key].items():
                     self.keyMap[key][k] = v
 
+    # validate default values in lists
+        self._validate_defaults(self.keyMap)
+        
     # construct queryRules property from class model rules
         self.queryRules = {}
         for key, value in self.__rules__['components'].items():
@@ -471,6 +475,44 @@ class jsonModel(object):
 
         return fields_dict
 
+    def _validate_defaults(self, fields_dict):
+
+    # validate key names in fields
+        for key, value in fields_dict.items():
+
+    # retrieve value type and type dict
+            value_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
+
+    # validate discrete value qualifiers against other criteria
+            qualifier = 'default_value'
+            if qualifier in value.keys():
+                multiple_values = False
+                if isinstance(value[qualifier], list):
+                    test_list = value[qualifier]
+                    multiple_values = True
+                else:
+                    test_list = [value[qualifier]]
+                value_path = 'field %s qualifier %s' % (key, qualifier)
+                for i in range(len(test_list)):
+                    test_value = test_list[i]
+                    quote_text = ''
+                    if isinstance(test_value, str):
+                        quote_text = '"'
+                    item_text = ''
+                    if multiple_values:
+                        item_text = '[%s]' % i
+                    qualifier_text = value_path + item_text
+                    header = 'Value %s%s%s for %s' % (quote_text, test_value, quote_text, qualifier_text)
+                    if value_type == 'list':
+                        default_item_key = '%s[0]' % key
+                        try:
+                            self.validate(test_value, default_item_key, object_title=header)
+                        except Exception as err:
+                            raise ModelValidationError(str(err).strip().replace('field %s' % default_item_key, qualifier_text))
+
+        return fields_dict
+
+        
     def _evaluate_field(self, record_dict, field_name, field_criteria):
 
         ''' a helper method for evaluating record values based upon query criteria
