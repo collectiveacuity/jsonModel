@@ -5,6 +5,7 @@ TODO
 ----
 * Change custom error argument to accept .format syntax
 * Allow javascript dot_path syntax in schema model
+* Consider altering validation of empty values in non-required fields
 * Possible Bug: Investigate field injection in property validation process
 * Documentation: Write auto-generate script for mkdocs documentation
 * Toggle to add all the criteria defaults for a key type in the keyMap
