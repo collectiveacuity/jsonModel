@@ -121,7 +121,7 @@ class jsonModel(object):
             self.keyMap[self.keyName[i]] = self.keyCriteria[i]
         for key, value in self.components.items():
 
-        # correct for javascript dot_path
+        # convert javascript dot_path to class dot_path
             dot_key = ''
             if not key:
                 dot_key = '.'
@@ -165,6 +165,9 @@ class jsonModel(object):
                 message = 'Query rules input must have all %s field key names.' % req_set
                 raise ModelValidationError(message)
             for key in req_set:
+                if not isinstance(query_rules[key], dict):
+                    message = 'Value for query rules %s field must be a dictionary.' % key
+                    raise ModelValidationError(message)
                 input_qualifier_set = set(query_rules[key].keys())
                 req_qualifier_set = set(self.queryRules[key].keys())
                 if input_qualifier_set - req_qualifier_set:
@@ -183,7 +186,7 @@ class jsonModel(object):
     # validate key names in fields
         for key, value in fields_dict.items():
     
-        # correct for javascript dot_path
+        # convert javascript dot_path to class dot_path
             if not key:
                 key = '.'
             else:
@@ -538,7 +541,6 @@ class jsonModel(object):
 
         return fields_dict
 
-        
     def _evaluate_field(self, record_dict, field_name, field_criteria):
 
         ''' a helper method for evaluating record values based upon query criteria
@@ -1429,13 +1431,17 @@ class jsonModel(object):
         _title_arg = '%s(object_title="...")' % __name__
 
     # validate input
+        copy_path = path_to_root
         if path_to_root:
             if not isinstance(path_to_root, str):
                 raise ModelValidationError('%s must be a string.' % _path_arg)
-            elif not path_to_root in self.keyMap.keys():
-                raise ModelValidationError('%s does not exist in components %s.' % (_path_arg.replace('...', path_to_root), self.keyMap.keys()))
+            else:
+                if path_to_root[0] != '.':
+                    copy_path = '.%s' % path_to_root
+                if not copy_path in self.keyMap.keys():
+                    raise ModelValidationError('%s does not exist in components %s.' % (_path_arg.replace('...', path_to_root), self.keyMap.keys()))
         else:
-            path_to_root = '.'
+            copy_path = '.'
         if object_title:
             if not isinstance(object_title, str):
                 raise ModelValidationError('%s must be a string' % _title_arg)
@@ -1444,9 +1450,9 @@ class jsonModel(object):
         error_dict = {
             'object_title': object_title,
             'model_schema': self.schema,
-            'input_criteria': self.keyMap[path_to_root],
+            'input_criteria': self.keyMap[copy_path],
             'failed_test': 'value_datatype',
-            'input_path': path_to_root,
+            'input_path': copy_path,
             'error_value': input_data,
             'error_code': 4001
         }
@@ -1460,22 +1466,22 @@ class jsonModel(object):
         input_type = self._datatype_names[input_index]
 
     # validate input data type
-        if input_type != self.keyMap[path_to_root]['value_datatype']:
+        if input_type != self.keyMap[copy_path]['value_datatype']:
             raise InputValidationError(error_dict)
 
     # run helper method appropriate to data type
         if input_type == 'boolean':
-            input_data = self._validate_boolean(input_data, path_to_root, object_title)
+            input_data = self._validate_boolean(input_data, copy_path, object_title)
         elif input_type == 'number':
-            input_data = self._validate_number(input_data, path_to_root, object_title)
+            input_data = self._validate_number(input_data, copy_path, object_title)
         elif input_type == 'string':
-            input_data = self._validate_string(input_data, path_to_root, object_title)
+            input_data = self._validate_string(input_data, copy_path, object_title)
         elif input_type == 'list':
-            schema_list = self._reconstruct(path_to_root)
-            input_data = self._validate_list(input_data, schema_list, path_to_root, object_title)
+            schema_list = self._reconstruct(copy_path)
+            input_data = self._validate_list(input_data, schema_list, copy_path, object_title)
         elif input_type == 'map':
-            schema_dict = self._reconstruct(path_to_root)
-            input_data = self._validate_dict(input_data, schema_dict, path_to_root, object_title)
+            schema_dict = self._reconstruct(copy_path)
+            input_data = self._validate_dict(input_data, schema_dict, copy_path, object_title)
 
         return input_data
 
@@ -1551,9 +1557,28 @@ class jsonModel(object):
         if not isinstance(query_criteria, dict):
             raise ModelValidationError('%s must be a dictionary.' % _query_arg)
 
+    # convert javascript dot_path to class dot_path
+        criteria_copy = {}
+        equal_fields = []
+        dot_fields = []
+        for key, value in query_criteria.items():
+            copy_key = key
+            if not key:
+                copy_key = '.'
+            else:
+                if key[0] != '.':
+                    copy_key = '.%s' % key
+                    dot_fields.append(copy_key)
+            criteria_copy[copy_key] = value
+            if value.__class__ in self._datatype_classes[0:4]:
+                criteria_copy[copy_key] = {
+                    'equal_to': value
+                }
+                equal_fields.append(copy_key)
+
     # validate query criteria against query rules
         query_kwargs = {
-            'fields_dict': query_criteria,
+            'fields_dict': criteria_copy,
             'fields_rules': self.queryRules,
             'declared_value': False
         }
@@ -1561,13 +1586,21 @@ class jsonModel(object):
             self._validate_fields(**query_kwargs)
         except ModelValidationError as err:
             message = err.error['message']
+            for field in equal_fields:
+                equal_error = 'field %s qualifier equal_to' % field
+                if message.find(equal_error) > -1:
+                    message = message.replace(equal_error, 'field %s' % field)
+                    break
+            for field in dot_fields:
+                if message.find('ield %s' % field) > -1:
+                    message = message.replace('ield %s' % field, 'ield %s' % field[1:])
             raise QueryValidationError(message)
 
     # query test record
         if valid_record:
             if not isinstance(valid_record, dict):
                 raise ModelValidationError('%s must be a dictionary.' % _record_arg)
-            for key, value in query_criteria.items():
+            for key, value in criteria_copy.items():
                 eval_outcome = self._evaluate_field(valid_record, key, value)
                 if not eval_outcome:
                     return False

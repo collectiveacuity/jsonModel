@@ -107,7 +107,8 @@ The default validation process can be modified, and other (less common) conditio
 
 Path Definitions
 ^^^^^^^^^^^^^^^^
-To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, the key named ".userID" maps to the "userID" key to be found in the top level map of the schema, ".address.city" refers to the "city" key inside the "address" map inside the schema map and ".comments[0]" refers to the first item inside the comments list.  Since the comments list is itself made optional by the declaration "required_field": false in the ".comments" key, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys.
+To validate additional conditionals placed on a property in the schema, the validation process looks through the schema for the value associated with a key or item specified in the key name of the components map. In this example, the key named ".userID" maps to the "userID" key to be found in the top level map of the schema, ".address.city" refers to the "city" key inside the "address" map inside the schema map and ".comments[0]" refers to the first item inside the comments list.  Since the comments list is itself made optional by the declaration "required_field": false in the ".comments" key, this component is only validated if there is an item to validate. Otherwise, it is ignored. "." is the key name for the top-level map itself and the "extra_fields" conditional changes the default to allow the top-level map to accept undeclared keys. 
+**NOTE:** The "." at the beginning of a dot-path is optional. So, a key named "userID" is the same as ".userID".
 
 List of Field Conditionals (and default values)
 -----------------------------------------------
@@ -281,11 +282,16 @@ Items are only added to a list from those items in kwargs if they are valid. If 
 
 Query Criteria
 --------------
-Query criteria are composed of a dictionary of one or more key-value pairs, where the key names are the dot path to the fields in the model schema to be queried and the values are dictionaries containing all the conditional operators for the query on the respective fields. Query criteria can be simple, such as the single field, operator and qualifier in the README documentation, or elaborate, such as found in the provided model sample-query.json below:
+Query criteria are composed of a dictionary of one or more key-value pairs, where the key names are the dot path to the fields in the model schema to be queried and the values are dictionaries containing any of the conditional operators for the query on the respective fields. Like component declarations, the "." at the beginning of the dot path for a key name is optional. For fields with number, string or boolean datatypes, { "field": { "equal_to": "value" } } can be shortened to { "field": "value" } and the class will automatically interpret the syntax as the "equal_to" criteria. Query criteria can be simple, such as the single field, operator and qualifier in the README documentation, or elaborate, such as found in the provided model sample-query.json below:
 
 **Sample Query**::
 
     {
+      ".active": {
+        "value_exists": true,
+        "equal_to": false
+      },
+      ".address.country": "United States",
       ".address.city": {
         "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
       },

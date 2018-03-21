@@ -4,12 +4,9 @@ ChangeLog
 TODO
 ----
 * Change custom error argument to accept .format syntax
-* Allow javascript dot_path syntax in schema model
-* Consider altering validation of empty values in non-required fields
-* Possible Bug: Investigate field injection in property validation process
-* Documentation: Write auto-generate script for mkdocs documentation
-* Toggle to add all the criteria defaults for a key type in the keyMap
-* Sort dictionary keys alphabetically prior to evaluation
+* Update error reporting to convert field paths back to javascript dot paths
+* Consider adding validation for HTTP methods of a RESTful API
+* Sort dictionary keys alphabetically prior to evaluation (currents inherits json file order)
 * Allow validation of null datatype declarations
 * Allow declaration of multiple datatypes for key values
 * Validate size of data object inputs
@@ -18,10 +15,12 @@ TODO
 * Assume integer datatype in schema declaration means integer data only
 * Construct property that returns raw schema input
 
-2.9 (2018.03.??)
+2.9 (2018.03.21)
 ----------------
 * **FEATURE ADDED** 'default_value' conditional added to list fields
 * Updated required field default to False for list fields with empty items
+* Updated component and query validation to parse javascript dot_path syntax
+* Updated query criteria to map number, string and boolean declarations to equal_to qualifier  
 
 2.8 (2017.12.12)
 ----------------

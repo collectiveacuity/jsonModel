@@ -59,12 +59,12 @@ In addition to intuitive self-valid schema declarations, jsonModel also offers a
     {
       "schema": { ... },
       "components": {
-        ".userID": {
+        "userID": {
           "min_length": 13,
           "max_length": 13,
           "must_not_contain": [ "[^\\w]", "_" ]
         },
-        ".address.city": {
+        "address.city": {
           "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
           "required_field": false
         }
@@ -113,7 +113,7 @@ To validate input against model declaration::
 
 To validate input against an individual component::
 
-    path_to_root = '.property'
+    path_to_root = 'dot.path[2].field'
     valid_model.validate(input, path_to_root)
 
 
@@ -130,6 +130,12 @@ To customize error message:
     input_title = 'Property field in input'
     valid_model.validate(input, path_to_root, input_title)
 
+To filter valid input based upon query criteria:
+
+    query_criteria = { 'dot.path[2].field': 'exact value' }
+    assert valid_model.query(query_criteria, valid_input)
+    query_criteria = { 'dot.path[2].field': { 'excluded_values': [ 'exact value' ] } }
+    assert not valid_model.query(query_criteria, valid_input)
 
 Further Reading
 ---------------

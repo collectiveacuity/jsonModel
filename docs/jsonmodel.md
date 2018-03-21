@@ -102,7 +102,7 @@ To initialize model with custom query rules::
 To declare query criteria::
 
     {
-        '.property': {
+        'dot.path[2].field': {
             'must_contain': [ 'v.+' ]
         }
     }
@@ -112,7 +112,7 @@ To validate query criteria::
     valid_model.query(sample_query)
 
 
-To query a record using the criteria::
+To evaluate a record using the criteria::
 
     valid_input = valid_model.validate(input)
 

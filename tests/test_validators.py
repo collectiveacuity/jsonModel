@@ -775,6 +775,8 @@ class jsonModelTests(jsonModel):
     # test evaluate valid input
         truth_table = []
         for key, value in valid_query.items():
+            if not isinstance(value, dict):
+                value = { 'equal_to': value }
             truth_table.append(self._evaluate_field(valid_input, key, value))
         assert True in truth_table
         assert False in truth_table
@@ -813,7 +815,7 @@ class jsonModelTests(jsonModel):
 
     # test evaluate maximum size query failure
         eval_kwargs['field_name'] = '.comments'
-        eval_kwargs['field_criteria'] = test_query['.comments']
+        eval_kwargs['field_criteria'] = test_query['comments']
         eval_kwargs['field_criteria']['max_size'] = 2
         eval_outcome = self._evaluate_field(**eval_kwargs)
         assert not eval_outcome
@@ -858,7 +860,7 @@ class jsonModelTests(jsonModel):
 
     # test evaluate excluded values query failure
         eval_kwargs['field_name'] = '.emoticon',
-        eval_kwargs['field_criteria'] = test_query['.emoticon']
+        eval_kwargs['field_criteria'] = test_query['emoticon']
         eval_kwargs['field_criteria']['excluded_values'].append('aGFwcHk=')
         eval_outcome = self._evaluate_field(**eval_kwargs)
         assert not eval_outcome
@@ -926,6 +928,10 @@ class jsonModelTests(jsonModel):
         assert self.query({'.rating': {'value_exists': False}}, valid_input)
         assert not self.query({'.rating': {'value_exists': True}}, valid_input)
 
+    # test query method with boolean field queries
+        assert self.query({'active': False}, valid_input)
+        assert not self.query({'active': True}, valid_input)
+
     # test query method with number field queries
         assert self.query({'.datetime': {'value_exists': True}}, valid_input)
         assert not self.query({'.datetime': {'value_exists': False}}, valid_input)
@@ -943,6 +949,8 @@ class jsonModelTests(jsonModel):
         assert not self.query({'.datetime': {'less_than': 1449179763.312077}}, valid_input)
         assert self.query({'.datetime': {'discrete_values': [1449179763.312077]}}, valid_input)
         assert not self.query({'.datetime': {'excluded_values': [1449179763.312077]}}, valid_input)
+        assert self.query({'datetime': 1449179763.312077}, valid_input)
+        assert not self.query({'datetime': 1449179763.31207}, valid_input)
 
     # test query method with string field queries
         assert self.query({'.userID': {'value_exists': True}}, valid_input)
@@ -973,6 +981,8 @@ class jsonModelTests(jsonModel):
         assert not self.query({'.userID': {'byte_data': True}}, valid_input)
         assert self.query({'.userID': {'byte_data': False}}, valid_input)
         assert not self.query({'.emoticon': {'byte_data': False}}, valid_input)
+        assert self.query({'address.country': 'United States'}, valid_input)
+        assert not self.query({'address.country': 'United'}, valid_input)
 
     # test query method with list field queries
         assert self.query({'.comments': {'value_exists': True}}, valid_input)
