@@ -20,7 +20,8 @@ TODO
 
 2.9 (2018.03.??)
 ----------------
-* **FEATURE ADDED** 'default_value' conditional to list fields
+* **FEATURE ADDED** 'default_value' conditional added to list fields
+* Updated required field default to False for list fields with empty items
 
 2.8 (2017.12.12)
 ----------------

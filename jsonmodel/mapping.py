@@ -33,22 +33,26 @@ class mapModel(object):
     ]
 
     def __init__(self, input):
+
+        self.keyName = []
+        self.keyCriteria = []
+
         if isinstance(input, dict):
-            key_name = [ '.' ]
-            key_criteria = [ { 'required_field': True, 'value_datatype': 'map', 'extra_fields': False } ]
-            self.keyName, self.keyCriteria = self.dict(input, '', key_name, key_criteria)
+            self.keyName = [ '.' ]
+            self.keyCriteria = [ { 'required_field': True, 'value_datatype': 'map', 'extra_fields': False } ]
+            self.dict(input, '')
         elif isinstance(input, list):
-            self.keyName, self.keyCriteria = self.list(input, '', [], [])
+            self.list(input, '')
         else:
             raise ModelValidationError('Input for mapModel must be a dictionary or list.')
 
-    def dict(self, input_dict, path_to_root, key_name, key_criteria):
+    def dict(self, input_dict, path_to_root):
         for key, value in input_dict.items():
             if not isinstance(key, str):
                 key_path = path_to_root + '.' + str(key)
-                raise ModelValidationError('Key name for field %s must not be a string datatype.' % key_path)
+                raise ModelValidationError('Key name for field %s must be a string datatype.' % key_path)
             key_path = path_to_root + '.' + key
-            key_name.append(key_path)
+            self.keyName.append(key_path)
             try:
                 class_index = self._datatype_classes.index(value.__class__)
             except:
@@ -65,17 +69,16 @@ class mapModel(object):
                     criteria_dict['extra_fields'] = False
             if criteria_dict['value_datatype'] in ('boolean', 'string', 'number'):
                 criteria_dict['declared_value'] = value
-            key_criteria.append(criteria_dict)
+            self.keyCriteria.append(criteria_dict)
             if isinstance(value, dict):
-                self.dict(input_dict=input_dict[key], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
+                self.dict(input_dict=input_dict[key], path_to_root=key_path)
             elif isinstance(value, list):
-                self.list(input_list=input_dict[key], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
-        return key_name, key_criteria
+                self.list(input_list=input_dict[key], path_to_root=key_path)
 
-    def list(self, input_list, path_to_root, key_name, key_criteria):
+    def list(self, input_list, path_to_root):
         if input_list:
             key_path = path_to_root + '[0]'
-            key_name.append(key_path)
+            self.keyName.append(key_path)
             try:
                 class_index = self._datatype_classes.index(input_list[0].__class__)
             except:
@@ -90,9 +93,8 @@ class mapModel(object):
                     criteria_dict['extra_fields'] = False
             if isinstance(input_list[0], bool) or isinstance(input_list[0], str) or isinstance(input_list[0], int) or isinstance(input_list[0], float):
                 criteria_dict['declared_value'] = input_list[0]
-            key_criteria.append(criteria_dict)
+            self.keyCriteria.append(criteria_dict)
             if isinstance(input_list[0], dict):
-                self.dict(input_dict=input_list[0], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
+                self.dict(input_dict=input_list[0], path_to_root=key_path)
             elif isinstance(input_list[0], list):
-                self.list(input_list=input_list[0], path_to_root=key_path, key_name=key_name, key_criteria=key_criteria)
-        return key_name, key_criteria
+                self.list(input_list=input_list[0], path_to_root=key_path)

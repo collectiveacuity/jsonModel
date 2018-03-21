@@ -64,6 +64,12 @@ class jsonModel(object):
                     message = 'Schema field %s must declare an initial item for the list.' % self.keyName[i]
                     raise ModelValidationError(message)
 
+            # alter list requirement if first item is empty
+                else:
+                    item_index = self.keyName.index(item_key)
+                    if not self.keyCriteria[item_index]['required_field']:
+                        self.keyCriteria[i]['required_field'] = False
+
     # validate title input & construct title method
         self.title = ''
         if 'title' in data_model.keys():
@@ -114,13 +120,25 @@ class jsonModel(object):
         for i in range(len(self.keyName)):
             self.keyMap[self.keyName[i]] = self.keyCriteria[i]
         for key, value in self.components.items():
+
+        # correct for javascript dot_path
+            dot_key = ''
+            if not key:
+                dot_key = '.'
+            else:
+                if key[0] != '.':
+                    dot_key = '.%s' % key
+
             if key in self.keyMap.keys():
                 for k, v in self.components[key].items():
                     self.keyMap[key][k] = v
+            elif dot_key and dot_key in self.keyMap.keys():
+                for k, v in self.components[key].items():
+                    self.keyMap[dot_key][k] = v
 
     # validate default values in lists
         self._validate_defaults(self.keyMap)
-        
+
     # construct queryRules property from class model rules
         self.queryRules = {}
         for key, value in self.__rules__['components'].items():
@@ -164,6 +182,14 @@ class jsonModel(object):
 
     # validate key names in fields
         for key, value in fields_dict.items():
+    
+        # correct for javascript dot_path
+            if not key:
+                key = '.'
+            else:
+                if key[0] != '.':
+                    key = '.%s' % key
+            
             if key not in self.keyName:
                 raise ModelValidationError('Field %s is not a field declared in model schema.' % key)
             elif not isinstance(value, dict):
@@ -479,7 +505,7 @@ class jsonModel(object):
 
     # validate key names in fields
         for key, value in fields_dict.items():
-
+                    
     # retrieve value type and type dict
             value_type = self.keyCriteria[self.keyName.index(key)]['value_datatype']
 
