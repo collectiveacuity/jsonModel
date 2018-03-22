@@ -74,8 +74,7 @@ The default validation process can be modified, and other (less common) conditio
             "min_value": 1,
             "max_value": 10,
             "default_value": 5,
-            "excluded_values": [ 7, 9 ],
-            "integer_data": true
+            "excluded_values": [ 7, 9 ]
         },
         ".address.city": {
             "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],

@@ -14,8 +14,8 @@
 - Evaluates model valid records using query criteria
 
 ## Nothin' Yet (aka TODO)
-- Allow javascript dot_path syntax in schema model
 - Change custom error argument to accept .format syntax
+- Validates the byte size of a map field
 - Validates that a path exists on localhost
 - Verifies that a url is responsive
 - Custom validations with lambda functions

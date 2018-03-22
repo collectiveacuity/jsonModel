@@ -61,12 +61,18 @@ class mapModel(object):
                 'required_field': False,
                 'value_datatype': self._datatype_names[class_index]
             }
+        # add integer data criteria to integer fields
+            if class_index == 1:
+                criteria_dict['integer_data'] = True
+        # enable required field if field has a non-empty value
             if input_dict[key]:
                 criteria_dict['required_field'] = True
+        # add extra fields to dictionary fields
             if isinstance(value, dict):
                 criteria_dict['extra_fields'] = True
                 if value:
                     criteria_dict['extra_fields'] = False
+        # add declared value to string, integer and boolean fields
             if criteria_dict['value_datatype'] in ('boolean', 'string', 'number'):
                 criteria_dict['declared_value'] = value
             self.keyCriteria.append(criteria_dict)
@@ -87,10 +93,15 @@ class mapModel(object):
                 'required_field': False,
                 'value_datatype': self._datatype_names[class_index]
             }
+        # add integer data criteria to integer fields
+            if class_index == 1:
+                criteria_dict['integer_data'] = True
+        # add extra fields to dictionary fields
             if isinstance(input_list[0], dict):
                 criteria_dict['extra_fields'] = True
                 if input_list[0]:
                     criteria_dict['extra_fields'] = False
+        # add declared value to string, integer and boolean fields
             if isinstance(input_list[0], bool) or isinstance(input_list[0], str) or isinstance(input_list[0], int) or isinstance(input_list[0], float):
                 criteria_dict['declared_value'] = input_list[0]
             self.keyCriteria.append(criteria_dict)

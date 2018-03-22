@@ -28,7 +28,7 @@ References:
 https://docs.python.org/3.6/distutils/setupscript.html
 
 https://python-packaging-user-guide.readthedocs.org/en/latest/
-https://docs.python.org/3.5/distutils/index.html
+https://docs.python.org/3.6/distutils/index.html
 https://github.com/jgehrcke/python-cmdline-bootstrap
 http://www.pyinstaller.org/
 
@@ -38,10 +38,10 @@ pip install twine
 
 Build Distributions:
 python setup.py sdist --format=gztar,zip
-pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-2.8.tar.gz
+pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-2.9.tar.gz
 
 Upload (or Register) Distributions to PyPi:
-twine upload dist/jsonmodel-2.8*
+twine upload dist/jsonmodel-2.9*
 
 Upload Documentation to Github:
 mkdocs gh-deploy
@@ -51,12 +51,12 @@ Installation:
 pip install [module]
 python setup.py develop  # for local on-the-fly file updates
 python setup.py install  # when possessing distribution files
-pip install dist/jsonmodel-2.7-py3-none-any.whl # when possessing wheel file
+pip install dist/jsonmodel-2.9-py3-none-any.whl # when possessing wheel file
 
 Uninstall:
 pip uninstall [module]
 python setup.py develop --uninstall # for removing symbolic link
-# remove command line tool in ../Python/Python35-32/Scripts/
+# remove command line tool in ../Python/Python3.6/Scripts/
 
 CLI Installation:
 command = 'name of command'

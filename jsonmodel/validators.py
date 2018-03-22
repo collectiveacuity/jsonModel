@@ -115,7 +115,7 @@ class jsonModel(object):
                 raise ModelValidationError('Value for model components must be a dictionary.')
             self.components = self._validate_fields(data_model['components'], self.__rules__['components'])
 
-    # construct keyMap property from components, key names and key criteria
+    # construct keyMap fields from key names and key criteria
         self.keyMap = {}
         for i in range(len(self.keyName)):
             self.keyMap[self.keyName[i]] = self.keyCriteria[i]
@@ -129,6 +129,7 @@ class jsonModel(object):
                 if key[0] != '.':
                     dot_key = '.%s' % key
 
+        # add component declarations to keyMap
             if key in self.keyMap.keys():
                 for k, v in self.components[key].items():
                     self.keyMap[key][k] = v

@@ -55,8 +55,7 @@
       "max_value": 10,
       "min_value": 1,
       "default_value": 5,
-      "excluded_values": [ 7, 9 ],
-      "integer_data": true
+      "excluded_values": [ 7, 9 ]
     },
     ".address.city": {
       "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],

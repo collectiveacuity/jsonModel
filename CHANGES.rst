@@ -9,18 +9,18 @@ TODO
 * Sort dictionary keys alphabetically prior to evaluation (currents inherits json file order)
 * Allow validation of null datatype declarations
 * Allow declaration of multiple datatypes for key values
-* Validate size of data object inputs
+* Add max_size to map datatypes to validate against byte size of map
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
-* Assume integer datatype in schema declaration means integer data only
 * Construct property that returns raw schema input
 
 2.9 (2018.03.21)
 ----------------
 * **FEATURE ADDED** 'default_value' conditional added to list fields
+* **FEATURE ADDED** integer fields in schema are automatically declared as integer_data
 * Updated required field default to False for list fields with empty items
 * Updated component and query validation to parse javascript dot_path syntax
-* Updated query criteria to map number, string and boolean declarations to equal_to qualifier  
+* Updated query criteria to map number, string and boolean declarations to equal_to qualifier
 
 2.8 (2017.12.12)
 ----------------

@@ -281,7 +281,7 @@ If 'extra_fields' is declared True in the components for a dictionary in the mod
 Items are only added to a list from those items in kwargs if they are valid. If the number of valid items in a list in the kwargs exceeds the 'max_size' of the corresponding list in the model, then subsequent items are not added to the list once the list reaches its maximum size.
 
 ## Query Criteria
-Query criteria are composed of a dictionary of one or more key-value pairs, where the key names are the dot path to the fields in the model schema to be queried and the values are dictionaries containing any of the conditional operators for the query on the respective fields. Like component declarations, the "." at the beginning of the dot path for a key name is optional. For fields with number, string or boolean datatypes, { "field": { "equal_to": "value" } } can be shortened to { "field": "value" } and the class will automatically interpret the syntax as the "equal_to" criteria. Query criteria can be simple, such as the single field, operator and qualifier in the README documentation, or elaborate, such as found in the provided model sample-query.json below:
+Query criteria are composed of a dictionary of one or more key-value pairs, where the key names are the dot path to the fields in the model schema to be queried and the values are dictionaries containing any of the conditional operators for the query on the respective fields. Like component declarations, the "." at the beginning of the dot path for a key name is optional. For fields with number, string or boolean datatypes, { "field": { "equal_to": "value" } } can be shortened to { "field": "value" } and the class will automatically interpret the syntax as the "equal_to" criteria. Query criteria can be simple, such as the single field, operator and qualifier in the example in [Home](index.md), or elaborate, such as found in the provided model sample-query.json below:
 
 **Sample Query**::
 
@@ -322,7 +322,6 @@ Query criteria are composed of a dictionary of one or more key-value pairs, wher
       },
       ".rating": {
         "excluded_values": [7, 9],
-        "integer_data": true,
         "max_value": 10,
         "min_value": 1
       },
