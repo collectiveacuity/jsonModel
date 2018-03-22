@@ -144,12 +144,12 @@ $ python setup.py install
 <pre><code>{
   "schema": { ... },
   "components": {
-    ".userID": {
+    "userID": {
       "min_length": 13,
       "max_length": 13,
       "must_not_contain": [ "[^\\w]", "_" ]
     },
-    ".address.city": {
+    "address.city": {
       "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami" ],
       "required_field": false
     }
@@ -186,7 +186,7 @@ valid_model = jsonModel(sample_schema)
 <pre><code>valid_model.validate(input)
 </code></pre>
 <p>To validate input against an individual component::</p>
-<pre><code>path_to_root = '.property'
+<pre><code>path_to_root = 'dot.path[2].field'
 valid_model.validate(input, path_to_root)
 </code></pre>
 <p>To handle invalid inputs::</p>
@@ -198,6 +198,12 @@ except InputValidationError as err:
 <p>To customize error message:</p>
 <pre><code>input_title = 'Property field in input'
 valid_model.validate(input, path_to_root, input_title)
+</code></pre>
+<p>To filter valid input based upon query criteria:</p>
+<pre><code>query_criteria = { 'dot.path[2].field': 'exact value' }
+assert valid_model.query(query_criteria, valid_input)
+query_criteria = { 'dot.path[2].field': { 'excluded_values': [ 'exact value' ] } }
+assert not valid_model.query(query_criteria, valid_input)
 </code></pre>
 <h2 id="further-reading">Further Reading</h2>
 <p>For more details about how to use the jsonModel class, refer to the <a href="jsonmodel/">jsonModel Class</a>, <a href="reference/">Reference</a> and <a href="roadmap/">Roadmap</a> pages.</p></div>
@@ -282,5 +288,5 @@ valid_model.validate(input, path_to_root, input_title)
 
 <!--
 MkDocs version : 0.17.2
-Build Date UTC : 2017-12-12 15:45:25
+Build Date UTC : 2018-03-22 00:52:12
 -->

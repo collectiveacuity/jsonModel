@@ -174,7 +174,7 @@ valid_model = jsonModel(sample_model, query_rules)
 </code></pre>
 <p>To declare query criteria::</p>
 <pre><code>{
-    '.property': {
+    'dot.path[2].field': {
         'must_contain': [ 'v.+' ]
     }
 }
@@ -182,7 +182,7 @@ valid_model = jsonModel(sample_model, query_rules)
 <p>To validate query criteria::</p>
 <pre><code>valid_model.query(sample_query)
 </code></pre>
-<p>To query a record using the criteria::</p>
+<p>To evaluate a record using the criteria::</p>
 <pre><code>valid_input = valid_model.validate(input)
 
 eval_outcome = valid_model.query(sample_query, valid_input)
