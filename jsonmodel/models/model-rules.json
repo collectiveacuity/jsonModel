@@ -8,8 +8,8 @@
         "similar_boolean": false,
         "map_fields": {},
         "similar_map": {},
-        "list_fields": [],
-        "similar_list": [],
+        "list_fields": [ "" ],
+        "similar_list": [ "" ],
         "null_fields": null,
         "similar_null": null
     },
@@ -107,8 +107,8 @@
             "field_metadata": {}
         }
     },
-    "title": "",
-    "description": "",
+    "title": "model_rules",
+    "description": "scope of qualifiers associated with each json datatype",
     "url": "",
     "metadata": {},
     "max_size": 0

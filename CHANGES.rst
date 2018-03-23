@@ -9,7 +9,7 @@ TODO
 * Sort dictionary keys alphabetically prior to evaluation (currents inherits json file order)
 * Allow validation of null datatype declarations
 * Allow declaration of multiple datatypes for key values
-* Add max_size to map datatypes to validate against byte size of map
+* Consider adding max_size to map datatypes to validate against byte size of map
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
 * Construct property that returns raw schema input

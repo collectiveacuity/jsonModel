@@ -3,5 +3,6 @@ pages:
   - Home: index.md
   - jsonModel Class: jsonmodel.md
   - Reference: reference.md
+  - Extensions: extensions.md
   - Roadmap: roadmap.md
 markdown_extensions: [ footnotes, smarty, abbr ]
