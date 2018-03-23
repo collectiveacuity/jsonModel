@@ -33,11 +33,17 @@ def document(json_model):
                     if item:
                         segment_list.append(item)
         return segment_list
+
+    url_parts = re.compile('(([A-Za-z]{3,9}:(?://)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9.\-]+(:[0-9]+)?|(?:www.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9.\-]+)((?:/[\+~%/.\w\-_]*)?\??(?:[\-\+,=&;%@.\w_]*)#?(?:[\w]*))?')
+    url_pattern = re.compile('((([A-Za-z]{3,9}:(?://)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9.\-]+(:[0-9]+)?|(?:www.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9.\-]+)((?:/[\+~%/.\w\-_]*)?\??(?:[\-\+,=&;%@.\w_]*)#?(?:[\w]*))?)')
     
     def _replace_url(x):
-        url_text = '<a href="%s">%s</a>' % (x.group(1), x.group(0))
+        url_string = x.group(0)
+        if not url_parts.findall(url_string)[0][1]:
+            return url_string
+        url_text = '<a href="%s">%s</a>' % (url_string, url_string)
         return url_text
-    
+
     def _document(self, format='markdown', syntax=''):
 
         '''
@@ -49,18 +55,19 @@ def document(json_model):
         '''
 
     # define headers
-        headers = ['Field', 'Datatype', 'Required', 'Default', 'Examples', 'Conditions']
+        headers = ['Field', 'Datatype', 'Required', 'Default', 'Examples', 'Conditions', 'Description']
         rows = []
         default_values = False
         additional_conditions = False
-    
+        field_description = False
+
     # construct rows
         for key, value in self.keyMap.items():
 
             key_segments = _segment_path(key)
-            print(key_segments)
 
             if key_segments:
+
                 row = []
 
             # add field column
@@ -139,54 +146,76 @@ def document(json_model):
                         if v['value_datatype'] == 'map':
                             example_value = '{...}'
                         elif v['value_datatype'] == 'list':
-                            item_key = k + '[0]'
-                            example_value = '[ %s ]' % determine_example(item_key, self.keyMap[item_key])
+                            example_value = '[...]'
                         elif v['value_datatype'] == 'null':
                             example_value = 'null'
                     return example_value
 
             # add examples column
                 row.append(determine_example(key, value))
-                
+
             # add additional conditions
                 conditions = ''
+                description = ''
                 for k, v in value.items():
                     extra_integer = False
                     if k == 'integer_data' and syntax == 'javascript':
                         extra_integer = True
-                    if k not in ('example_values', 'value_datatype', 'required_field', 'declared_value') or extra_integer:          
-                        additional_conditions = True
-                        if conditions:
-                            conditions += '<br>'
-                        condition_value = v
-                        if isinstance(v, str):
-                            condition_value = '"%s"' % v
-                        elif isinstance(v, bool):
-                            condition_value = str(v).lower()
-                        conditions += '%s: %s' % (k, condition_value)
+                    if k not in ('example_values', 'value_datatype', 'required_field', 'declared_value', 'default_value', 'field_position', 'field_metadata') or extra_integer:
+                        add_extra = False
+                        if k == 'extra_fields':
+                            if v:
+                                add_extra = True
+                        if k in ('field_description', 'field_title'):
+                            field_description = True
+                            if k == 'field_description':
+                                description = v
+                            elif not description:
+                                description = v
+                        elif k != 'extra_fields' or add_extra:
+                            additional_conditions = True
+                            if conditions:
+                                conditions += '<br>'
+                            condition_value = v
+                            if isinstance(v, str):
+                                condition_value = '"%s"' % v
+                            elif isinstance(v, bool):
+                                condition_value = str(v).lower()
+                            conditions += '%s: %s' % (k, condition_value)
                 row.append(conditions)
+                row.append(description)
 
+            # add row to rows
                 rows.append(row)
 
+    # add rows for top field
+        top_dict = self.keyMap['.']
+        if top_dict['extra_fields']:
+            rows.append(['<i>**extra fields allowed</i>', '', '', '', '', '', ''])
+        if 'max_bytes' in top_dict.keys():
+            rows.append(['<i>**max bytes: %s</i>' % top_dict['max_bytes'], '', '', '', '', '', ''])
+    
     # eliminate unused columns
+        if not field_description:
+            headers.pop()
         if not additional_conditions:
             headers.pop()
         if not default_values:
             headers.pop(3)
         for row in rows:
+            if not field_description:
+                row.pop()
             if not additional_conditions:
                 row.pop()
             if not default_values:
                 row.pop(3)
-    
+
     # construct table html
         table_html = tabulate(rows, headers, tablefmt='html')
     
     # add links to urls in text
-        url_regex = re.compile('\[(.*?)\]\((.*)\)')
-        table_html = url_regex.sub(_replace_url, table_html)
-
-        print(self.keyMap)
+        # markdown_url = re.compile('\[(.*?)\]\((.*)\)')
+        table_html = url_pattern.sub(_replace_url, table_html)
 
         return table_html
         
@@ -200,11 +229,11 @@ if __name__ == '__main__':
     from jsonmodel.loader import jsonLoader
     from jsonmodel.validators import jsonModel
     
-    model_rules = jsonLoader(__module__, 'models/model-rules.json')
-    del model_rules['components']
+    model_rules = jsonLoader(__module__, '../samples/sample-model.json')
+    model_rules['components']['.']['extra_fields'] = True
+    model_rules['components']['.datetime']['field_description'] = 'https://collectiveacuity.com'
     rules_model = jsonModel(model_rules)
     rules_model = document(rules_model)
-    
     
     documentation = rules_model.document(syntax='javascript')
     with open('../docs/extensions.md', 'wt') as f:
