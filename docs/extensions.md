@@ -1,22 +1,29 @@
+# Extensions
+_a package of extensions to a jsonModel class object_
+## tabulate
+### 
+**Import:**  
+jsonmodel.extensions  
+### 
+**Initialize::**
+
+    from jsonmodel.extensions import tabulate
+    json_model = jsonModel(sample_schema)
+    tabulate(json_model)
+
+### 
+**Signature:**  
+tabulate(self, format="html", syntax="")
+### 
+**Description:**  
+a function to create a table from the class model keyMap  
 <table>
 <thead>
-<tr><th>Field                               </th><th>Datatype        </th><th>Required  </th><th>Default   </th><th>Examples                                   </th><th>Conditions                                                                                                                       </th><th>Description                         </th></tr>
+<tr><th>Argument  </th><th>Type  </th><th>Required  </th><th>Default  </th><th>Description                             </th></tr>
 </thead>
 <tbody>
-<tr><td>userID                              </td><td>string          </td><td>yes       </td><td>          </td><td>"gY3Cv81QwL0Fs"                            </td><td>min_length: 13<br>max_length: 13<br>min_value: "1111111111111"<br>max_value: "yyyyyyyyyyyyy"<br>must_not_contain: ['[^\\w]', '_']</td><td>13 digit unique base 64 url safe key</td></tr>
-<tr><td>datetime                            </td><td>number          </td><td>yes       </td><td>          </td><td>1456190345.543713                          </td><td>greater_than: 1.1<br>less_than: 2000000000.0                                                                                     </td><td><a href="https://collectiveacuity.com">https://collectiveacuity.com</a>        </td></tr>
-<tr><td>active                              </td><td>boolean         </td><td>yes       </td><td>          </td><td>true                                       </td><td>equal_to: false                                                                                                                  </td><td>                                    </td></tr>
-<tr><td>emoticon                            </td><td>string          </td><td>yes       </td><td>          </td><td>"aGFwcHk="                                 </td><td>byte_data: true<br>excluded_values: ['c2Fk']                                                                                     </td><td>                                    </td></tr>
-<tr><td>reference                           </td><td>null            </td><td>          </td><td>          </td><td>null                                       </td><td>                                                                                                                                 </td><td>                                    </td></tr>
-<tr><td>rating                              </td><td>number          </td><td>          </td><td>5         </td><td>8                                          </td><td>integer_data: true<br>max_value: 10<br>min_value: 1<br>excluded_values: [7, 9]                                                   </td><td>                                    </td></tr>
-<tr><td>address                             </td><td>object          </td><td>yes       </td><td>          </td><td>{...}                                      </td><td>                                                                                                                                 </td><td>                                    </td></tr>
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;city        </td><td>string          </td><td>          </td><td>"New York"</td><td>"New Orleans"                              </td><td>discrete_values: ['New Orleans', 'New York', 'Los Angeles', 'Miami']                                                             </td><td>                                    </td></tr>
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;region      </td><td>string          </td><td>yes       </td><td>          </td><td>"LA"                                       </td><td>greater_than: "AB"<br>less_than: "Yyyyyyyyyyyyyyyyyyyyyyyy"<br>contains_either: ['[A-Z]{2}', '[A-Z][a-z]+']                      </td><td>State or Province                   </td></tr>
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;postal_code </td><td>string          </td><td>          </td><td>          </td><td>""                                         </td><td>                                                                                                                                 </td><td>                                    </td></tr>
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;country     </td><td>string          </td><td>yes       </td><td>          </td><td>"United States"                            </td><td>                                                                                                                                 </td><td>                                    </td></tr>
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;country_code</td><td>number          </td><td>          </td><td>          </td><td>0                                          </td><td>integer_data: true<br>discrete_values: [36, 124, 554, 826, 840]                                                                  </td><td>                                    </td></tr>
-<tr><td>comments                            </td><td>array of strings</td><td>          </td><td>          </td><td>[...]                                      </td><td>min_size: 1<br>max_size: 3<br>unique_values: true                                                                                </td><td>                                    </td></tr>
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;<i>item</i> </td><td>string          </td><td>          </td><td>          </td><td>"couldn't find the place", "hidden gem!!!!"</td><td>max_length: 140<br>must_contain: ['[a-zA-Z]{2,}']                                                                                </td><td>                                    </td></tr>
-<tr><td><i>**extra fields allowed</i>       </td><td>                </td><td>          </td><td>          </td><td>                                           </td><td>                                                                                                                                 </td><td>                                    </td></tr>
+<tr><td>self      </td><td>object</td><td>Yes       </td><td>None     </td><td>                                        </td></tr>
+<tr><td>format    </td><td>str   </td><td>          </td><td>"html"   </td><td>string with format for table output     </td></tr>
+<tr><td>syntax    </td><td>str   </td><td>          </td><td>""       </td><td>[optional] string with linguistic syntax</td></tr>
 </tbody>
 </table>
