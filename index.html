@@ -55,6 +55,9 @@
                         <a href="reference/">Reference</a>
                     </li>
                     <li >
+                        <a href="extensions/">Extensions</a>
+                    </li>
+                    <li >
                         <a href="roadmap/">Roadmap</a>
                     </li>
                 </ul>
@@ -205,8 +208,13 @@ assert valid_model.query(query_criteria, valid_input)
 query_criteria = { 'dot.path[2].field': { 'excluded_values': [ 'exact value' ] } }
 assert not valid_model.query(query_criteria, valid_input)
 </code></pre>
+<p>To produce html documentation of model criteria:</p>
+<pre><code>from jsonmodel.extensions import tabulate
+tabulate(valid_model)
+html_table = valid_model.tabulate()
+</code></pre>
 <h2 id="further-reading">Further Reading</h2>
-<p>For more details about how to use the jsonModel class, refer to the <a href="jsonmodel/">jsonModel Class</a>, <a href="reference/">Reference</a> and <a href="roadmap/">Roadmap</a> pages.</p></div>
+<p>For more details about how to use the jsonModel class, refer to the <a href="jsonmodel/">jsonModel Class</a>, <a href="reference/">Reference</a>, <a href="extensions/">Extensions</a> and <a href="roadmap/">Roadmap</a> pages.</p></div>
         </div>
 
         <footer class="col-md-12">
@@ -288,5 +296,5 @@ assert not valid_model.query(query_criteria, valid_input)
 
 <!--
 MkDocs version : 0.17.2
-Build Date UTC : 2018-03-22 00:52:12
+Build Date UTC : 2018-03-28 16:42:09
 -->
