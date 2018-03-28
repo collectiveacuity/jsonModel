@@ -1,3 +1,4 @@
+''' a package of helper functions for extensions.py '''
 __author__ = 'rcj1492'
 __created__ = '2018.03'
 __license__ = 'MIT'

@@ -39,7 +39,9 @@ The default validation process can be modified, and other (less common) conditio
 
     "components": {
         ".": {
-            "extra_fields": false
+            "extra_fields": false,
+            "min_size": 10,
+            "max_size": 300
         },
         ".active": {
             "equal_to": false
@@ -132,8 +134,8 @@ __NOTE:__ The "." at the beginning of a dot-path is optional. So, a key named "u
 <tr><td>greater_than     </td><td>Number or String          </td><td>4024        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the value a number or string must be greater than                                                                                                                       </td></tr>
 <tr><td>less_than        </td><td>Number or String          </td><td>4025        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the value a number or string must be less than                                                                                                                          </td></tr>
 <tr><td>equal_to         </td><td>Boolean, Number or String </td><td>4026        </td><td>Y       </td><td>Y       </td><td>Y        </td><td>     </td><td>      </td><td>available</td><td>the value a number, string or boolean must equal                                                                                                                        </td></tr>
-<tr><td>min_size         </td><td>Integer                   </td><td>4031        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>the minimum number of items in a list                                                                                                                                   </td></tr>
-<tr><td>max_size         </td><td>Integer                   </td><td>4032        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>the maximum number of items in a list                                                                                                                                   </td></tr>
+<tr><td>min_size         </td><td>Integer                   </td><td>4031        </td><td>        </td><td>        </td><td>         </td><td>Y    </td><td>Y     </td><td>available</td><td>the minimum size of a map converted to json data or the minimum number of items in a list                                                                               </td></tr>
+<tr><td>max_size         </td><td>Integer                   </td><td>4032        </td><td>        </td><td>        </td><td>         </td><td>Y    </td><td>Y     </td><td>available</td><td>the maximum size of a map converted to json data or the maximum number of items in a list                                                                               </td></tr>
 <tr><td>unique_values    </td><td>Boolean                   </td><td>4033        </td><td>        </td><td>        </td><td>         </td><td>     </td><td>Y     </td><td>available</td><td>a true boolean treats a list as a set of unique primitives with no duplication                                                                                          </td></tr>
 <tr><td>discrete_values  </td><td>List of Strings or Numbers</td><td>4041        </td><td>Y       </td><td>Y       </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a list of values allowed                                                                                                                                                </td></tr>
 <tr><td>identical_to     </td><td>String                    </td><td>            </td><td>Y       </td><td>Y       </td><td>Y        </td><td>Y    </td><td>Y     </td><td>         </td><td>the key name in the components map whose value the value of this component must match                                                                                   </td></tr>
@@ -174,6 +176,8 @@ Errors created from improper model specification will raise a ModelValidationErr
         'input_criteria': {
             'required_field': True,
             'value_datatype': 'map',
+            'min_size': 10,
+            'max_size': 300,
             'maximum_scope': [ 'datetime', 'address', 'active', 'userID', 'comments', 'rating', 'emoticon' ],
             'extra_fields': False
         },
@@ -290,6 +294,9 @@ Query criteria are composed of a dictionary of one or more key-value pairs, wher
         "value_exists": true,
         "equal_to": false
       },
+      ".address": {
+        "max_size": 100
+      },
       ".address.country": "United States",
       ".address.city": {
         "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
@@ -375,6 +382,8 @@ When the model is initialized, it accepts an optional dictionary for customized 
      ".map_fields": {
         "identical_to": ".similar_map",
         "lambda_function": "",
+        "max_size": 0,
+        "min_size": 0,
         "validation_url": "",
         "value_exists": false
      },

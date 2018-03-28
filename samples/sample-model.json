@@ -3,7 +3,6 @@
   "description": "an example model for the module",
   "url": "http://collectiveacuity.com/jsonmodel/sample?action=download",
   "metadata": { "version": "1.1.1" },
-  "max_size": 2048,
   "schema": {
     "userID": "gY3Cv81QwL0Fs",
     "datetime": 1456190345.543713,
@@ -22,7 +21,9 @@
   },
   "components": {
     ".": {
-      "extra_fields": false
+      "extra_fields": false,
+      "min_size": 10,
+      "max_size": 300
     },
     ".active": {
       "equal_to": false

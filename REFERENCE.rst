@@ -44,7 +44,9 @@ The default validation process can be modified, and other (less common) conditio
 
     "components": {
         ".": {
-            "extra_fields": false
+            "extra_fields": false,
+            "min_size": 10,
+            "max_size": 300
         },
         ".userID": {
             "min_length": 13,
@@ -129,8 +131,8 @@ List of Field Conditionals (and default values)
 - "**max_value**": 0.0 or "" / the maximum value of a number or string / error_code: 4023 [**numbers and strings only**]
 - "**greater_than**": 0.0 or "" / the value a number or string must be greater than / error_code: 4024 [**numbers and strings only**]
 - "**less_than**": 0.0 or "" / the value a number or string must be less than / error_code: 4025 [**numbers and strings only**]
-- "**min_size**": 0 / the minimum number of items in a list / error_code: 4031 / [**lists only**]
-- "**max_size**": 0 / the maximum number of items in a list / error_code: 4032 / [**lists only**]
+- "**min_size**": 0 / the minimum number of items in a list / error_code: 4031 / [**maps and lists only**]
+- "**max_size**": 0 / the maximum number of items in a list / error_code: 4032 / [**maps and lists only**]
 - "**unique_values**": false / a true boolean treats a list as a set of unique primitives with no duplication / error_code: 4033 [**lists of strings and numbers only**]
 - "**discrete_values**": [] / a list of values allowed / error_code: 4041 [**numbers and strings only**]
 - "**identical_to**": "" / **TODO** / the key name in the components map whose value the value of this component must match
@@ -169,6 +171,8 @@ Errors created from improper model specification will raise a ModelValidationErr
         'input_criteria': {
             'required_field': True,
             'value_datatype': 'map',
+            'min_size': 10,
+            'max_size': 300,
             'maximum_scope': [ 'datetime', 'address', 'active', 'userID', 'comments', 'rating', 'emoticon' ],
             'extra_fields': False
         },
@@ -290,6 +294,9 @@ Query criteria are composed of a dictionary of one or more key-value pairs, wher
         "value_exists": true,
         "equal_to": false
       },
+      ".address": {
+        "max_size": 100
+      },
       ".address.country": "United States",
       ".address.city": {
         "discrete_values": [ "New Orleans", "New York", "Los Angeles", "Miami"]
@@ -378,6 +385,8 @@ When the model is initialized, it accepts an optional dictionary for customized 
      ".map_fields": {
         "identical_to": ".similar_map",
         "lambda_function": "",
+        "max_size": 0,
+        "min_size": 0,
         "validation_url": "",
         "value_exists": false
      },

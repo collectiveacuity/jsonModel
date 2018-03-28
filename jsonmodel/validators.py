@@ -1,8 +1,11 @@
+''' a package of data validation classes '''
 __author__ = 'rcj1492'
 __created__ = '2015.11'
 __license__ = 'MIT'
 
 import re
+import sys
+import json
 from base64 import b64decode
 from jsonmodel.exceptions import InputValidationError, ModelValidationError
 from jsonmodel.exceptions import QueryValidationError
@@ -99,14 +102,14 @@ class jsonModel(object):
             self.metadata = data_model['metadata']
 
     # validate max size input & construct maxSize property
-        self.maxSize = None
-        if 'max_size' in data_model.keys():
-            if not isinstance(data_model['max_size'], int):
-                raise ModelValidationError('Value for model max_size must be a positive integer.')
-            elif data_model['max_size'] < 0:
-                raise ModelValidationError('Value for model max_size must be a positive integer.')
-            elif data_model['max_size']:
-                self.maxSize = data_model['max_size']
+    #     self.maxSize = None
+    #     if 'max_size' in data_model.keys():
+    #         if not isinstance(data_model['max_size'], int):
+    #             raise ModelValidationError('Value for model max_size must be a positive integer.')
+    #         elif data_model['max_size'] < 0:
+    #             raise ModelValidationError('Value for model max_size must be a positive integer.')
+    #         elif data_model['max_size']:
+    #             self.maxSize = data_model['max_size']
 
     # validate components input & construct component property
         self.components = {}
@@ -571,22 +574,44 @@ class jsonModel(object):
         elif not value_exists:
             return True
 
+    # convert javascript dot_path to class dot_path
+        field_key = field_name
+        if not field_name:
+            field_key = '.'
+        else:
+            if field_name[0] != '.':
+                field_key = '.%s' % field_name
+
     # evaluate other query criteria
         for key, value in field_criteria.items():
             if key in ('min_size', 'min_length'):
                 found = False
-                for record_value in record_values:
-                    if len(record_value) >= value:
-                        found = True
-                        break
+                if self.keyMap[field_key]['value_datatype'] == 'map':
+                    for record_value in record_values:
+                        record_size = sys.getsizeof(json.dumps(str(record_value)).replace(' ','')) - 51
+                        if record_size >= value:
+                            found = True
+                            break
+                else:
+                    for record_value in record_values:
+                        if len(record_value) >= value:
+                            found = True
+                            break
                 if not found:
                     return False
             elif key in ('max_size', 'max_length'):
                 found = False
-                for record_value in record_values:
-                    if len(record_value) <= value:
-                        found = True
-                        break
+                if self.keyMap[field_key]['value_datatype'] == 'map':
+                    for record_value in record_values:
+                        record_size = sys.getsizeof(json.dumps(str(record_value)).replace(' ','')) - 51
+                        if record_size <= value:
+                            found = True
+                            break
+                else:
+                    for record_value in record_values:
+                        if len(record_value) <= value:
+                            found = True
+                            break
                 if not found:
                     return False
             elif key == 'min_value':
@@ -713,6 +738,34 @@ class jsonModel(object):
 
     # reconstruct key path to current dictionary in model
         rules_top_level_key = re.sub('\[\d+\]', '[0]', path_to_root)
+        map_rules = self.keyMap[rules_top_level_key]
+
+    # construct list error report template
+        map_error = {
+            'object_title': object_title,
+            'model_schema': self.schema,
+            'input_criteria': map_rules,
+            'failed_test': 'value_datatype',
+            'input_path': path_to_root,
+            'error_value': 0,
+            'error_code': 4001
+        }
+
+    # validate map size
+        if 'min_size' in map_rules.keys():
+            input_size = sys.getsizeof(json.dumps(str(input_dict)).replace(' ','')) - 51
+            if input_size < map_rules['min_size']:
+                map_error['failed_test'] = 'min_size'
+                map_error['error_value'] = input_size
+                map_error['error_code'] = 4031
+                raise InputValidationError(map_error)
+        if 'max_size' in map_rules.keys():
+            input_size = sys.getsizeof(json.dumps(str(input_dict)).replace(' ','')) - 51
+            if input_size > map_rules['max_size']:
+                map_error['failed_test'] = 'max_size'
+                map_error['error_value'] = input_size
+                map_error['error_code'] = 4032
+                raise InputValidationError(map_error)
 
     # construct lists of keys in input dictionary
         input_keys = []
@@ -1592,9 +1645,13 @@ class jsonModel(object):
                 if message.find(equal_error) > -1:
                     message = message.replace(equal_error, 'field %s' % field)
                     break
-            for field in dot_fields:
-                if message.find('ield %s' % field) > -1:
-                    message = message.replace('ield %s' % field, 'ield %s' % field[1:])
+            field_pattern = re.compile('ield\s(\..*?)\s')
+            field_name = field_pattern.findall(message)
+            if field_name:
+                if field_name[0] in dot_fields:
+                    def _replace_field(x):
+                        return 'ield %s ' % x.group(1)[1:]
+                    message = field_pattern.sub(_replace_field, message)
             raise QueryValidationError(message)
 
     # query test record

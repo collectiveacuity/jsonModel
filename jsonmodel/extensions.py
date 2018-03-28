@@ -38,7 +38,6 @@ if __name__ == '__main__':
     rules_model = tabulate(rules_model)
     
     documentation = rules_model.tabulate(syntax='javascript')
-    print(documentation)
     with open('../docs/test.md', 'wt') as f:
         f.write(documentation)
         f.close()

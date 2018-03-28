@@ -18,6 +18,8 @@
  ".map_fields": {
     "identical_to": ".similar_map",
     "lambda_function": "",
+    "max_size": 0,
+    "min_size": 0,
     "validation_url": "",
     "value_exists": false
  },

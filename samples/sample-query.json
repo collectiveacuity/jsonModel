@@ -16,6 +16,9 @@
     "greater_than": "AB",
     "less_than": "Yyyyyyyyyyyyyyyyyyyyyyyy"
   },
+  "address": {
+    "max_size": 1000
+  },
   "comments": {
     "max_size": 3,
     "min_size": 1,

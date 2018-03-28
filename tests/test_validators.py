@@ -28,10 +28,12 @@ class jsonModelTests(jsonModel):
         assert isinstance(self.description, str)
         assert isinstance(self.url, str)
         assert isinstance(self.metadata, dict)
-        assert isinstance(self.maxSize, int)
+        # assert isinstance(self.maxSize, int)
 
     # test declarative fields in model keyMap
         assert self.keyMap['.']['value_datatype']
+        assert self.keyMap['.']['min_size']
+        assert self.keyMap['.']['max_size']
         assert self.keyMap['.userID']['required_field']
         assert self.keyMap['.address.region']['declared_value']
         assert self.keyMap['.rating']['default_value']
@@ -208,7 +210,17 @@ class jsonModelTests(jsonModel):
         new_default_rating = self.ingest(**default_rating_ingest)
         assert new_default_rating['rating'] == 5
 
-    # test min_size exception
+    # test map max_size exception
+        from base64 import b64encode
+        z = 'too many things to emote in order to put into one line without extending well beyond the max size'
+        big_map = deepcopy(valid_input)
+        big_map['emoticon'] = b64encode(z.encode('utf-8')).decode()
+        try:
+            self.validate(big_map)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'max_size'
+
+    # test list min_size exception
         short_list = deepcopy(valid_input)
         short_list['comments'] = []
         try:
@@ -217,7 +229,7 @@ class jsonModelTests(jsonModel):
             assert err.error['failed_test'] == 'min_size'
             assert not err.error['object_title']
 
-    # test max_size exception
+    # test list max_size exception
         long_list = deepcopy(valid_input)
         long_list['comments'].append('pewter')
         try:
@@ -522,7 +534,7 @@ class jsonModelTests(jsonModel):
             'metadata': self.metadata,
             'title': self.title,
             'description': self.description,
-            'max_size': self.maxSize,
+            # 'max_size': self.maxSize,
             'url': self.url
         }
 
@@ -813,7 +825,15 @@ class jsonModelTests(jsonModel):
         assert not eval_outcome
         del eval_kwargs['field_criteria']['value_exists']
 
-    # test evaluate maximum size query failure
+    # test evaluate map maximum size query failure
+        eval_kwargs['field_name'] = '.address'
+        eval_kwargs['field_criteria'] = test_query['address']
+        eval_kwargs['field_criteria']['max_size'] = 10
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['max_size']
+        
+    # test evaluate list maximum size query failure
         eval_kwargs['field_name'] = '.comments'
         eval_kwargs['field_criteria'] = test_query['comments']
         eval_kwargs['field_criteria']['max_size'] = 2
@@ -984,6 +1004,12 @@ class jsonModelTests(jsonModel):
         assert self.query({'address.country': 'United States'}, valid_input)
         assert not self.query({'address.country': 'United'}, valid_input)
 
+    # test query method with map field queries
+        assert self.query({'address': {'min_size': 2}}, valid_input)
+        assert not self.query({'address': {'min_size': 1000}}, valid_input)
+        assert not self.query({'address': {'max_size': 2}}, valid_input)
+        assert self.query({'address': {'max_size': 1000}}, valid_input)
+        
     # test query method with list field queries
         assert self.query({'.comments': {'value_exists': True}}, valid_input)
         assert not self.query({'.comments': {'value_exists': False}}, valid_input)

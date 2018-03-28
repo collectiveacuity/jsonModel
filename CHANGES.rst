@@ -14,6 +14,14 @@ TODO
 * Allow validation of path to file or folder
 * Construct property that returns raw schema input
 
+3.0 (2018.03.28)
+-----------------
+* **UPGRADE** extensions package with add-on methods for json model objects
+* **FEATURE ADDED** tabulate method to extensions to create a table from json model criteria 
+* **FEATURE ADDED** min_size & max_size conditionals added to map fields
+* **DEPRECATED** max_size field in top-level json model schema declaration
+* Bug fix for reporting correct javascript dot_path syntax on query errors
+
 2.9 (2018.03.21)
 ----------------
 * **FEATURE ADDED** 'default_value' conditional added to list fields

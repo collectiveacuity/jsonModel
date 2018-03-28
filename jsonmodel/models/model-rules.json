@@ -74,6 +74,8 @@
         ".map_fields": {
             "required_field": false,
             "extra_fields": false,
+            "min_size": 0,
+            "max_size": 0,
             "identical_to": ".similar_map",
             "lambda_function": "",
             "validation_url": "",

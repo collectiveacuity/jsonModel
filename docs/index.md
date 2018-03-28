@@ -137,6 +137,12 @@ To filter valid input based upon query criteria:
     query_criteria = { 'dot.path[2].field': { 'excluded_values': [ 'exact value' ] } }
     assert not valid_model.query(query_criteria, valid_input)
 
+To produce html documentation of model criteria:
+
+    from jsonmodel.extensions import tabulate
+    tabulate(valid_model)
+    html_table = valid_model.tabulate()
+    
 Further Reading
 ---------------
-For more details about how to use the jsonModel class, refer to the [jsonModel Class](jsonmodel.md), [Reference](reference.md) and [Roadmap](roadmap.md) pages.
+For more details about how to use the jsonModel class, refer to the [jsonModel Class](jsonmodel.md), [Reference](reference.md), [Extensions](extensions.md) and [Roadmap](roadmap.md) pages.
