@@ -38,8 +38,8 @@ class jsonModel(object):
 
     # construct base methods
         from copy import deepcopy
-        data_model = deepcopy(data_model)
-        self.schema = data_model['schema']
+        self.dataModel = deepcopy(data_model)
+        self.schema = self.dataModel['schema']
         model_map = mapModel(self.schema)
         self.keyName = model_map.keyName
         self.keyCriteria = model_map.keyCriteria
@@ -75,48 +75,48 @@ class jsonModel(object):
 
     # validate title input & construct title method
         self.title = ''
-        if 'title' in data_model.keys():
-            if not isinstance(data_model['title'], str):
+        if 'title' in self.dataModel.keys():
+            if not isinstance(self.dataModel['title'], str):
                 raise ModelValidationError('Value for model title must be a string.')
-            self.title = data_model['title']
+            self.title = self.dataModel['title']
 
     # validate description input & construct description method
         self.description = ''
-        if 'description' in data_model.keys():
-            if not isinstance(data_model['description'], str):
+        if 'description' in self.dataModel.keys():
+            if not isinstance(self.dataModel['description'], str):
                 raise ModelValidationError('Value for model description must be a string.')
-            self.description = data_model['description']
+            self.description = self.dataModel['description']
 
     # validate url input & construct title method
         self.url = ''
-        if 'url' in data_model.keys():
-            if not isinstance(data_model['url'], str):
+        if 'url' in self.dataModel.keys():
+            if not isinstance(self.dataModel['url'], str):
                 raise ModelValidationError('Value for model url must be a string.')
-            self.title = data_model['url']
+            self.title = self.dataModel['url']
 
     # validate metadata input & construct metadata method
         self.metadata = {}
-        if 'metadata' in data_model.keys():
-            if not isinstance(data_model['metadata'], dict):
+        if 'metadata' in self.dataModel.keys():
+            if not isinstance(self.dataModel['metadata'], dict):
                 raise ModelValidationError('Value for model metadata must be a dictionary.')
-            self.metadata = data_model['metadata']
+            self.metadata = self.dataModel['metadata']
 
     # validate max size input & construct maxSize property
     #     self.maxSize = None
-    #     if 'max_size' in data_model.keys():
-    #         if not isinstance(data_model['max_size'], int):
+    #     if 'max_size' in self.dataModel.keys():
+    #         if not isinstance(self.dataModel['max_size'], int):
     #             raise ModelValidationError('Value for model max_size must be a positive integer.')
-    #         elif data_model['max_size'] < 0:
+    #         elif self.dataModel['max_size'] < 0:
     #             raise ModelValidationError('Value for model max_size must be a positive integer.')
-    #         elif data_model['max_size']:
-    #             self.maxSize = data_model['max_size']
+    #         elif self.dataModel['max_size']:
+    #             self.maxSize = self.dataModel['max_size']
 
     # validate components input & construct component property
         self.components = {}
-        if 'components' in data_model.keys():
-            if not isinstance(data_model['components'], dict):
+        if 'components' in self.dataModel.keys():
+            if not isinstance(self.dataModel['components'], dict):
                 raise ModelValidationError('Value for model components must be a dictionary.')
-            self.components = self._validate_fields(data_model['components'], self.__rules__['components'])
+            self.components = self._validate_fields(self.dataModel['components'], self.__rules__['components'])
 
     # construct keyMap fields from key names and key criteria
         self.keyMap = {}
@@ -563,6 +563,7 @@ class jsonModel(object):
 
     # validate existence of field
         field_exists = True
+        record_values = []
         try:
             record_values = self._walk(field_name, record_dict)
         except:

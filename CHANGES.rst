@@ -5,14 +5,17 @@ TODO
 ----
 * Change custom error argument to accept .format syntax
 * Update error reporting to convert field paths back to javascript dot paths
+* Add support for mongo/mango query operator syntax;
 * Consider adding validation for HTTP methods of a RESTful API
 * Sort dictionary keys alphabetically prior to evaluation (currents inherits json file order)
 * Allow validation of null datatype declarations
 * Allow declaration of multiple datatypes for key values
-* Consider adding max_size to map datatypes to validate against byte size of map
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
-* Construct property that returns raw schema input
+
+3.1 (2018.04.??)
+----------------
+* Added dataModel property as deepcopy of data_model argument
 
 3.0 (2018.03.28)
 -----------------
