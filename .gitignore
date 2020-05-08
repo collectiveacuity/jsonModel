@@ -62,6 +62,7 @@ nbproject
 .node_history
 __pycache__
 tinker/
+docs/test.md
 
 #################   backup sync   #################
 desktop.ini

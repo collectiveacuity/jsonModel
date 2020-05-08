@@ -30,6 +30,8 @@ class QueryValidationError(Exception):
 class InputValidationError(Exception):
     ''' a class for reporting jsonmodel input validation errors '''
     def __init__(self, error_dict=None):
+    
+        # construct default error property
         self.error = {
             'object_title': '',
             'model_schema': {},
@@ -39,6 +41,8 @@ class InputValidationError(Exception):
             'error_value': None,
             'error_code': 0
         }
+
+        # add values from args to error property
         if isinstance(error_dict, dict):
             if 'object_title' in error_dict:
                 self.error['object_title'] = error_dict['object_title']
@@ -54,6 +58,8 @@ class InputValidationError(Exception):
                 self.error['error_value'] = error_dict['error_value']
             if 'error_code' in error_dict:
                 self.error['error_code'] = error_dict['error_code']
+
+        # compose message
         if self.error['object_title']:
             failed_test = self.error['failed_test']
             first_line = '\n%s is invalid.' % (self.error['object_title'].rstrip())
@@ -66,4 +72,137 @@ class InputValidationError(Exception):
             self.message = '%s%s' % (first_line, second_line)
         else:
             self.message = '\nError Report: %s' % self.error
+
         super(InputValidationError, self).__init__(self.message)
+    
+    def explain(self, criteria=None):
+        
+        # retrieve variables from report
+        test = self.error['failed_test']
+        value = self.error['input_criteria'][test]
+        error = self.error['error_value']
+        datatype = self.error['input_criteria']['value_datatype']
+        field = self.error['input_path'][1:]
+
+        # define disjunction script
+        def conjoin(words, truncate=0, junction='or'):
+            text = ''
+            for i in range(len(words)):
+                if text:
+                    if i + 1 == len(words):
+                        text += ' %s ' % junction
+                    else:
+                        text += ', '
+                if isinstance(words[i], str):
+                    text += words[i][truncate:]
+                else:
+                    text += str(words[i])
+            return text
+
+        # construct default explanation
+        explanation = '%s must be %s' % (test, value)
+
+        # generate explanation for missing or extra fields
+        if test in ('required_field'):
+            explanation = 'is missing required field %s' % error[0][1:]
+            if field:
+                truncate = len(field) + 2
+                subfield = error[0][truncate:]
+                explanation = 'is missing required sub-field %s' % subfield
+        elif test in ('extra_fields'):
+            plural = ''
+            if len(error) > 1:
+                plural = 's'
+            explanation = 'may not contain field%s %s' % (plural, conjoin(error, truncate=1))
+            if field:
+                truncate = len(field) + 2
+                explanation = 'may not contain sub-field%s %s' % (plural, conjoin(error, truncate=truncate))
+        elif test in ('key_datatype'):
+            explanation = 'datatype of key must be a %s' % value
+
+        # generate explanation for map and list fields
+        elif test in ('min_size'):
+            if datatype == 'map':
+                explanation = 'must be at least %s characters long when converted to a string' % value
+                if value == 1:
+                    explanation = 'may not be empty'
+            elif datatype == 'list':
+                explanation = 'must have at least %s items' % value
+                if value == 1:
+                    explanation = 'may not be empty'
+        elif test in ('max_size'):
+            if datatype == 'map':
+                explanation = 'may not be longer than %s characters when converted to a string' % value
+                if value == 1:
+                    explanation = 'may only be 1 character long when converted to a string'
+            elif datatype == 'list':
+                explanation = 'may not have more than %s items' % value
+                if value == 1:
+                    explanation = 'may only have 1 item'
+        elif test in ('unique_values'):
+            explanation = 'must contain unique values'
+        
+        # generate explanation for invalid string, number and boolean fields
+        elif test in ('value_datatype'):
+            explanation = 'must be a %s' % value
+            if value == 'null':
+                explanation = 'must be null'
+            elif 'integer_data' in self.error['input_criteria'].keys():
+                if self.error['input_criteria']['integer_data']:
+                    explanation = 'must be an integer'
+        elif test in ('integer_data'):
+            explanation = 'must be an integer'
+        elif test in ('byte_data'):
+            explanation = 'must be byte data encoded as a base64 string'
+        elif test in ('max_value'):
+            explanation = 'must be no greater than %s' % value
+            if datatype == 'string':
+                explanation = 'must not fall after %s in alphanumeric order' % value
+        elif test in ('min_value'):
+            explanation = 'must be no less than %s' % value
+            if datatype == 'string':
+                explanation = 'must not come before %s in alphanumeric order' % value
+        elif test in ('equal_to'):
+            explanation = 'must equal %s' % value
+            if datatype in ('boolean'):
+                explanation = 'must equal %s' % str(value).lower() 
+        elif test in ('greater_than'):
+            explanation = 'must be greater than %s' % value
+            if datatype == 'string':
+                explanation = 'must fall after %s in alphanumeric order' % value
+        elif test in ('less_than'):
+            explanation = 'must be less than %s' % value
+            if datatype == 'string':
+                explanation = 'must come before %s in alphanumeric order' % value
+        elif test in ('min_length'):
+            explanation = 'must be at least %s characters long' % value
+            if value == 1:
+                explanation = 'may not be empty'
+        elif test in ('max_length'):
+            explanation = 'may not be longer than %s characters' % value
+            if value == 1:
+                explanation = 'may only be 1 character long'
+        elif test in ('discrete_values'):
+            explanation = 'must be either %s' % conjoin(value)
+            if len(value) == 1:
+                explanation = 'must be %s' % value[0]
+        elif test in ('excluded_values'):
+            explanation = 'can be neither %s' % conjoin(value, junction='nor')
+            if len(value) == 1:
+                explanation = 'cannot be %s' % value[0]
+        elif test in ('must_not_contain'):
+            explanation = 'can match neither regex patterns %s' % conjoin(value, junction='nor')
+            if len(value) == 1:
+                explanation = 'cannot match regex pattern %s' % value[0]
+        elif test in ('must_contain'):
+            explanation = 'must match regex patterns %s' % conjoin(value, junction='and')
+            if len(value) == 1:
+                explanation = 'must match regex pattern %s' % value[0]
+        elif test in ('contains_either'):
+            explanation = 'must match either regex patterns %s' % conjoin(value)
+            if len(value) == 1:
+                explanation = 'must match regex pattern %s' % value[0]
+        
+        # TODO override explanation with criteria values
+        
+        return explanation

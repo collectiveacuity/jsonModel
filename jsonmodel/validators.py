@@ -836,20 +836,20 @@ class jsonModel(object):
     # validate existence of extra fields
         extra_keys = set(input_keys) - set(max_keys)
         if extra_keys and not self.keyMap[rules_top_level_key]['extra_fields']:
-            extra_key_list = []
-            for key in extra_keys:
-                pathless_key = re.sub(rules_top_level_key, '', key, count=1)
-                extra_key_list.append(pathless_key)
+            # extra_key_list = []
+            # for key in extra_keys:
+            #     pathless_key = re.sub(rules_top_level_key, '', key, count=1)
+            #     extra_key_list.append(pathless_key)
             error_dict = {
                 'object_title': object_title,
                 'model_schema': self.schema,
                 'input_criteria': self.keyMap[rules_top_level_key],
                 'failed_test': 'extra_fields',
                 'input_path': path_to_root,
-                'error_value': extra_key_list,
+                'error_value': list(extra_keys),
                 'error_code': 4003
             }
-            error_dict['input_criteria']['maximum_scope'] = max_key_list
+            error_dict['input_criteria']['maximum_scope'] = list(max_keys)
             raise InputValidationError(error_dict)
 
     # validate datatype of value
@@ -1625,6 +1625,8 @@ class jsonModel(object):
                     copy_key = '.%s' % key
                     dot_fields.append(copy_key)
             criteria_copy[copy_key] = value
+
+            # allow equal to value of strings, numbers and booleans to be declared directly
             if value.__class__ in self._datatype_classes[0:4]:
                 criteria_copy[copy_key] = {
                     'equal_to': value

@@ -3,6 +3,7 @@ ChangeLog
 
 TODO
 ----
+* Allow declaration of error messages in criteria such as must_not_contain & must_contain
 * Change custom error argument to accept .format syntax
 * Update error reporting to convert field paths back to javascript dot paths
 * Add support for mongo/mango query operator syntax;
@@ -15,7 +16,9 @@ TODO
 
 3.1 (2018.04.??)
 ----------------
-* Added dataModel property as deepcopy of data_model argument
+* **FEATURE ADDED** explain method added to InputValidationError
+* **DEPRECATED** full path of keys added to extra fields error report
+* dataModel property added as deepcopy of data_model argument
 
 3.0 (2018.03.28)
 -----------------

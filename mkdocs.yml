@@ -5,5 +5,4 @@ pages:
   - Reference: reference.md
   - Extensions: extensions.md
   - Roadmap: roadmap.md
-  - Test: test.md
 markdown_extensions: [ footnotes, smarty, abbr ]
