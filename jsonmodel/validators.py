@@ -227,8 +227,9 @@ class jsonModel(object):
                 qualifier_index = self._datatype_classes.index(type_dict[k].__class__)
                 qualifier_type = self._datatype_names[qualifier_index]
                 if v_type != qualifier_type:
-                    message = 'Value for field %s qualifier %s must be a %s datatype.' % (key, k, qualifier_type)
-                    raise ModelValidationError(message)
+                    if v_type != 'map' or k not in ('must_not_contain','must_contain','contains_either'):
+                        message = 'Value for field %s qualifier %s must be a %s datatype.' % (key, k, qualifier_type)
+                        raise ModelValidationError(message)
                 if qualifier_type == 'number':
                     if isinstance(type_dict[k], int):
                         if not isinstance(v, int):
@@ -237,9 +238,14 @@ class jsonModel(object):
 
     # validate internal logic of each qualifier value declaration
                 if k in ('must_not_contain', 'must_contain', 'contains_either'):
-                    for item in v:
+                    patterns = v
+                    k_type = 'list'
+                    if isinstance(patterns, dict):
+                        patterns = v.keys()
+                        k_type = 'map'
+                    for item in patterns:
                         if not isinstance(item, str):
-                            message = 'Each item in list field %s qualifier %s must be a string.' % (key, k)
+                            message = 'Each %s in %s field %s qualifier %s must be a string.' % (v_type, k_type, key, k)
                             raise ModelValidationError(message)
                 if k in ('min_length', 'max_length', 'min_size', 'max_size'):
                     if v < 0:
@@ -345,13 +351,19 @@ class jsonModel(object):
                                 message = '%s must be an "integer_data".' % header
                                 raise ModelValidationError(message)
                     if 'must_not_contain' in value.keys():
-                        for regex in value['must_not_contain']:
+                        patterns = value['must_not_contain']
+                        if isinstance(patterns, dict):
+                            patterns = value['must_not_contain'].keys()
+                        for regex in patterns:
                             regex_pattern = re.compile(regex)
                             if regex_pattern.findall(test_value):
                                 message = '%s matches regex pattern in "must_not_contain": ["%s"]' % (header, regex)
                                 raise ModelValidationError(message)
                     if 'must_contain' in value.keys():
-                        for regex in value['must_contain']:
+                        patterns = value['must_contain']
+                        if isinstance(patterns, dict):
+                            patterns = value['must_contain'].keys()
+                        for regex in patterns:
                             regex_pattern = re.compile(regex)
                             if not regex_pattern.findall(test_value):
                                 message = '%s does not match regex pattern in "must_contain": ["%s"].' % (header, regex)
@@ -359,7 +371,10 @@ class jsonModel(object):
                     if 'contains_either' in value.keys():
                         regex_match = False
                         regex_patterns = []
-                        for regex in value['contains_either']:
+                        patterns = value['contains_either']
+                        if isinstance(patterns, dict):
+                            patterns = value['contains_either'].keys()
+                        for regex in patterns:
                             regex_patterns.append(regex)
                             regex_pattern = re.compile(regex)
                             if regex_pattern.findall(test_value):
@@ -437,13 +452,19 @@ class jsonModel(object):
                                 message = '%s cannot be more than "max_length": %s' % (header, value['max_length'])
                                 raise ModelValidationError(message)
                         if 'must_not_contain' in value.keys():
-                            for regex in value['must_not_contain']:
+                            patterns = value['must_not_contain']
+                            if isinstance(patterns, dict):
+                                patterns = value['must_not_contain'].keys()
+                            for regex in patterns:
                                 regex_pattern = re.compile(regex)
                                 if regex_pattern.findall(test_value):
                                     message = '%s matches regex pattern in "must_not_contain": ["%s"]' % (header, regex)
                                     raise ModelValidationError(message)
                         if 'must_contain' in value.keys():
-                            for regex in value['must_contain']:
+                            patterns = value['must_contain']
+                            if isinstance(patterns, dict):
+                                patterns = value['must_contain'].keys()
+                            for regex in patterns:
                                 regex_pattern = re.compile(regex)
                                 if not regex_pattern.findall(test_value):
                                     message = '%s does not match regex pattern in "must_contain": ["%s"]' % (header, regex)
@@ -451,7 +472,10 @@ class jsonModel(object):
                         if 'contains_either' in value.keys():
                             regex_match = False
                             regex_patterns = []
-                            for regex in value['contains_either']:
+                            patterns = value['contains_either']
+                            if isinstance(patterns, dict):
+                                patterns = value['contains_either'].keys()
+                            for regex in patterns:
                                 regex_patterns.append(regex)
                                 regex_pattern = re.compile(regex)
                                 if regex_pattern.findall(test_value):
@@ -689,7 +713,10 @@ class jsonModel(object):
                 if value != found:
                     return False
             elif key == 'must_contain':
-                for regex in value:
+                patterns = value
+                if isinstance(value, dict):
+                    patterns = value.keys()
+                for regex in patterns:
                     regex_pattern = re.compile(regex)
                     found = False
                     for record_value in record_values:
@@ -699,7 +726,10 @@ class jsonModel(object):
                     if not found:
                         return False
             elif key == 'must_not_contain':
-                for regex in value:
+                patterns = value
+                if isinstance(value, dict):
+                    patterns = value.keys()
+                for regex in patterns:
                     regex_pattern = re.compile(regex)
                     found = False
                     for record_value in record_values:
@@ -710,7 +740,10 @@ class jsonModel(object):
                         return False
             elif key == 'contains_either':
                 found = False
-                for regex in value:
+                patterns = value
+                if isinstance(value, dict):
+                    patterns = value.keys()
+                for regex in patterns:
                     regex_pattern = re.compile(regex)
                     for record_value in record_values:
                         if regex_pattern.findall(record_value):
@@ -1129,22 +1162,33 @@ class jsonModel(object):
                 error_dict['error_code'] = 4013
                 raise InputValidationError(error_dict)
         if 'must_not_contain' in input_criteria.keys():
-            for regex in input_criteria['must_not_contain']:
+            patterns = input_criteria['must_not_contain']
+            if isinstance(input_criteria['must_not_contain'], dict):
+                patterns = input_criteria['must_not_contain'].keys()
+            for regex in patterns:
                 regex_pattern = re.compile(regex)
                 if regex_pattern.findall(input_string):
                     error_dict['failed_test'] = 'must_not_contain'
+                    error_dict['failed_match'] = regex
                     error_dict['error_code'] = 4014
                     raise InputValidationError(error_dict)
         if 'must_contain' in input_criteria.keys():
-            for regex in input_criteria['must_contain']:
+            patterns = input_criteria['must_contain']
+            if isinstance(input_criteria['must_contain'], dict):
+                patterns = input_criteria['must_contain'].keys()
+            for regex in patterns:
                 regex_pattern = re.compile(regex)
                 if not regex_pattern.findall(input_string):
                     error_dict['failed_test'] = 'must_contain'
+                    error_dict['failed_match'] = regex
                     error_dict['error_code'] = 4015
                     raise InputValidationError(error_dict)
         if 'contains_either' in input_criteria.keys():
             regex_match = False
-            for regex in input_criteria['contains_either']:
+            patterns = input_criteria['contains_either']
+            if isinstance(input_criteria['contains_either'], dict):
+                patterns = input_criteria['contains_either'].keys()
+            for regex in patterns:
                 regex_pattern = re.compile(regex)
                 if regex_pattern.findall(input_string):
                     regex_match = True

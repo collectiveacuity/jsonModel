@@ -12,10 +12,11 @@
 - Ingests arbitrary keyword data and outputs model valid dictionary
 - Validates query criteria against model scope
 - Evaluates model valid records using query criteria
+- Validates the byte size of a map field
+- Provides colloquial explanations of errors
 
 ## Nothin' Yet (aka TODO)
 - Change custom error argument to accept .format syntax
-- Validates the byte size of a map field
 - Validates that a path exists on localhost
 - Verifies that a url is responsive
 - Custom validations with lambda functions

@@ -52,6 +52,8 @@ class InputValidationError(Exception):
                 self.error['input_criteria'] = error_dict['input_criteria']
             if 'failed_test' in error_dict:
                 self.error['failed_test'] = error_dict['failed_test']
+            if 'failed_match' in error_dict:
+                self.error['failed_match'] = error_dict['failed_match']
             if 'input_path' in error_dict:
                 self.error['input_path'] = error_dict['input_path']
             if 'error_value' in error_dict:
@@ -67,6 +69,8 @@ class InputValidationError(Exception):
             if failed_test in self.error['input_criteria']:
                 if failed_test == 'required_field':
                     second_line += ': True'
+                elif failed_test in ('must_contain','must_not_contain','contains_either') and isinstance(self.error['input_criteria'][failed_test], dict):
+                    second_line += ': %s' % list(self.error['input_criteria'][failed_test].keys())
                 else:
                     second_line += ': %s' % self.error['input_criteria'][failed_test]
             self.message = '%s%s' % (first_line, second_line)
@@ -191,17 +195,33 @@ class InputValidationError(Exception):
             if len(value) == 1:
                 explanation = 'cannot be %s' % value[0]
         elif test in ('must_not_contain'):
-            explanation = 'can match neither regex patterns %s' % conjoin(value, junction='nor')
-            if len(value) == 1:
-                explanation = 'cannot match regex pattern %s' % value[0]
+            if isinstance(value, dict):
+                failed_match = self.error['failed_match']
+                explanation = value[failed_match]
+            else:
+                explanation = 'can match neither regex patterns %s' % conjoin(value, junction='nor')
+                if len(value) == 1:
+                    explanation = 'cannot match regex pattern %s' % value[0]
         elif test in ('must_contain'):
-            explanation = 'must match regex patterns %s' % conjoin(value, junction='and')
-            if len(value) == 1:
-                explanation = 'must match regex pattern %s' % value[0]
+            if isinstance(value, dict):
+                failed_match = self.error['failed_match']
+                explanation = value[failed_match]
+            else:
+                explanation = 'must match regex patterns %s' % conjoin(value, junction='and')
+                if len(value) == 1:
+                    explanation = 'must match regex pattern %s' % value[0]
         elif test in ('contains_either'):
-            explanation = 'must match either regex patterns %s' % conjoin(value)
-            if len(value) == 1:
-                explanation = 'must match regex pattern %s' % value[0]
+            if isinstance(value, dict):
+                matches = []
+                for k, v in value.items():
+                    matches.append(v)
+                explanation = 'either %s' % conjoin(matches)
+                if len(matches) == 1:
+                    explanation = matches[0] 
+            else:
+                explanation = 'must match either regex patterns %s' % conjoin(value)
+                if len(value) == 1:
+                    explanation = 'must match regex pattern %s' % value[0]
         
         # TODO override explanation with criteria values
         

@@ -444,6 +444,15 @@ class jsonModelTests(jsonModel):
             assert err.error['failed_test'] == 'must_contain'
             assert err.explain().find('match regex') > -1
 
+    # test must_contain dictionary exception
+        required_country = deepcopy(valid_input)
+        required_country['address']['country'] = 'Canada'
+        try:
+            self.validate(required_country)
+        except InputValidationError as err:
+            assert err.error['failed_test'] == 'must_contain'
+            assert err.explain().find('must reside in a United state') > -1
+
     # test contains_either exception
         optional_words = deepcopy(valid_input)
         optional_words['address']['region'] = 'N1'
@@ -670,6 +679,21 @@ class jsonModelTests(jsonModel):
             jsonModel(contains_either_error)
         except ModelValidationError as err:
             assert str(err).find('.address.region') > 0
+    
+    # test optional dictionary values for regex criteria
+        regex_criteria_dict = deepcopy(test_model)
+        country_contains = { '^United\s': 'must reside in a United state', '^[A|a].+': 'must reside in an A+ country' }
+        regex_criteria_dict['components']['.address.country']['contains_either'] = country_contains
+        regex_criteria_dict['components']['.address.country']['must_not_contain'] = { '^[A|a]': 'must not reside in an A+ country' }
+        assert jsonModel(regex_criteria_dict)
+    
+    # test conflict between declared value and optional regex criteria
+        regex_criteria_dict_error = deepcopy(test_model)
+        regex_criteria_dict_error['components']['.address.country']['must_not_contain'] = { '^U': 'must not reside in U country' }
+        try:
+            jsonModel(regex_criteria_dict_error)
+        except ModelValidationError as err:
+            assert str(err).find('matches regex pattern')
 
     # test wrong datatype qualifier values in components exception
         min_size_error = deepcopy(test_model)
@@ -943,7 +967,7 @@ class jsonModelTests(jsonModel):
         eval_kwargs['field_criteria']['contains_either'][0] = '[A-Z]{2}'
 
     # test evaluate must contain query failure
-        eval_kwargs['field_name'] = '.address.country',
+        eval_kwargs['field_name'] = '.address.country'
         eval_kwargs['field_criteria'] = { 'must_contain': [ 'America' ] }
         eval_outcome = self._evaluate_field(**eval_kwargs)
         assert not eval_outcome
@@ -953,7 +977,26 @@ class jsonModelTests(jsonModel):
         eval_kwargs['field_criteria'] = { 'must_not_contain': [ 'States' ] }
         eval_outcome = self._evaluate_field(**eval_kwargs)
         assert not eval_outcome
+        del eval_kwargs['field_criteria']['must_not_contain']
 
+    # test evaluate must contain dictionary query failure
+        eval_kwargs['field_criteria'] = {'must_contain': { 'America': 'must be from America'}}
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['must_contain']
+
+    # test evaluate must contain dictionary query failure
+        eval_kwargs['field_criteria'] = {'must_not_contain': {'State': 'cannot be from a state'}}
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert not eval_outcome
+        del eval_kwargs['field_criteria']['must_not_contain']
+
+    # test evaluate contains either dictionary query
+        eval_kwargs['field_criteria'] = {'contains_either': country_contains }
+        eval_outcome = self._evaluate_field(**eval_kwargs)
+        assert eval_outcome
+        del eval_kwargs['field_criteria']['contains_either']
+    
     # test sample empty query
         assert self.query(valid_query)
         assert isinstance(self.query(valid_query), bool)
@@ -1029,10 +1072,16 @@ class jsonModelTests(jsonModel):
         assert self.query({'.userID': {'excluded_values': ['6nPbM9gTwLz']}}, valid_input)
         assert self.query({'.userID': {'must_contain': ['6nPbM9gTwLz']}}, valid_input)
         assert not self.query({'.userID': {'must_contain': ['/']}}, valid_input)
+        assert self.query({'.address.country': {'must_contain': { '^United\s': 'US'}}}, valid_input)
+        assert not self.query({'.address.country': {'must_contain': { '^States': 'US'}}}, valid_input)
         assert not self.query({'.userID': {'must_not_contain': ['6nPbM9gTwLz']}}, valid_input)
         assert self.query({'.userID': {'must_not_contain': ['/']}}, valid_input)
+        assert self.query({'.address.country': {'must_not_contain': {'^[A|a].+': 'not A+'}}}, valid_input)
+        assert not self.query({'.address.country': {'must_not_contain': {'States': 'not US'}}}, valid_input)
         assert self.query({'.userID': {'contains_either': ['6nPbM9gTwLz', '/']}}, valid_input)
         assert not self.query({'.userID': {'contains_either': [':', '/']}}, valid_input)
+        assert self.query({'.address.country': {'contains_either': country_contains }}, valid_input)
+        assert not self.query({'.address.country': {'contains_either': {'^[A|a].+': 'A+'}}}, valid_input)
         assert self.query({'.emoticon': {'byte_data': True}}, valid_input)
         assert not self.query({'.userID': {'byte_data': True}}, valid_input)
         assert self.query({'.userID': {'byte_data': False}}, valid_input)

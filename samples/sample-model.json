@@ -73,6 +73,11 @@
       "discrete_values": [ 36, 124, 554, 826, 840 ],
       "integer_data": true
     },
+    ".address.country": {
+      "must_contain": { 
+        "^United\\s": "must reside in a United state"
+      }
+    },
     ".comments": {
       "required_field": false,
       "min_size": 1,

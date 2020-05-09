@@ -16,6 +16,7 @@ TODO
 
 3.1 (2018.04.??)
 ----------------
+* **FEATURE ADDED** custom error messages added for regex pattern criteria
 * **FEATURE ADDED** explain method added to InputValidationError
 * **DEPRECATED** full path of keys added to extra fields error report
 * dataModel property added as deepcopy of data_model argument
