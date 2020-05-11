@@ -129,7 +129,7 @@ To generate a colloquial explanation of error::
     try:
         valid_model.validate(invalid_input)
     except InputValidationError as err:
-         assert err.explain()
+         print(err.explain())
        
 To customize error message::
 

@@ -2,8 +2,6 @@
     :target: https://pypi.python.org/pypi/jsonmodel
 .. image:: https://img.shields.io/pypi/l/jsonmodel.svg
     :target: https://pypi.python.org/pypi/jsonmodel
-.. image:: https://img.shields.io/coveralls/github/collectiveacuity/jsonmodel.svg
-    :target: https://pypi.python.org/pypi/jsonmodel
 
 =========
 jsonModel
@@ -125,6 +123,13 @@ To handle invalid inputs::
         assert err.error['error_code'] > 4000
 
 
+To generate a colloquial explanation of error::
+
+    try:
+        valid_model.validate(invalid_input)
+    except InputValidationError as err:
+         print(err.explain())
+         
 To customize error message::
 
     input_title = 'Property field in input'
