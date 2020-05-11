@@ -34,6 +34,8 @@ plugins/
 hooks/
 
 #################  unit testing   #################
+.coveralls.*
+.nyc_output/
 htmlcov/
 .tox/
 .coverage
@@ -43,6 +45,7 @@ nosetests.xml
 coverage.xml
 
 #################  dependencies   #################
+package-lock.json
 node_modules/
 
 #############  version control  ################
@@ -54,6 +57,8 @@ docs_dev/
 notes/
 
 #################    IDE files    #################
+venv/
+venv3/
 .~lock.*
 .DS_STORE
 .netbeans
@@ -69,3 +74,5 @@ desktop.ini
 *.gdoc
 .dropbox
 Thumbs.db
+
+#################    dev files    #################

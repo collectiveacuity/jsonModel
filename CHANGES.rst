@@ -3,9 +3,7 @@ ChangeLog
 
 TODO
 ----
-* Allow declaration of error messages in criteria such as must_not_contain & must_contain
 * Change custom error argument to accept .format syntax
-* Update error reporting to convert field paths back to javascript dot paths
 * Add support for mongo/mango query operator syntax;
 * Consider adding validation for HTTP methods of a RESTful API
 * Sort dictionary keys alphabetically prior to evaluation (currents inherits json file order)
@@ -14,7 +12,7 @@ TODO
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
 
-3.1 (2018.04.??)
+3.1 (2020.05.11)
 ----------------
 * **FEATURE ADDED** custom error messages added for regex pattern criteria
 * **FEATURE ADDED** explain method added to InputValidationError

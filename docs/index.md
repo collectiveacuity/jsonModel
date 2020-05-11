@@ -124,20 +124,26 @@ To handle invalid inputs::
     except InputValidationError as err:
         assert err.error['error_code'] > 4000
 
+To generate a colloquial explanation of error::
 
-To customize error message:
+    try:
+        valid_model.validate(invalid_input)
+    except InputValidationError as err:
+         assert err.explain()
+       
+To customize error message::
 
     input_title = 'Property field in input'
     valid_model.validate(input, path_to_root, input_title)
 
-To filter valid input based upon query criteria:
+To filter valid input based upon query criteria::
 
     query_criteria = { 'dot.path[2].field': 'exact value' }
     assert valid_model.query(query_criteria, valid_input)
     query_criteria = { 'dot.path[2].field': { 'excluded_values': [ 'exact value' ] } }
     assert not valid_model.query(query_criteria, valid_input)
 
-To produce html documentation of model criteria:
+To produce html documentation of model criteria::
 
     from jsonmodel.extensions import tabulate
     tabulate(valid_model)

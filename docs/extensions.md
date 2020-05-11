@@ -23,7 +23,7 @@ a function to create a table from the class model keyMap
 </thead>
 <tbody>
 <tr><td>self      </td><td>object</td><td>Yes       </td><td>None     </td><td>                                        </td></tr>
-<tr><td>format    </td><td>str   </td><td>          </td><td>"html"   </td><td>string with format for table output     </td></tr>
-<tr><td>syntax    </td><td>str   </td><td>          </td><td>""       </td><td>[optional] string with linguistic syntax</td></tr>
+<tr><td>format    </td><td>str   </td><td>          </td><td>&quot;html&quot;   </td><td>string with format for table output     </td></tr>
+<tr><td>syntax    </td><td>str   </td><td>          </td><td>&quot;&quot;       </td><td>[optional] string with linguistic syntax</td></tr>
 </tbody>
 </table>
