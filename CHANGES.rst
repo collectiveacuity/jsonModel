@@ -3,6 +3,7 @@ ChangeLog
 
 TODO
 ----
+* Change min_size/max_size in map fields to measure key size
 * Change custom error argument to accept .format syntax
 * Add support for mongo/mango query operator syntax;
 * Consider adding validation for HTTP methods of a RESTful API
@@ -11,6 +12,10 @@ TODO
 * Allow declaration of multiple datatypes for key values
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
+
+3.2 (2020.05.13)
+----------------
+* Bug fix to remove unused optional argument in explain method
 
 3.1 (2020.05.11)
 ----------------

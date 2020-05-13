@@ -78,9 +78,9 @@ class InputValidationError(Exception):
             self.message = '\nError Report: %s' % self.error
 
         super(InputValidationError, self).__init__(self.message)
-    
-    def explain(self, criteria=None):
-        
+
+    def explain(self):
+
         # retrieve variables from report
         test = self.error['failed_test']
         value = self.error['input_criteria'][test]
@@ -145,7 +145,7 @@ class InputValidationError(Exception):
                     explanation = 'may only have 1 item'
         elif test in ('unique_values'):
             explanation = 'must contain unique values'
-        
+
         # generate explanation for invalid string, number and boolean fields
         elif test in ('value_datatype'):
             explanation = 'must be a %s' % value
@@ -222,7 +222,5 @@ class InputValidationError(Exception):
                 explanation = 'must match either regex patterns %s' % conjoin(value)
                 if len(value) == 1:
                     explanation = 'must match regex pattern %s' % value[0]
-        
-        # TODO override explanation with criteria values
-        
+
         return explanation
