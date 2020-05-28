@@ -3,6 +3,9 @@ ChangeLog
 
 TODO
 ----
+* Add "contains_all" to criteria for lists to cover multiple items
+* Add "=", ">", "<", "<=", ">=" as criteria shortcuts
+* Add "in" as criteria shortcut for "discrete_values"
 * Change min_size/max_size in map fields to measure key size
 * Change custom error argument to accept .format syntax
 * Add support for mongo/mango query operator syntax;
