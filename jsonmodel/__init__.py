@@ -1,7 +1,7 @@
 ''' A Collection of Methods for Validating JSON Structured Data '''
 __author__ = 'rcj1492'
 __created__ = '2015.12'
-__version__ = '3.2'
+__version__ = '3.3'
 __license__ = 'MIT'
 __module__ = 'jsonmodel'
 __email__ = 'support@collectiveacuity.com'
