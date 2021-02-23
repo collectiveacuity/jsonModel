@@ -11,15 +11,19 @@ TODO
 * Add support for mongo/mango query operator syntax;
 * Consider adding validation for HTTP methods of a RESTful API
 * Sort dictionary keys alphabetically prior to evaluation (currents inherits json file order)
-* Allow validation of null datatype declarations
 * Allow declaration of multiple datatypes for key values
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
 
+3.3 (2021.02.23)
+----------------
+* **FEATURE ADDED** validation of any valid datatype for null declarations
+* **FEATURE ADDED** ingestion of any valid datatype for null declarations
+
 3.2 (2020.05.13)
 ----------------
 * Bug fix to remove unused optional argument in explain method
-
+  
 3.1 (2020.05.11)
 ----------------
 * **FEATURE ADDED** custom error messages added for regex pattern criteria

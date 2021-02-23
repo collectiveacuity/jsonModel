@@ -130,7 +130,7 @@ class jsonModelTests(jsonModel):
             self.validate(invalid_object, object_title='jsonModel input')
         except InputValidationError as err:
             assert str(err).find('Value jsonModel')
-            
+
     # test json structure of error message
         try:
             self.validate(invalid_list)
@@ -603,10 +603,16 @@ class jsonModelTests(jsonModel):
         dot_ingested = dot_model.ingest(**{'.': {'.': 'test'}})
         assert dot_ingested['.']['.'] == 'test'
 
-    # test null value in model
+    # test null values in model
         null_schema = deepcopy(test_model)
         null_schema['test'] = None
-        assert jsonModel(null_schema)
+        null_model = jsonModel(null_schema)
+
+    # test ingested values for declared null fields
+        null_ingested = null_model.ingest(**{'reference': 'test'})
+        assert null_ingested['reference'] == 'test'
+        null_ingested = null_model.ingest(**{'reference': invalid_object})
+        assert null_ingested['reference'] == None
 
     # test default_value ingestion of list datatypes
         default_list_model = deepcopy(test_model)

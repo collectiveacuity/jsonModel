@@ -1273,6 +1273,8 @@ class jsonModel(object):
                     v_type = self._datatype_names[v_index]
                     if v_type == value_type:
                         value_match = True
+                    elif value_type == 'null':
+                        value_match = True
                 except:
                     value_match = False
             if value_match:
