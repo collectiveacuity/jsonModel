@@ -9,93 +9,113 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
         <title>Reference - Json Model</title>
-        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="../css/highlight.css">
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
 
-        <script src="../js/jquery-1.10.2.min.js"></script>
-        <script src="../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../js/highlight.pack.js"></script> 
+        <script src="../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
     <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">Json Model</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../jsonmodel/" class="nav-link">jsonModel Class</a>
+                            </li>
+                            <li class="navitem active">
+                                <a href="./" class="nav-link">Reference</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../extensions/" class="nav-link">Extensions</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../roadmap/" class="nav-link">Roadmap</a>
+                            </li>
+                        </ul>
 
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="..">Json Model</a>
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../jsonmodel/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../extensions/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-                <!-- Main navigation -->
-                <ul class="nav navbar-nav">
-                    <li >
-                        <a href="..">Home</a>
-                    </li>
-                    <li >
-                        <a href="../jsonmodel/">jsonModel Class</a>
-                    </li>
-                    <li class="active">
-                        <a href="./">Reference</a>
-                    </li>
-                    <li >
-                        <a href="../extensions/">Extensions</a>
-                    </li>
-                    <li >
-                        <a href="../roadmap/">Roadmap</a>
-                    </li>
-                </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                        <i class="fa fa-search"></i> Search
-                    </a>
-                </li>
-                    <li >
-                        <a rel="next" href="../jsonmodel/">
-                            <i class="fa fa-arrow-left"></i> Previous
-                        </a>
-                    </li>
-                    <li >
-                        <a rel="prev" href="../extensions/">
-                            Next <i class="fa fa-arrow-right"></i>
-                        </a>
-                    </li>
-            </ul>
-        </div>
-    </div>
-</div>
 
         <div class="container">
-                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#reference-materials">Reference Materials</a></li>
-            <li><a href="#schema-default-behavior">Schema Default Behavior</a></li>
-            <li><a href="#components-map">Components Map</a></li>
-            <li><a href="#list-of-field-conditionals">List of Field Conditionals</a></li>
-            <li><a href="#error-handling">Error Handling</a></li>
-            <li><a href="#ingesting-kwargs">Ingesting Kwargs</a></li>
-            <li><a href="#query-criteria">Query Criteria</a></li>
-    </ul>
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#reference-materials" class="nav-link">Reference Materials</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#schema-default-behavior" class="nav-link">Schema Default Behavior</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#components-map" class="nav-link">Components Map</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#list-of-field-conditionals" class="nav-link">List of Field Conditionals</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#error-handling" class="nav-link">Error Handling</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#ingesting-kwargs" class="nav-link">Ingesting Kwargs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#query-criteria" class="nav-link">Query Criteria</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
 </div></div>
-                <div class="col-md-9" role="main">
+                    <div class="col-md-9" role="main">
 
 <h1 id="reference-materials">Reference Materials</h1>
 <p><em>Documentation for model declaration and error handling for jsonModel validation</em></p>
@@ -213,7 +233,7 @@
 <tr><td>key_datatype     </td><td>String                    </td><td>n/a         </td><td>        </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the datatype of a key name must be a string                                                                                                                             </td></tr>
 <tr><td>maximum_scope    </td><td>List                      </td><td>n/a         </td><td>        </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the maximum extent of keys allowed in a dictionary generated by extra_fields default                                                                                    </td></tr>
 <tr><td>declared_value   </td><td>Any                       </td><td>n/a         </td><td>        </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the value or item defined in the schema [strings                                                                                                                        </td></tr>
-<tr><td>default_value    </td><td>Any                       </td><td>n/a         </td><td>Y       </td><td>Y       </td><td>Y        </td><td>     </td><td>      </td><td>available</td><td>a value for an optional field when field is missing in input                                                                                                            </td></tr>
+<tr><td>default_value    </td><td>Any                       </td><td>n/a         </td><td>Y       </td><td>Y       </td><td>Y        </td><td>     </td><td>Y     </td><td>available</td><td>a value for an optional field when field is missing in input                                                                                                            </td></tr>
 <tr><td>byte_data        </td><td>Boolean                   </td><td>4011        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>a true boolean expects to see base64 byte data in the string field                                                                                                      </td></tr>
 <tr><td>min_length       </td><td>Integer                   </td><td>4012        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the minimum number of characters in a string                                                                                                                            </td></tr>
 <tr><td>max_length       </td><td>Integer                   </td><td>4013        </td><td>Y       </td><td>        </td><td>         </td><td>     </td><td>      </td><td>available</td><td>the maximum number of characters in a string                                                                                                                            </td></tr>
@@ -418,7 +438,7 @@
 </code></pre>
 <p>The query method follows a similar process by which input is validated. A record whose field values evaluate to true for all criteria returns true. Otherwise, something in the record does not match one or more query criteria and the query method returns false. Because the query method returns a false as soon as it encounters a failed criteria from a dictionary of fields in the query criteria, query time will vary based upon the number of records, how many fail and how many fields are added to the query criteria.</p>
 <h3 id="querying-items">Querying Items</h3>
-<p>Although the query method will evaluate items nested inside lists to an arbitrary depth, it does so by evaluating all items in the list and all sub-branches of any nested lists inside the list. As a result, querying items inside lists suffers non-linear explosion. And, unlike the process of item ingestion, if any item in a list (or branch of a sub-list) fails to evaluate to true to a criteria in the query, the entire record will return false. <strong>Be Warned</strong></p>
+<p>Although the query method will evaluate items nested inside lists to an arbitrary depth, it does so by evaluating all items in the list and all sub-branches of any nested lists inside the list. As a result, querying items inside lists suffers non-linear explosion. And, unlike the process of item ingestion, if any item in a list (or branch of a sub-list) evaluates to true to the criteria provided the entire list will evaluate to true. <strong>Be Warned</strong></p>
 <h3 id="query-errors">Query Errors</h3>
 <p>If query criteria contain fields, operators or qualifiers which are outside the scope of the model, the query method will produce a QueryValidationError.</p>
 <p>To handle a QueryValidationError::</p>
@@ -498,32 +518,35 @@ except QueryValidationError as err:
 </code></pre>
 <p><em>[The lambda_function, identical_to and validation_url operators are not yet supported by the model.]</em></p>
 <p>A malformed query rules argument on model initialization will produce a ModelValidationError.</p></div>
+            </div>
         </div>
 
         <footer class="col-md-12">
             <hr>
-            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
-        <script>var base_url = '..';</script>
-        <script src="../js/base.js"></script>
-        <script src="../search/require.js"></script>
-        <script src="../search/search.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js" defer></script>
+        <script src="../search/main.js" defer></script>
 
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-    <div class="modal-dialog">
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
             </div>
             <div class="modal-body">
                 <p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form role="form">
+                <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>
@@ -532,12 +555,12 @@ except QueryValidationError as err:
             </div>
         </div>
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
             </div>
             <div class="modal-body">
               <table class="table">
@@ -549,19 +572,19 @@ except QueryValidationError as err:
                 </thead>
                 <tbody>
                   <tr>
-                    <td><kbd>?</kbd></td>
+                    <td class="help shortcut"><kbd>?</kbd></td>
                     <td>Open this help</td>
                   </tr>
                   <tr>
-                    <td><kbd>&larr;</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td><kbd>&rarr;</kbd></td>
+                    <td class="next shortcut"><kbd>n</kbd></td>
                     <td>Next page</td>
                   </tr>
                   <tr>
-                    <td><kbd>s</kbd></td>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
                     <td>Search</td>
                   </tr>
                 </tbody>
@@ -572,7 +595,6 @@ except QueryValidationError as err:
         </div>
     </div>
 </div>
-
 
     </body>
 </html>
