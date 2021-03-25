@@ -47,6 +47,7 @@ class jsonModelTests(jsonModel):
         assert self.keyMap['.comments']['min_size']
         assert self.keyMap['.comments']['max_size']
         assert self.keyMap['.comments']['unique_values']
+        assert self.keyMap['.comments']['declared_value']
         assert self.keyMap['.userID']['must_not_contain']
         assert self.keyMap['.comments[0]']['must_contain']
         assert self.keyMap['.address.region']['contains_either']
@@ -1125,6 +1126,29 @@ class jsonModelTests(jsonModel):
         assert not self.query({'.comments[0]': {'must_contain': ['tin']}}, valid_input)
         assert self.query({'.comments[0]': {'contains_either': ['gold', 'tin']}}, valid_input)
         assert not self.query({'.comments[0]': {'contains_either': ['tin', 'zinc']}}, valid_input)
+
+    # test use_declared method
+        use_declared_schema = deepcopy(test_model)
+        use_declared_model = jsonModel(use_declared_schema)
+        assert use_declared_model.use_declared()
+        assert use_declared_model.keyMap['.rating']['default_value'] == 5
+        assert use_declared_model.keyMap['.address.city']['default_value'] == 'New York'
+        assert use_declared_model.keyMap['.address.region']['default_value'] == 'LA'
+        assert len(use_declared_model.keyMap['.comments']['default_value']) == 1
+        assert use_declared_model.keyMap['.active']['default_value']
+    
+    # test use_declared ingestion
+        ingest_declared_schema = deepcopy(test_model)
+        ingest_declared_schema['schema']['comments'].append('Escargot delecticious!!!')
+        ingest_declared_model = jsonModel(ingest_declared_schema)
+        assert len(ingest_declared_model.keyMap['.comments']['declared_value']) == 2
+        ingest_declared_model.use_declared()
+        assert len(ingest_declared_model.keyMap['.comments']['default_value']) == 2
+        ingest_declared = ingest_declared_model.ingest()
+        assert ingest_declared['userID'] == 'gY3Cv81QwL0Fs'
+        assert ingest_declared['active']
+        assert ingest_declared['rating'] == 5
+        assert len(ingest_declared['comments']) == 2
 
         return self
 

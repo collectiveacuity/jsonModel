@@ -8,12 +8,18 @@ TODO
 * Add "in" as criteria shortcut for "discrete_values"
 * Change min_size/max_size in map fields to measure key size
 * Change custom error argument to accept .format syntax
+* Add conversion to/from swagger OpenAPI declarations
 * Add support for mongo/mango query operator syntax;
 * Consider adding validation for HTTP methods of a RESTful API
 * Sort dictionary keys alphabetically prior to evaluation (currents inherits json file order)
 * Allow declaration of multiple datatypes for key values
 * Allow declaration of a lambda function for further validation
 * Allow validation of path to file or folder
+
+3.4 (2021.03.25)
+----------------
+* **METHOD ADDED** use_declared method to assign declared values to defaults 
+* **FEATURE ADDED** declared_value coverage for list datatypes
 
 3.3 (2021.02.23)
 ----------------

@@ -1713,3 +1713,21 @@ class jsonModel(object):
                     return False
 
         return True
+
+    def use_declared(self):
+
+        '''
+            a core method to assign declared values to defaults
+
+            whenever a default value is not specified for a component
+            in the schema, this method assigns the declared value
+
+        :return: self
+        '''
+
+        for key, value in self.keyMap.items():
+            if not 'default_value' in value.keys():
+                if 'declared_value' in value.keys():
+                    value['default_value'] = value['declared_value']
+        
+        return self

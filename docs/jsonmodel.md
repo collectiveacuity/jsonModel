@@ -77,6 +77,13 @@ To produce a default record:
 
     default_dict = valid_model.ingest()
 
+###Use Declared
+Another way to guarantee an ingestion will return a dictionary that will pass a model validation test is by using the `use_declared` method before ingestion. `use_declared` will automatically assign the declared value to any key in the schema without a "default_value" qualifier.
+
+To produce a default record with declared values instead:
+
+    valid_model.use_declared()
+    declared_dict = valid_model.ingest()
 
 Query Records
 -------------

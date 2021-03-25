@@ -74,7 +74,7 @@ class mapModel(object):
                 if value:
                     criteria_dict['extra_fields'] = False
         # add declared value to string, integer and boolean fields
-            if criteria_dict['value_datatype'] in ('boolean', 'string', 'number'):
+            if criteria_dict['value_datatype'] in ('boolean', 'string', 'number', 'list'):
                 criteria_dict['declared_value'] = value
             self.keyCriteria.append(criteria_dict)
             if isinstance(value, dict):
