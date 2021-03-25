@@ -38,10 +38,10 @@ pip install twine
 
 Build Distributions:
 python setup.py sdist --format=gztar,zip
-pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-3.3.tar.gz
+pip wheel --no-index --no-deps --wheel-dir dist dist/jsonmodel-3.4.tar.gz
 
 Upload (or Register) Distributions to PyPi:
-twine upload dist/jsonmodel-3.3*
+twine upload dist/jsonmodel-3.4*
 
 Upload Documentation to Github:
 mkdocs gh-deploy
@@ -51,7 +51,7 @@ Installation:
 pip install [module]
 python setup.py develop  # for local on-the-fly file updates
 python setup.py install  # when possessing distribution files
-pip install dist/jsonmodel-3.3-py3-none-any.whl # when possessing wheel file
+pip install dist/jsonmodel-3.4-py3-none-any.whl # when possessing wheel file
 
 Uninstall:
 pip uninstall [module]
